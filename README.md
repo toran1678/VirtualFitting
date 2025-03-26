@@ -23,9 +23,7 @@ Mysql 포트 3307 사용 중
 
 ### Frontend File Structure
 #### assets
-<p>$\bf{\large{\color{#5ad7b7}assets}}$</p>
 이미지, 아이콘, 폰트 등 정적 파일들
-d
 #### components
 재사용 가능한 컴포넌트들
 #### pages
