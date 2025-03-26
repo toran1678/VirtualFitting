@@ -22,7 +22,9 @@ Mysql 포트 3307 사용 중
 테이블 명 capstone
 
 ### Frontend File Structure
+<span style="color: red">
 #### assets
+</span>
 이미지, 아이콘, 폰트 등 정적 파일들
 #### components
 재사용 가능한 컴포넌트들
