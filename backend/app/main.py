@@ -22,15 +22,6 @@ app.add_middleware(
 @app.get('/')
 def welcome_root():
     return "Welcome to root Hello!!!!"
-
-def get_db_connection():
-    return mysql.connector.connect(
-        host="mysql",  # docker-compose에서 설정한 서비스명
-        user="root",
-        password="123456",
-        database="capstone",
-        port=3306
-    )
     
 # 의존성: 데이터베이스 세션 가져오기
 def get_db():
