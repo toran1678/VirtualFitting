@@ -4,7 +4,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import SessionLocal, engine
-import app.crud as crud
+import app.crud.crud as crud
 import app.models.models as models
 
 # 데이터베이스 테이블 생성
