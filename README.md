@@ -3,7 +3,7 @@
 ### 실행 방법
 ```bash
 # Frontend 실행 방법
-cd frontend
+/frontend 에서
 npm install
 npm start
 
@@ -46,4 +46,3 @@ Mysql 포트 3307 사용 중
 유틸리티 함수들 (데이터 포맷팅, 유효성 검사 등)
 #### styles
 스타일 관련 파일 CSS 등
-//
