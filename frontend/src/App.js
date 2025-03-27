@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
+// import React, { useState } from 'react';
+import Router from "./components/Router";
 
 function App() {
   return (
     <div>
-      <nav>
-        <NavLink to='/'>Start</NavLink>
-        <Link to='/about'>About</Link>
-        <Link to='/contact'>Contact</Link>
-      </nav>
+      <Router />
     </div>
   );
 }
