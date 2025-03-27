@@ -5,9 +5,11 @@ class UserBase(BaseModel):
     nickname: str
     email: str
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
+    name: str
+    nickname: str
+    email: str
     password: str
-    password_hash: str
 
 class UserRead(UserBase):
     user_id: int
