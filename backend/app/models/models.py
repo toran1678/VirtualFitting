@@ -1,11 +1,11 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, BLOB
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
-from app.database import Base
+from app.db.database import Base
 
 # 1. Member Table
 class Member(Base):
-    __tablename__ = "member" # 테이블 이름
+    __tablename__ = "users" # 테이블 이름
 
     user_id = Column(Integer, primary_key=True, autoincrement=True) # INTEGER, PRIMARY KEY, AUTOINCREMENT
     name = Column(String(10), index=True) # VARCHAR(10)
