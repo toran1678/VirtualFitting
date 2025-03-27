@@ -8,6 +8,18 @@ npm install
 npm start
 
 # Backend 실행 방법
+/backend 에서
+python -m venv venv
+source venv/Scripts/activate
+
+# 윈도우 안 될 경우 ( cmd로 켜야함 난 그랬음 )
+cd venv
+cd Scripts
+activate.bat
+
+/backend 에서
+pip install -r requirements.txt
+
 cd backend
 uvicorn app.main:app --reload
 
