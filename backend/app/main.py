@@ -2,8 +2,10 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from database import SessionLocal, engine
-import models, crud
+
+from app.database import SessionLocal, engine
+import app.crud as crud
+import app.models.models as models
 
 # 데이터베이스 테이블 생성
 models.Base.metadata.create_all(bind=engine)

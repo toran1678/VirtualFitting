@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models import Item
+from app.models.models import Item
 
 # 데이터 추가
 def create_item(db: Session, name: str, description: str):

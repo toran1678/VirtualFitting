@@ -4,3 +4,4 @@ mysql-connector-python
 sqlalchemy
 mysql
 PyMySQL
+cryptography

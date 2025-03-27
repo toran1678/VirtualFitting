@@ -22,11 +22,6 @@ pip install -r requirements.txt
 
 cd backend
 uvicorn app.main:app --reload
-
-# 현재 오류 때문에
-cd backend
-cd app
-uvicorn main:app --reload
 ```
 
 ### 설정
