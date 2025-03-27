@@ -3,8 +3,8 @@ from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 from app.db.database import Base
 
-# 1. Member Table
-class Member(Base):
+# 1. Users Table
+class Users(Base):
     __tablename__ = "users" # 테이블 이름
 
     user_id = Column(Integer, primary_key=True, autoincrement=True) # INTEGER, PRIMARY KEY, AUTOINCREMENT
@@ -45,7 +45,7 @@ class Feed(Base):
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # 댓글 관계 설정 (1:N)
-    comments = relationship("feed_comment", back_populates="feed", cascade="all, delete")
+    comments = relationship("FeedComent", back_populates="feed", cascade="all, delete")
 
 # 5. Feed Comment Table
 class FeedComment(Base):
@@ -58,7 +58,7 @@ class FeedComment(Base):
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     # 역참조
-    feed = relationship("feed", back_populates="comments")
+    feed = relationship("Feed", back_populates="comments")
 
 class Item(Base):
     __tablename__ = "items" # 테이블 이름

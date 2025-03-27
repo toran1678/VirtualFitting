@@ -22,3 +22,11 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Base 클래스 생성 (모든 모델은 이 클래스를 상속)
 Base = declarative_base()
+
+# 의존성: 데이터베이스 세션 가져오기
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

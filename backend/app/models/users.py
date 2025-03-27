@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Integer, String
-from backend.app.db.database import Base
+from app.db.database import Base
 
-# 1. Member Table
-class Member(Base):
+# Users Table
+class Users(Base):
     __tablename__ = "users" # 테이블 이름
 
     user_id = Column(Integer, primary_key=True, autoincrement=True) # INTEGER, PRIMARY KEY, AUTOINCREMENT
