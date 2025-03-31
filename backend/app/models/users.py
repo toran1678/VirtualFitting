@@ -9,5 +9,4 @@ class Users(Base):
     name = Column(String(10), index=True) # VARCHAR(10)
     password_hash = Column(String(255), nullable=False) # VARCHAR(255)
     nickname = Column(String(20), nullable=False, unique=True) # VARCHAR(10) UNIQUE
-    password = Column(String(20))
     email = Column(String(30))

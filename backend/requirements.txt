@@ -9,3 +9,8 @@ cryptography
 # crawling
 requests
 beautifulsoup4
+
+# Password encryption
+passlib[bcrypt]
+
+pydantic[email]
