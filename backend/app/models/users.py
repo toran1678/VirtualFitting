@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, Date
 from app.db.database import Base
 
 # Users Table
@@ -10,3 +10,7 @@ class Users(Base):
     password_hash = Column(String(255), nullable=False) # VARCHAR(255)
     nickname = Column(String(20), nullable=False, unique=True) # VARCHAR(10) UNIQUE
     email = Column(String(30))
+    birth_date = Column(Date)
+    phone_number = Column(String(20))
+    address = Column(String(255))
+    profile_image = Column(String(255))
