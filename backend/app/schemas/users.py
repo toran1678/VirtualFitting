@@ -8,6 +8,8 @@ class UserBase(BaseModel):
     password: str
     nickname: NicknameStr
     email: EmailStr
+    phone_number: str
+    address: str = None
 
 class UserCreate(BaseModel):
     name: NameStr
