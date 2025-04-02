@@ -8,7 +8,7 @@ class VirtualFittings(Base):
 
     fitting_id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
-    clothing_id = Column(Integer, ForeignKey("clothing_items.clothing_id"), nullable=False)
+    clothing_id = Column(Integer, ForeignKey("clothing_items.item_id"), nullable=False)
     fitting_image = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=datetime.now)
