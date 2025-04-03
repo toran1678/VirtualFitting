@@ -1,0 +1,46 @@
+.header {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    top: 0;
+    width: 100%;
+    z-index: 10;
+  }
+  
+  .header-left {
+    display: flex;
+    align-items: center; /* 사이드바 버튼과 로고를 세로로 가운데 정렬 */
+}
+
+  .header .logo {
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: 10px;
+  }
+  
+  .nav-links {
+    list-style: none;
+    display: flex;
+    margin: 0;
+    padding: 0;
+    margin-right: 20px;
+  }
+  
+  .nav-links li {
+    margin-right: 20px;
+  }
+  
+  .nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    padding-right: 10px;
+  }
+  
+  .nav-links a:hover {
+    color: #7e7e7e;
+  }
+  

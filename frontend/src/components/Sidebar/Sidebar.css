@@ -1,0 +1,105 @@
+/* Sidebar 기본 스타일 */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: -250px; /* 사이드바 기본 위치는 왼쪽 밖에 숨겨놓음 */
+  width: 250px;
+  height: 100%;
+  background-color: #333;
+  color: white;
+  transition: left 0.3s ease; /* 열리고 닫힐 때 애니메이션 효과 */
+  padding-top: 20px;
+}
+  
+.sidebar.open {
+  left: 0; /* 사이드바가 열리면 왼쪽 0으로 설정 */
+}
+
+.sidebar-links {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar-links li {
+  margin: 20px 0;
+}
+
+.sidebar-links a {
+  color: white;
+  text-decoration: none;
+  font-size: 18px;
+  display: block;
+  padding: 10px;
+}
+
+.sidebar-links a:hover {
+  background-color: #636363;  /* hover 효과 */
+}
+
+.sidebar-toggle-btn {
+  margin-top: 3px;
+  margin-right: 3px;
+  top: 20px;
+  left: 20px;
+  padding: 10px, 20px;
+  background-color: transparent;
+  color: white;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;  /* 사이드바 버튼을 사이드바 위에 두기 */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;  /* 가로줄들이 버튼 중앙에 위치하도록 설정 */
+  height: 30px; /* 버튼 높이 설정 */
+  width: 30px;  /* 버튼 너비 설정 */
+}
+
+.sidebar-toggle-btn:hover {
+  background-color: #636363;
+}
+
+/* 햄버거 메뉴의 각 바 */
+.bar {
+  width: 30px;
+  height: 4px;
+  background-color: white;
+  transition: all 0.3s ease;
+  transform-origin: center;
+  border-radius: 2px;  /* 좀 더 부드럽고 매끄러운 선을 만들기 위해 radius 추가 */
+}
+
+/* 사이드바가 열렸을 때 바 변경 */
+.sidebar-toggle-btn .bar.open:nth-child(1) {
+  transform: translateY(12px) rotate(45deg);  /* 첫 번째 바를 위로 밀고 회전 */
+}
+
+.sidebar-toggle-btn .bar.open:nth-child(2) {
+  opacity: 0; /* 두 번째 바를 숨김 */
+}
+
+.sidebar-toggle-btn .bar.open:nth-child(3) {
+  transform: translateY(-12px) rotate(-45deg);  /* 세 번째 바를 아래로 밀고 회전 */
+}
+
+/* X 버튼 스타일 추가 */
+.sidebar-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;  /* 오른쪽 상단에 위치하도록 설정 */
+  background-color: #646464;
+  color: white;
+  border: none;
+  font-size: 20px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.sidebar-close-btn:hover {
+  background-color: #858585;
+}
