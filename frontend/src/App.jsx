@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import MainPage from "./pages/MainPage.jsx"
-import "./App.css"
-import { ThemeProvider } from "./context/ThemeContext.jsx"
+"use client"
 
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import { ThemeProvider } from "./context/ThemeContext"
+import MainPage from "./pages/MainPage"
+import RegisterPage from "./pages/RegisterPage"
+import LoginPage from "./pages/LoginPage"
+import "./App.css"
 
 function App() {
   return (
@@ -11,7 +13,8 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<MainPage />} />
-          {/* Add more routes as you develop them */}
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={<LoginPage />} />
           <Route path="/virtual-fitting" element={<div>Virtual Fitting Page (Coming Soon)</div>} />
           <Route path="/feed" element={<div>Feed Page (Coming Soon)</div>} />
           <Route path="/mypage" element={<div>My Page (Coming Soon)</div>} />
@@ -21,4 +24,4 @@ function App() {
   )
 }
 
-export default App;
+export default App

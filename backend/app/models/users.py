@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime
+from sqlalchemy import Column, Integer, String, Date, DateTime, Boolean
 from app.db.database import Base
 from datetime import datetime, timezone
 
@@ -18,3 +18,8 @@ class Users(Base):
     profile_picture = Column(String(255), nullable=True)            # 프로필 이미지
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))    # 계정 생성 시간
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=datetime.now) # 계정 수정 시간
+    # 추가 컬럼 제안
+    kakao_id = Column(String(100), unique=True, nullable=True)  # 카카오 사용자 ID
+    provider_type = Column(String(20), nullable=True)  # 로그인 제공자 (일반, 카카오, 네이버 등)
+    is_verified = Column(Boolean, default=False)  # 이메일 인증 여부
+    refresh_token = Column(String(255), nullable=True)  # OAuth 리프레시 토큰 (선택적)

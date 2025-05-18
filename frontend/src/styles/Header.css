@@ -17,6 +17,12 @@
   margin: 0 auto;
 }
 
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
 .logo a {
   font-size: 1.5rem;
   font-weight: 700;
@@ -115,20 +121,81 @@
   background-color: var(--accent-hover);
 }
 
-@media (max-width: 768px) {
+/* 햄버거 버튼 스타일 */
+.hamburger-button {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 24px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 10;
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 2px;
+  background-color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+/* 햄버거 버튼 X 애니메이션 */
+.hamburger-button.active .hamburger-line:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.hamburger-button.active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger-button.active .hamburger-line:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
+}
+
+@media (max-width: 1024px) {
+  .hamburger-button {
+    display: flex;
+  }
+
+  .navigation .nav-item {
+    display: none;
+  }
+
   .header-container {
-    flex-direction: column;
     padding: 1rem;
   }
 
   .search-bar {
+    margin: 0 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    flex-wrap: wrap;
+  }
+
+  .logo-container {
+    width: 100%;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+
+  .search-bar {
+    order: 3;
     margin: 1rem 0;
     max-width: 100%;
+    width: 100%;
+  }
+
+  .navigation {
+    order: 2;
   }
 
   .navigation ul {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem;
+    justify-content: flex-end;
   }
 }
