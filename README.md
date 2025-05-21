@@ -53,7 +53,7 @@ pip install -r requirements.txt
 uvicorn main:app --reload --port 8000
 ```
 
-### 🛠 백엔드 .env 예시
+### 🛠 백엔드 .env
 ``.env`` 파일을 ``backend/`` 내부에 생성하고 아래처럼 작성합니다:
 ```bash
 # 데이터베이스 설정

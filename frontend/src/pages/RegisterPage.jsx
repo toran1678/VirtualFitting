@@ -1,13 +1,15 @@
 "use client"
 
-import { useState, useContext, useRef, useEffect } from "react"
+import { useState, useRef, useEffect } from "react"
+// import { useContext } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { ThemeContext } from "../context/ThemeContext"
+// import { ThemeContext } from "../context/ThemeContext"
 import "../styles/RegisterPage.css"
-import { requestEmailVerification, verifyEmailCode, registerUser } from "../api/auth"
+// import { requestEmailVerification } from "../api/auth"
+import { verifyEmailCode, registerUser } from "../api/auth"
 
 const RegisterPage = () => {
-  const { darkMode } = useContext(ThemeContext)
+  //const { darkMode } = useContext(ThemeContext)
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
   const verificationInputRef = useRef(null)
@@ -379,7 +381,7 @@ const RegisterPage = () => {
 
     try {
       // 실제 API 호출로 이메일 인증 코드 요청
-      const response = await requestEmailVerification(formData.email)
+      // const response = await requestEmailVerification(formData.email)
 
       setEmailVerificationSent(true)
       setVerificationTimer(180) // 3분 타이머 설정

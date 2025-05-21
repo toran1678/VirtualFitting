@@ -1,13 +1,14 @@
 "use client"
 
-import { useState, useContext, useEffect } from "react"
+import { useState, useEffect } from "react"
+// import { useContext } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { ThemeContext } from "../context/ThemeContext"
+// import { ThemeContext } from "../context/ThemeContext"
 import "../styles/LoginPage.css"
 import { loginUser, saveRememberedId, getRememberedId } from "../api/auth"
 
 const LoginPage = () => {
-  const { darkMode } = useContext(ThemeContext)
+  // const { darkMode } = useContext(ThemeContext)
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState({

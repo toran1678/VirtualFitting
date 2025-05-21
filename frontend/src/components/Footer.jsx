@@ -1,12 +1,12 @@
 "use client"
 
-import { useContext } from "react"
+// import { useContext } from "react"
 import { Link } from "react-router-dom"
-import { ThemeContext } from "../context/ThemeContext"
+// import { ThemeContext } from "../context/ThemeContext"
 import "../styles/Footer.css"
 
 const Footer = () => {
-  const { darkMode } = useContext(ThemeContext)
+  // const { darkMode } = useContext(ThemeContext)
 
   return (
     <footer className="footer">
