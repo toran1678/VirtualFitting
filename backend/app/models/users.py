@@ -15,7 +15,7 @@ class Users(Base):
     birth_date = Column(Date, nullable=True)                        # 생년월일
     phone_number = Column(String(20), unique=True, nullable=False)  # 전화번호  / 중복 불가, 필수
     address = Column(String(255), nullable=True)                    # 주소
-    profile_picture = Column(String(255), nullable=True)            # 프로필 이미지
+    profile_picture = Column(String(255), nullable=True)            # 프로필 이미지 URL
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))    # 계정 생성 시간
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=datetime.now) # 계정 수정 시간
     # 추가 컬럼 제안

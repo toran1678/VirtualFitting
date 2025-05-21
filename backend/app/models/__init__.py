@@ -7,6 +7,7 @@ from .feed_comments import FeedComments
 from .virtual_fittings import VirtualFittings
 from .custom_clothing_items import CustomClothingItems
 from .good_wish_lists import GoodWishLists
+from .verification import EmailVerification
 
 __all__ = ["Base",
            "Users",
@@ -16,4 +17,5 @@ __all__ = ["Base",
            "FeedComments",
            "VirtualFittings",
            "CustomClothingItems",
-           "GoodWishLists"]
+           "GoodWishLists",
+           "EmailVerification"]

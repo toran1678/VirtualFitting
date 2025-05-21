@@ -1,18 +1,21 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+import os
+from dotenv import load_dotenv
 
-# MySQL 연결 정보
-user = "root"
-passwd = "123456"
-host = "localhost"
-port = "3307"
-db = "capstone"
+# 환경 변수 로드
+load_dotenv()
+
+# MySQL 연결 정보를 환경 변수에서 가져오기
+DB_USER = os.getenv("DB_USER", "root")
+DB_PASSWORD = os.getenv("DB_PASSWORD", "123456")
+DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "3307")
+DB_NAME = os.getenv("DB_NAME", "capstone")
 
 # MySQL 데이터베이스 연결 URL
-DB_URL = "mysql+pymysql://{user}:{passwd}@{host}:{port}/{db}?charset=utf8".format(
-    user=user, passwd=passwd, host=host, port=port, db=db
-    )
+DB_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?charset=utf8"
 
 # SQLAlchemy 엔진 생성
 engine = create_engine(DB_URL)

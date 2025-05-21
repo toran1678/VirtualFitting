@@ -113,7 +113,7 @@ const MainPage = () => {
                   <span className="divider">|</span>
                   <a href="#">비밀번호 찾기</a>
                   <span className="divider">|</span>
-                  <a href="#">회원가입</a>
+                  <a href="/register">회원가입</a>
                 </div>
               </div>
 

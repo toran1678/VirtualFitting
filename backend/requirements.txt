@@ -6,6 +6,10 @@ mysql
 PyMySQL
 cryptography
 
+python-dotenv
+email-validator
+python-multipart
+
 # crawling
 requests
 beautifulsoup4

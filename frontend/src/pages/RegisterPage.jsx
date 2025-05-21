@@ -4,6 +4,7 @@ import { useState, useContext, useRef, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { ThemeContext } from "../context/ThemeContext"
 import "../styles/RegisterPage.css"
+import { requestEmailVerification, verifyEmailCode, registerUser } from "../api/auth"
 
 const RegisterPage = () => {
   const { darkMode } = useContext(ThemeContext)
@@ -275,17 +276,47 @@ const RegisterPage = () => {
       setIsSubmitting(true)
 
       try {
-        // 여기에 API 호출 코드 추가
-        console.log("회원가입 데이터:", formData)
+        // 회원가입 데이터 준비
+        const userData = {
+          id: formData.id,
+          name: formData.name,
+          password: formData.password,
+          nickname: formData.nickname,
+          email: formData.email,
+          birth_date: formData.birthDate || null,
+          phone_number: formData.phoneNumber.replace(/-/g, ""),
+          address: formData.address || null,
+          is_verified: true, // 이미 이메일 인증을 완료했으므로 true로 설정
+        }
+
+        // 프로필 이미지가 있는 경우 FormData로 변환하여 전송
+        if (formData.profilePicture) {
+          const formDataToSend = new FormData()
+
+          // JSON 데이터를 FormData에 추가
+          formDataToSend.append("data", JSON.stringify(userData))
+
+          // 파일 추가
+          formDataToSend.append("profile_picture", formData.profilePicture)
+
+          // 회원가입 API 호출 (FormData 사용)
+          await registerUser(formDataToSend)
+        } else {
+          // 프로필 이미지가 없는 경우 JSON으로 전송
+          await registerUser(userData)
+        }
 
         // 성공 시 로그인 페이지로 이동
-        setTimeout(() => {
-          alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.")
-          navigate("/login")
-        }, 1500)
+        alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.")
+        navigate("/login")
       } catch (error) {
-        console.error("회원가입 오류:", error)
-        alert("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.")
+        // 에러 처리
+        if (error.response && error.response.data) {
+          // 서버에서 반환한 에러 메시지가 있는 경우
+          alert(`회원가입 오류: ${error.response.data.detail || "알 수 없는 오류가 발생했습니다."}`)
+        } else {
+          alert("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.")
+        }
       } finally {
         setIsSubmitting(false)
       }
@@ -338,7 +369,7 @@ const RegisterPage = () => {
   }
 
   // 이메일 인증 코드 발송 함수
-  const sendVerificationCode = () => {
+  const sendVerificationCode = async () => {
     if (!formData.email || errors.email) {
       alert("유효한 이메일 주소를 입력해주세요.")
       return
@@ -346,10 +377,11 @@ const RegisterPage = () => {
 
     setIsVerifying(true)
 
-    // 실제 구현에서는 API 호출로 대체
-    setTimeout(() => {
+    try {
+      // 실제 API 호출로 이메일 인증 코드 요청
+      const response = await requestEmailVerification(formData.email)
+
       setEmailVerificationSent(true)
-      setIsVerifying(false)
       setVerificationTimer(180) // 3분 타이머 설정
       setTimerActive(true)
       alert(`${formData.email}로 인증 코드가 발송되었습니다. 3분 내에 입력해주세요.`)
@@ -358,11 +390,20 @@ const RegisterPage = () => {
       if (verificationInputRef.current) {
         verificationInputRef.current.focus()
       }
-    }, 1500)
+    } catch (error) {
+      // 에러 처리
+      if (error.response && error.response.data) {
+        alert(`인증 코드 발송 오류: ${error.response.data.detail || "알 수 없는 오류가 발생했습니다."}`)
+      } else {
+        alert("인증 코드 발송 중 오류가 발생했습니다. 다시 시도해주세요.")
+      }
+    } finally {
+      setIsVerifying(false)
+    }
   }
 
   // 이메일 인증 코드 확인 함수
-  const verifyCode = () => {
+  const verifyCode = async () => {
     if (!formData.verificationCode) {
       setErrors({
         ...errors,
@@ -373,10 +414,11 @@ const RegisterPage = () => {
 
     setIsVerifying(true)
 
-    // 실제 구현에서는 API 호출로 대체
-    setTimeout(() => {
-      // 예시로 "123456"을 올바른 코드로 가정
-      if (formData.verificationCode === "123456") {
+    try {
+      // 실제 API 호출로 이메일 인증 코드 확인
+      const response = await verifyEmailCode(formData.email, formData.verificationCode)
+
+      if (response.success) {
         setEmailVerified(true)
         setTimerActive(false)
         alert("이메일 인증이 완료되었습니다.")
@@ -386,8 +428,22 @@ const RegisterPage = () => {
           verificationCode: "인증 코드가 일치하지 않습니다",
         })
       }
+    } catch (error) {
+      // 에러 처리
+      if (error.response && error.response.data) {
+        setErrors({
+          ...errors,
+          verificationCode: error.response.data.detail || "인증 코드가 일치하지 않습니다",
+        })
+      } else {
+        setErrors({
+          ...errors,
+          verificationCode: "인증 코드 확인 중 오류가 발생했습니다",
+        })
+      }
+    } finally {
       setIsVerifying(false)
-    }, 1000)
+    }
   }
 
   // 타이머 포맷팅 함수
