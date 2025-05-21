@@ -5,13 +5,14 @@ import { Link } from "react-router-dom"
 import { ThemeContext } from "../context/ThemeContext"
 import "../styles/Sidebar.css"
 
-const Sidebar = ({ isOpen, toggleSidebar }) => {
+const Sidebar = ({ isOpen, toggleSidebar, children }) => {
   const { darkMode, toggleTheme } = useContext(ThemeContext)
 
   return (
     <>
       <div className={`sidebar-overlay ${isOpen ? "active" : ""}`} onClick={toggleSidebar}></div>
       <div className={`sidebar ${isOpen ? "open" : ""}`}>
+        {children}
         <div className="sidebar-header">
           <div className="sidebar-logo">FASHION GUYS</div>
           <button className="close-button" onClick={toggleSidebar} aria-label="사이드바 닫기">

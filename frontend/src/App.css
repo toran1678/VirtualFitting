@@ -11,6 +11,14 @@
   --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   --footer-bg: #f8f9fa;
   --footer-border: #dddddd;
+
+  /* 스크롤바 변수 추가 */
+  --scrollbar-width: 8px;
+  --scrollbar-track: rgba(0, 0, 0, 0.05);
+  --scrollbar-thumb: rgba(0, 0, 0, 0.2);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.3);
+  --scrollbar-thumb-active: rgba(0, 0, 0, 0.4);
+  --scrollbar-border-radius: 10px;
 }
 
 .dark-mode {
@@ -26,6 +34,12 @@
   --header-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
   --footer-bg: #1e1e1e;
   --footer-border: #333333;
+
+  /* 다크 모드 스크롤바 변수 추가 */
+  --scrollbar-track: rgba(255, 255, 255, 0.05);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+  --scrollbar-thumb-active: rgba(255, 255, 255, 0.4);
 }
 
 body {
@@ -37,6 +51,71 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   transition: background-color 0.3s, color 0.3s;
+  overflow-x: hidden; /* 가로 스크롤 방지 */
 }
 
-/* Keep the rest of your existing App.css styles */
+/* 스크롤바 스타일 추가 */
+/* 기본 스크롤바 설정 (Firefox) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* 스크롤바 전체 */
+::-webkit-scrollbar {
+  width: var(--scrollbar-width);
+  height: var(--scrollbar-width);
+}
+
+/* 스크롤바 트랙 (배경) */
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: var(--scrollbar-border-radius);
+  margin: 4px 0;
+}
+
+/* 스크롤바 썸 (움직이는 부분) */
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: var(--scrollbar-border-radius);
+  transition: background 0.3s ease;
+}
+
+/* 스크롤바 썸 호버 상태 */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* 스크롤바 썸 클릭 상태 */
+::-webkit-scrollbar-thumb:active {
+  background: var(--scrollbar-thumb-active);
+}
+
+/* 스크롤바 코너 */
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* 모바일에서는 기본 스크롤바 사용 */
+@media (max-width: 768px) {
+  * {
+    scrollbar-width: auto;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+}
+
+/* 애니메이션 효과가 있는 스크롤바 (선택적) */
+.animated-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, var(--accent-color) 0%, var(--accent-hover) 100%);
+  border-radius: var(--scrollbar-border-radius);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.animated-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, var(--accent-hover) 0%, var(--accent-color) 100%);
+}

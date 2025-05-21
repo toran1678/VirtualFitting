@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Form, UploadFile, File
+from fastapi import APIRouter, Request, Depends, HTTPException, status, Query, Form, UploadFile, File
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
 import secrets
 import string
 import json
 import logging
+import hashlib
 from typing import Optional
 
 from app.db.database import get_db
@@ -18,6 +19,59 @@ router = APIRouter(
     tags=["auth"]
 )
 logger = logging.getLogger(__name__)
+
+# 해싱 함수 재사용
+def hash_password(password: str) -> str:
+    salt = "virtual_fitting_salt"
+    return hashlib.sha256((password + salt).encode()).hexdigest()
+
+# 로그인
+@router.post("/login")
+async def login(
+    request: Request,
+    id: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    user = db.query(Users).filter(Users.id == id).first()
+    
+    if not user or user.password_hash != hash_password(password):
+        raise HTTPException(status_code=401, detail="아이디 또는 비밀번호가 일치하지 않습니다.")
+
+    request.session["user_id"] = user.user_id
+    return {
+        "message": "로그인 성공",
+        "user": {
+            "user_id": user.user_id,
+            "id": user.id,
+            "name": user.name,
+            "nickname": user.nickname,
+            "email": user.email,
+            "profile_picture": user.profile_picture,
+            "is_verified": user.is_verified
+        }
+    }
+
+# 세션 로그인 상태 확인
+@router.get("/me")
+async def get_current_user(request: Request, db: Session = Depends(get_db)):
+    user_id = request.session.get("user_id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="로그인이 필요합니다.")
+    
+    user = db.query(Users).filter(Users.user_id == user_id).first()
+    return {
+        "user_id": user.user_id,
+        "id": user.id,
+        "nickname": user.nickname,
+        "email": user.email
+    }
+    
+# 로그아웃
+@router.post("/logout")
+async def logout(request: Request):
+    request.session.clear()
+    return {"message": "로그아웃 되었습니다."}
 
 # 이메일 인증 코드 요청 (쿼리 파라미터)
 @router.post("/request-verification", status_code=status.HTTP_200_OK, response_model=VerificationResponse)

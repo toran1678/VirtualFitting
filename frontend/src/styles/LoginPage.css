@@ -110,6 +110,23 @@ input.error {
   animation: shake 0.5s;
 }
 
+/* 로그인 에러 메시지 스타일 */
+.login-error-message {
+  background-color: #fff0f0;
+  color: #e53e3e;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  text-align: center;
+  border: 1px solid #fed7d7;
+}
+
+/* 다크 모드에서의 에러 메시지 */
+.dark .login-error-message {
+  background-color: rgba(229, 62, 62, 0.1);
+  border-color: rgba(229, 62, 62, 0.3);
+}
+
 @keyframes shake {
   0%,
   100% {

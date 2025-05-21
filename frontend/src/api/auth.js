@@ -9,10 +9,119 @@ const API_URL = "http://localhost:8004"
 // axios 인스턴스 생성
 const api = axios.create({
   baseURL: API_URL,
+  withCredentials: true, // 세션 쿠키 전송
   headers: {
     "Content-Type": "application/json",
   },
 })
+
+/**
+ * 로그인 함수
+ * @param {Object} credentials - 로그인 정보 (아이디, 비밀번호)
+ * @returns {Promise<Object>} - 응답 데이터
+ */
+export const loginUser = async (credentials) => {
+  try {
+    // FormData 객체 생성
+    const formData = new FormData()
+    formData.append("id", credentials.id)
+    formData.append("password", credentials.password)
+
+    const response = await api.post("/auth/login", formData, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    })
+
+    // 사용자 정보 저장
+    const userData = {
+      user_id: response.data.user.user_id,
+      id: response.data.user.id,
+      name: response.data.user.name,
+      nickname: response.data.user.nickname,
+      email: response.data.user.email,
+      profile_picture: response.data.user.profile_picture,
+      is_verified: response.data.user.is_verified,
+      isLoggedIn: true,
+    }
+
+    localStorage.setItem("user", JSON.stringify(userData))
+
+    return response.data
+  } catch (error) {
+    console.error("로그인 오류:", error)
+    throw error
+  }
+}
+
+/**
+ * 로그아웃 함수
+ * @returns {Promise<Object>} - 응답 데이터
+ */
+export const logoutUser = async () => {
+  try {
+    const response = await api.post("/auth/logout")
+    localStorage.removeItem("user")
+    return response.data
+  } catch (error) {
+    console.error("로그아웃 오류:", error)
+    // 서버 오류가 발생해도 로컬 상태는 초기화
+    localStorage.removeItem("user")
+    throw error
+  }
+}
+
+/**
+ * 현재 로그인 상태 확인
+ * @returns {boolean} 로그인 여부
+ */
+export const isLoggedIn = () => {
+  const user = localStorage.getItem("user")
+  if (!user) return false
+
+  try {
+    const userData = JSON.parse(user)
+    return userData.isLoggedIn === true
+  } catch (e) {
+    return false
+  }
+}
+
+/**
+ * 현재 로그인한 사용자 정보 가져오기
+ * @returns {Object|null} 사용자 정보
+ */
+export const getCurrentUser = () => {
+  const user = localStorage.getItem("user")
+  if (!user) return null
+
+  try {
+    return JSON.parse(user)
+  } catch (e) {
+    return null
+  }
+}
+
+/**
+ * 아이디 저장 함수
+ * @param {string} id - 저장할 아이디
+ * @param {boolean} remember - 저장 여부
+ */
+export const saveRememberedId = (id, remember) => {
+  if (remember) {
+    localStorage.setItem("rememberedId", id)
+  } else {
+    localStorage.removeItem("rememberedId")
+  }
+}
+
+/**
+ * 저장된 아이디 가져오기
+ * @returns {string|null} 저장된 아이디
+ */
+export const getRememberedId = () => {
+  return localStorage.getItem("rememberedId")
+}
 
 /**
  * 이메일 인증 코드 요청
@@ -109,64 +218,6 @@ export const registerUser = async (userData) => {
       console.error("상태 코드:", error.response.status)
     }
 
-    throw error
-  }
-}
-
-/**
- * 로그인
- * @param {Object} credentials - 로그인 정보 (아이디, 비밀번호)
- * @returns {Promise<Object>} - 응답 데이터 (토큰 등)
- */
-export const loginUser = async (credentials) => {
-  try {
-    console.log("로그인 요청:", credentials)
-
-    const response = await api.post("/login", credentials)
-
-    console.log("로그인 성공:", response.data)
-    return response.data
-  } catch (error) {
-    console.error("로그인 오류:", error)
-
-    if (error.response) {
-      console.error("서버 응답:", error.response.data)
-      console.error("상태 코드:", error.response.status)
-    }
-
-    throw error
-  }
-}
-
-/**
- * 로그아웃
- * @returns {Promise<Object>} - 응답 데이터
- */
-export const logoutUser = async () => {
-  try {
-    const response = await api.post("/logout")
-    return response.data
-  } catch (error) {
-    console.error("로그아웃 오류:", error)
-    throw error
-  }
-}
-
-/**
- * 사용자 정보 조회
- * @param {string} token - 인증 토큰
- * @returns {Promise<Object>} - 사용자 정보
- */
-export const getUserInfo = async (token) => {
-  try {
-    const response = await api.get("/user", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-    return response.data
-  } catch (error) {
-    console.error("사용자 정보 조회 오류:", error)
     throw error
   }
 }

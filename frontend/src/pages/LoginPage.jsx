@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useContext } from "react"
+import { useState, useContext, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { ThemeContext } from "../context/ThemeContext"
 import "../styles/LoginPage.css"
+import { loginUser, saveRememberedId, getRememberedId } from "../api/auth"
 
 const LoginPage = () => {
   const { darkMode } = useContext(ThemeContext)
@@ -17,6 +18,16 @@ const LoginPage = () => {
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  const [loginError, setLoginError] = useState("")
+
+  // 컴포넌트 마운트 시 저장된 아이디 불러오기
+  useEffect(() => {
+    const savedId = getRememberedId()
+    if (savedId) {
+      setFormData(prev => ({ ...prev, id: savedId }))
+      setRememberMe(true)
+    }
+  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -24,6 +35,19 @@ const LoginPage = () => {
       ...formData,
       [name]: value,
     })
+    
+    // 입력 시 에러 메시지 초기화
+    if (errors[name]) {
+      setErrors({
+        ...errors,
+        [name]: ""
+      })
+    }
+    
+    // 로그인 에러 메시지 초기화
+    if (loginError) {
+      setLoginError("")
+    }
   }
 
   const validateForm = () => {
@@ -37,25 +61,39 @@ const LoginPage = () => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (validateForm()) {
-      setIsSubmitting(true)
+      setIsSubmitting(true);
+      setLoginError("");
 
       try {
-        // 여기에 API 호출 코드 추가
-        console.log("로그인 데이터:", formData)
-        console.log("아이디 저장:", rememberMe)
-
-        // 성공 시 메인 페이지로 이동
-        setTimeout(() => {
-          navigate("/")
-        }, 1000)
+        console.log("로그인 시도 중...");
+        // auth.js의 loginUser 함수 사용
+        const result = await loginUser(formData);
+        console.log("로그인 결과:", result);
+        
+        // 아이디 저장 처리
+        saveRememberedId(formData.id, rememberMe);
+        
+        // 메인 페이지로 이동
+        navigate("/");
       } catch (error) {
-        console.error("로그인 오류:", error)
-        alert("로그인 중 오류가 발생했습니다. 다시 시도해주세요.")
+        console.error("로그인 오류:", error);
+        
+        // 서버에서 반환한 에러 메시지 표시
+        if (error.response) {
+          const detail = error.response.data?.detail
+          if (detail) {
+            setLoginError(detail)
+          } else {
+            setLoginError(`오류 코드 ${error.response.status}: 서버에서 에러 응답이 왔습니다.`)
+          }
+        } else {
+          setLoginError("서버 연결에 문제가 있습니다. 잠시 후 다시 시도해주세요.")
+        }
       } finally {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       }
     }
   }
@@ -63,6 +101,7 @@ const LoginPage = () => {
   const handleKakaoLogin = () => {
     // 카카오 로그인 API 연동 코드
     console.log("카카오 로그인 시도")
+    alert("카카오 로그인 기능은 현재 개발 중입니다.")
   }
 
   return (
@@ -74,6 +113,13 @@ const LoginPage = () => {
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
+          {/* 로그인 에러 메시지 표시 */}
+          {loginError && (
+            <div className="login-error-message">
+              {loginError}
+            </div>
+          )}
+
           <div className="form-group">
             <div className="input-container">
               <svg

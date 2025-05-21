@@ -1,3 +1,4 @@
+/* Header.css */
 .header {
   background-color: var(--bg-primary);
   box-shadow: var(--header-shadow);
@@ -6,37 +7,54 @@
   z-index: 1000;
   width: 100%;
   transition: background-color 0.3s, box-shadow 0.3s;
+  height: 70px; /* 헤더 높이 고정 */
 }
 
 .header-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 2rem;
-  max-width: 1200px;
+  padding: 0 2rem;
+  max-width: 1400px;
   margin: 0 auto;
+  height: 100%; /* 컨테이너 높이를 헤더 높이에 맞춤 */
+}
+
+/* 왼쪽 영역 (로고 + 검색창) */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  height: 100%;
+  flex: 1; /* 왼쪽 영역이 가능한 공간을 차지하도록 설정 */
 }
 
 .logo-container {
   display: flex;
   align-items: center;
   gap: 1rem;
+  height: 100%; /* 로고 컨테이너 높이 설정 */
 }
 
 .logo a {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: var(--text-primary);
   text-decoration: none;
   letter-spacing: 1px;
   transition: color 0.3s;
   font-family: "Courier New", Courier, monospace;
+  white-space: nowrap; /* 로고 텍스트가 줄바꿈되지 않도록 설정 */
 }
 
+.logo a:hover {
+  color: var(--accent-color);
+}
+
+/* 검색창 스타일 수정 */
 .search-bar {
-  flex: 1;
-  max-width: 400px;
-  margin: 0 2rem;
+  max-width: 300px;
+  width: 100%;
 }
 
 .search-bar form {
@@ -46,18 +64,24 @@
 
 .search-bar input {
   width: 100%;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1rem;
   border: 1px solid var(--border-color);
-  border-radius: 20px;
+  border-radius: 24px;
   font-size: 0.9rem;
-  background-color: var(--bg-primary);
+  background-color: var(--bg-secondary);
   color: var(--text-primary);
-  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+  transition: all 0.3s ease;
+}
+
+.search-bar input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
 }
 
 .search-bar button {
   position: absolute;
-  right: 10px;
+  right: 12px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -67,6 +91,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.search-bar button:hover {
+  color: var(--accent-color);
+}
+
+/* 오른쪽 영역 (네비게이션 + 로그인/프로필) */
+.header-right {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.navigation {
+  height: 100%; /* 네비게이션 높이 설정 */
+  display: flex;
+  align-items: center;
 }
 
 .navigation ul {
@@ -76,6 +118,7 @@
   padding: 0;
   gap: 1.5rem;
   align-items: center;
+  height: 100%; /* 네비게이션 메뉴 높이 설정 */
 }
 
 .navigation a {
@@ -83,17 +126,22 @@
   text-decoration: none;
   font-weight: 500;
   transition: color 0.3s;
+  font-size: 0.95rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  white-space: nowrap; /* 메뉴 텍스트가 줄바꿈되지 않도록 설정 */
 }
 
 .navigation a:hover {
   color: var(--accent-color);
+  background-color: var(--bg-secondary);
 }
 
 .theme-toggle {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0.3rem;
+  padding: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -104,26 +152,169 @@
 
 .theme-toggle:hover {
   background-color: var(--bg-secondary);
+  color: var(--accent-color);
 }
 
-.login-button {
+/* 로그인/회원가입 버튼 스타일 개선 - 헤더 전용 */
+.auth-buttons {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  height: 36px; /* 버튼 높이 고정 */
+}
+
+/* 헤더 로그인 버튼 스타일 - 클래스 이름 변경 */
+.header .login-button,
+.header-login-button {
   background-color: var(--accent-color);
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0 1.2rem;
+  border-radius: 18px;
   cursor: pointer;
   font-weight: 500;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  height: 36px; /* 버튼 높이 고정 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+  white-space: nowrap; /* 버튼 텍스트가 줄바꿈되지 않도록 설정 */
+}
+
+.header .login-button:hover,
+.header-login-button:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+}
+
+/* 원래 로그인 버튼 스타일 유지 (로그인 페이지용) */
+.login-button {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
 }
 
 .login-button:hover {
-  background-color: var(--accent-hover);
+  background-color: var(--bg-secondary);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
 }
 
-/* 햄버거 버튼 스타일 */
-.hamburger-button {
+.register-button {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  padding: 0 1.2rem;
+  border-radius: 18px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  height: 36px; /* 버튼 높이 고정 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap; /* 버튼 텍스트가 줄바꿈되지 않도록 설정 */
+}
+
+.register-button:hover {
+  background-color: var(--bg-secondary);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+/* 사용자 프로필 스타일 */
+.user-profile-container {
+  margin-left: 0.5rem;
+  height: 36px; /* 프로필 컨테이너 높이 고정 */
+  display: flex;
+  align-items: center;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: 24px;
+  transition: background-color 0.3s ease;
+  height: 100%; /* 프로필 높이 설정 */
+}
+
+.user-profile:hover {
+  background-color: var(--bg-secondary);
+}
+
+.profile-image {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--accent-color);
+  color: white;
+  font-weight: bold;
+}
+
+.profile-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-initial {
+  font-size: 1rem;
+  text-transform: uppercase;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  max-width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  background-color: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.3rem 0.6rem;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  transition: all 0.3s ease;
+  height: 32px; /* 로그아웃 버튼 높이 고정 */
+}
+
+.logout-button:hover {
+  background-color: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+}
+
+.logout-button span {
   display: none;
+}
+
+/* 햄버거 버튼 스타일 수정 - 항상 보이도록 변경 */
+.hamburger-button {
+  display: flex; /* none에서 flex로 변경하여 항상 보이게 함 */
   flex-direction: column;
   justify-content: space-between;
   width: 24px;
@@ -155,6 +346,7 @@
   transform: translateY(-8px) rotate(-45deg);
 }
 
+/* 반응형 스타일 */
 @media (max-width: 1024px) {
   .hamburger-button {
     display: flex;
@@ -165,37 +357,96 @@
   }
 
   .header-container {
-    padding: 1rem;
+    padding: 0 1rem;
   }
 
   .search-bar {
-    margin: 0 1rem;
+    max-width: 200px;
+  }
+
+  .logout-button span {
+    display: inline;
   }
 }
 
 @media (max-width: 768px) {
+  .header {
+    height: auto; /* 모바일에서는 높이 자동 조정 */
+  }
+
   .header-container {
     flex-wrap: wrap;
+    padding: 0.8rem 1rem;
+    height: auto; /* 모바일에서는 높이 자동 조정 */
+  }
+
+  .header-left {
+    width: 100%;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
   }
 
   .logo-container {
-    width: 100%;
-    justify-content: space-between;
-    margin-bottom: 1rem;
+    width: auto;
+    justify-content: flex-start;
+    height: auto; /* 모바일에서는 높이 자동 조정 */
   }
 
   .search-bar {
     order: 3;
-    margin: 1rem 0;
+    margin: 0.8rem 0;
     max-width: 100%;
     width: 100%;
   }
 
+  .header-right {
+    width: 100%;
+    justify-content: flex-end;
+    height: auto;
+  }
+
   .navigation {
     order: 2;
+    height: auto; /* 모바일에서는 높이 자동 조정 */
   }
 
   .navigation ul {
     justify-content: flex-end;
+    height: auto; /* 모바일에서는 높이 자동 조정 */
+  }
+
+  .user-profile {
+    padding: 0.2rem;
+  }
+
+  .user-name {
+    display: none;
+  }
+
+  .auth-buttons {
+    gap: 0.5rem;
+  }
+
+  .header .login-button,
+  .header-login-button,
+  .register-button {
+    padding: 0 0.8rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-buttons {
+    flex-direction: row; /* 변경: 열에서 행으로 */
+    gap: 0.4rem;
+    align-items: center;
+  }
+
+  .theme-toggle {
+    padding: 0.3rem;
+  }
+
+  .navigation ul {
+    gap: 0.8rem;
   }
 }

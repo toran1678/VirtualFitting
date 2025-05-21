@@ -52,9 +52,9 @@ class RegisterResponse(BaseModel):
         "json_schema_extra": {
             "examples": [
                 {
-                    "id": "testuser123",
+                    "id": "test1",
                     "name": "홍길동",
-                    "password": "Password123!",
+                    "password": "password1!",
                     "nickname": "길동이",
                     "email": "test@example.com",
                     "birth_date": "1990-01-01",

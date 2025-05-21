@@ -8,7 +8,8 @@
   z-index: 998;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
+  transition: opacity 0.3s ease;
+  will-change: opacity;
 }
 
 .sidebar-overlay.active {
@@ -16,6 +17,7 @@
   visibility: visible;
 }
 
+/* 사이드바 스타일 수정 */
 .sidebar {
   position: fixed;
   top: 0;
@@ -25,13 +27,16 @@
   background-color: var(--bg-primary);
   box-shadow: var(--card-shadow);
   z-index: 999;
-  transition: left 0.3s ease;
+  transition: transform 0.3s ease;
+  transform: translateX(0);
+  will-change: transform;
   display: flex;
   flex-direction: column;
 }
 
 .sidebar.open {
-  left: 0;
+  transform: translateX(300px);
+  left: -300px; /* left 속성은 변경하지 않고 transform만 사용 */
 }
 
 .sidebar-header {
