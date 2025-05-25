@@ -10,6 +10,7 @@
     "axios": "^1.9.0",
     "dotenv": "^16.5.0",
     "kakao-js-sdk": "^1.2.3",
+    "lucide-react": "^0.511.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router": "^7.4.0",

@@ -4,43 +4,16 @@ import { useState, useContext, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import "../styles/Header.css"
 import { ThemeContext } from "../context/ThemeContext"
+import { useAuth } from "../context/AuthContext"
 import Sidebar from "./Sidebar"
-import { isLoggedIn, getCurrentUser, logoutUser } from "../api/auth"
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("")
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [userLoggedIn, setUserLoggedIn] = useState(false)
-  const [userData, setUserData] = useState(null)
   const [isScrolled, setIsScrolled] = useState(false)
   const { darkMode, toggleTheme } = useContext(ThemeContext)
+  const { user, isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
-
-  // 컴포넌트 마운트 시 로그인 상태 확인
-  useEffect(() => {
-    const checkLoginStatus = () => {
-      const loginStatus = isLoggedIn()
-      setUserLoggedIn(loginStatus)
-
-      if (loginStatus) {
-        setUserData(getCurrentUser())
-      } else {
-        setUserData(null)
-      }
-    }
-
-    checkLoginStatus()
-
-    const handleStorageChange = () => {
-      checkLoginStatus()
-    }
-
-    window.addEventListener("storage", handleStorageChange)
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange)
-    }
-  }, [])
 
   // 스크롤 감지 효과
   useEffect(() => {
@@ -68,12 +41,11 @@ const Header = () => {
   }
 
   const handleLoginLogout = async () => {
-    if (userLoggedIn) {
+    if (isAuthenticated) {
       try {
-        await logoutUser()
-        setUserLoggedIn(false)
-        setUserData(null)
-        navigate("/")
+        await logout()
+        // 헤더에서는 새로고침 유지 (필요한 경우)
+        window.location.reload()
       } catch (error) {
         console.error("로그아웃 오류:", error)
         alert("로그아웃 중 오류가 발생했습니다.")
@@ -160,7 +132,7 @@ const Header = () => {
                   <Link to="/feed">피드</Link>
                 </li>
 
-                {userLoggedIn && (
+                {isAuthenticated && (
                   <li className="nav-item">
                     <Link to="/mypage">마이페이지</Link>
                   </li>
@@ -208,17 +180,17 @@ const Header = () => {
                   </button>
                 </li>
 
-                {userLoggedIn ? (
+                {isAuthenticated ? (
                   <li className="user-profile-container">
                     <div className="user-profile">
                       <div className="profile-image">
-                        {userData?.profile_picture ? (
-                          <img src={userData.profile_picture || "/placeholder.svg"} alt="프로필" />
+                        {user?.profile_picture ? (
+                          <img src={user.profile_picture || "/placeholder.svg"} alt="프로필" />
                         ) : (
-                          <div className="profile-initial">{userData?.nickname?.charAt(0) || "U"}</div>
+                          <div className="profile-initial">{user?.nickname?.charAt(0) || "U"}</div>
                         )}
                       </div>
-                      <span className="user-name">{userData?.nickname || "사용자"}</span>
+                      <span className="user-name">{user?.nickname || "사용자"}</span>
                       <button className="logout-button" onClick={handleLoginLogout}>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
@@ -252,7 +224,7 @@ const Header = () => {
         </div>
       </header>
 
-      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} isLoggedIn={userLoggedIn} userData={userData} />
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} isLoggedIn={isAuthenticated} userData={user} />
     </>
   )
 }

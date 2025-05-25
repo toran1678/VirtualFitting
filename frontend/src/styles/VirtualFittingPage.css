@@ -1,0 +1,365 @@
+/* VirtualFittingPage.css */
+.virtual-fitting-page {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.virtual-fitting-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* 메인 업로드 섹션 */
+.main-upload-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-bottom: 2rem;
+}
+
+.upload-area h2 {
+  color: var(--text-primary);
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.image-upload-box {
+  width: 100%;
+  height: 500px;
+  border: 2px dashed var(--border-color);
+  border-radius: 16px;
+  background-color: var(--bg-secondary);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.image-upload-box:hover {
+  border-color: var(--accent-color);
+  background-color: var(--card-bg);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 2rem;
+}
+
+.upload-placeholder:hover {
+  transform: scale(1.02);
+}
+
+.upload-icon-svg {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1.5rem;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+  color: var(--text-secondary);
+}
+
+.upload-placeholder:hover .upload-icon-svg {
+  opacity: 1;
+  transform: scale(1.1);
+  color: var(--accent-color);
+}
+
+.upload-placeholder p {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.upload-placeholder span {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.uploaded-image {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.uploaded-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 14px;
+}
+
+.change-image-btn {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.change-image-btn:hover {
+  background-color: var(--accent-hover);
+  transform: translateX(-50%) translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+/* 피팅 버튼 섹션 */
+.fitting-button-section {
+  display: flex;
+  justify-content: center;
+  margin: 3rem 0;
+}
+
+.fitting-btn {
+  background: linear-gradient(135deg, var(--accent-color) 0%, var(--accent-hover) 100%);
+  color: white;
+  border: none;
+  padding: 1.2rem 3rem;
+  border-radius: 12px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
+  min-width: 300px;
+}
+
+.fitting-btn:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 123, 255, 0.4);
+}
+
+.fitting-btn:disabled {
+  background: var(--text-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 하단 탭 섹션 */
+.bottom-section {
+  margin-top: 4rem;
+}
+
+.tab-navigation {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-bottom: 2rem;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 0.5rem;
+  box-shadow: var(--card-shadow);
+}
+
+.tab-btn {
+  flex: 1;
+  background-color: transparent;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+  background-color: var(--card-bg);
+}
+
+.tab-btn.active {
+  background-color: var(--accent-color);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.tab-content {
+  background-color: var(--card-bg);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: var(--card-shadow);
+  min-height: 400px;
+}
+
+.items-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.grid-item {
+  background-color: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.grid-item:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.grid-item img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.item-info h4 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.category {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background-color: var(--bg-primary);
+  padding: 0.3rem 0.8rem;
+  border-radius: 16px;
+  display: inline-block;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .main-upload-section {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+
+  .tab-navigation {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .tab-btn {
+    padding: 0.8rem 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .virtual-fitting-container {
+    padding: 1rem;
+  }
+
+  .image-upload-box {
+    height: 350px;
+  }
+
+  .items-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+
+  .grid-item img {
+    height: 140px;
+  }
+
+  .fitting-btn {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    min-width: 250px;
+  }
+
+  .tab-content {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .items-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tab-btn {
+    font-size: 0.9rem;
+    padding: 0.7rem 0.5rem;
+  }
+
+  .fitting-btn {
+    padding: 0.9rem 1.5rem;
+    font-size: 1rem;
+    min-width: 200px;
+  }
+
+  .upload-placeholder p {
+    font-size: 1.1rem;
+  }
+
+  .upload-placeholder span {
+    font-size: 0.9rem;
+  }
+}
+
+/* 로딩 애니메이션 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+/* 호버 효과 강화 */
+.grid-item:hover .item-info h4 {
+  color: var(--accent-color);
+}
+
+.grid-item:hover .category {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.inline-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+  color: var(--accent-color);
+}

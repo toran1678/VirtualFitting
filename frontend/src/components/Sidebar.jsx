@@ -103,9 +103,9 @@ const Sidebar = ({ isOpen, toggleSidebar, children }) => {
               )}
             </button>
           </div>
-          <button className="sidebar-login-button" onClick={toggleSidebar}>
+          {/* <button className="sidebar-login-button" onClick={toggleSidebar}>
             로그인
-          </button>
+          </button> */}
         </div>
       </div>
     </>

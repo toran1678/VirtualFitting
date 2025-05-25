@@ -1,15 +1,14 @@
 "use client"
 
 import { useState, useEffect } from "react"
-// import { useContext } from "react"
 import { Link, useNavigate } from "react-router-dom"
-// import { ThemeContext } from "../context/ThemeContext"
+import { useAuth } from "../context/AuthContext"
 import "../styles/LoginPage.css"
-import { loginUser, saveRememberedId, getRememberedId } from "../api/auth"
+import { saveRememberedId, getRememberedId } from "../api/auth"
 
 const LoginPage = () => {
-  // const { darkMode } = useContext(ThemeContext)
   const navigate = useNavigate()
+  const { login, isAuthenticated, loading: authLoading } = useAuth()
 
   const [formData, setFormData] = useState({
     id: "",
@@ -21,11 +20,18 @@ const LoginPage = () => {
   const [rememberMe, setRememberMe] = useState(false)
   const [loginError, setLoginError] = useState("")
 
+  // 이미 로그인된 경우 메인 페이지로 리다이렉트
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/")
+    }
+  }, [isAuthenticated, navigate])
+
   // 컴포넌트 마운트 시 저장된 아이디 불러오기
   useEffect(() => {
     const savedId = getRememberedId()
     if (savedId) {
-      setFormData(prev => ({ ...prev, id: savedId }))
+      setFormData((prev) => ({ ...prev, id: savedId }))
       setRememberMe(true)
     }
   }, [])
@@ -36,15 +42,15 @@ const LoginPage = () => {
       ...formData,
       [name]: value,
     })
-    
+
     // 입력 시 에러 메시지 초기화
     if (errors[name]) {
       setErrors({
         ...errors,
-        [name]: ""
+        [name]: "",
       })
     }
-    
+
     // 로그인 에러 메시지 초기화
     if (loginError) {
       setLoginError("")
@@ -62,26 +68,27 @@ const LoginPage = () => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (validateForm()) {
-      setIsSubmitting(true);
-      setLoginError("");
+      setIsSubmitting(true)
+      setLoginError("")
 
       try {
-        console.log("로그인 시도 중...");
-        // auth.js의 loginUser 함수 사용
-        const result = await loginUser(formData);
-        console.log("로그인 결과:", result);
-        
+        console.log("로그인 시도 중...")
+
+        // AuthContext의 login 함수 사용
+        await login(formData)
+        console.log("로그인 성공!")
+
         // 아이디 저장 처리
-        saveRememberedId(formData.id, rememberMe);
-        
-        // 메인 페이지로 이동
-        navigate("/");
+        saveRememberedId(formData.id, rememberMe)
+
+        // 메인 페이지로 이동 (AuthContext가 상태를 자동으로 업데이트)
+        navigate("/")
       } catch (error) {
-        console.error("로그인 오류:", error);
-        
+        console.error("로그인 오류:", error)
+
         // 서버에서 반환한 에러 메시지 표시
         if (error.response) {
           const detail = error.response.data?.detail
@@ -94,7 +101,7 @@ const LoginPage = () => {
           setLoginError("서버 연결에 문제가 있습니다. 잠시 후 다시 시도해주세요.")
         }
       } finally {
-        setIsSubmitting(false);
+        setIsSubmitting(false)
       }
     }
   }
@@ -115,11 +122,7 @@ const LoginPage = () => {
 
         <form className="login-form" onSubmit={handleSubmit}>
           {/* 로그인 에러 메시지 표시 */}
-          {loginError && (
-            <div className="login-error-message">
-              {loginError}
-            </div>
-          )}
+          {loginError && <div className="login-error-message">{loginError}</div>}
 
           <div className="form-group">
             <div className="input-container">
@@ -146,6 +149,7 @@ const LoginPage = () => {
                 value={formData.id}
                 onChange={handleChange}
                 className={errors.id ? "error" : ""}
+                autoComplete="username"
               />
             </div>
             {errors.id && <span className="error-message">{errors.id}</span>}
@@ -176,6 +180,7 @@ const LoginPage = () => {
                 value={formData.password}
                 onChange={handleChange}
                 className={errors.password ? "error" : ""}
+                autoComplete="current-password"
               />
             </div>
             {errors.password && <span className="error-message">{errors.password}</span>}
@@ -191,8 +196,8 @@ const LoginPage = () => {
             </Link>
           </div>
 
-          <button type="submit" className="login-button" disabled={isSubmitting}>
-            {isSubmitting ? (
+          <button type="submit" className="login-button" disabled={isSubmitting || authLoading}>
+            {isSubmitting || authLoading ? (
               <div className="spinner">
                 <div className="bounce1"></div>
                 <div className="bounce2"></div>
