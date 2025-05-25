@@ -8,5 +8,5 @@ class MyRoom(Base):
     
     nickname = Column(String(20), primary_key=True)
     title = Column(String(100), nullable=False)
-    image = Column(BLOB, nullable=False)
+    image_url = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
