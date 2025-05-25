@@ -3,6 +3,18 @@ AI 기반 가상 피팅 서비스 + 사용자 피드 기능이 포함된 풀스�
 
 ***
 
+## ✅ 공통 환경
+|항목|버전|
+|:-----:|:-----:|
+|OS|Windows 10 / 11|
+|Python|3.11|
+|Node.js|18.18.0|
+|npm|9.8.1|
+|CUDA|10.1|
+pip	최신 권장 (pip install --upgrade pip)
+
+✅ 프론트엔드 (React)
+
 ## 📁 프로젝트 구조
 ```bash
 project-root/
