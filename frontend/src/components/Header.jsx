@@ -12,6 +12,7 @@ const Header = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [userLoggedIn, setUserLoggedIn] = useState(false)
   const [userData, setUserData] = useState(null)
+  const [isScrolled, setIsScrolled] = useState(false)
   const { darkMode, toggleTheme } = useContext(ThemeContext)
   const navigate = useNavigate()
 
@@ -28,57 +29,67 @@ const Header = () => {
       }
     }
 
-    // 초기 로그인 상태 확인
     checkLoginStatus()
 
-    // 로컬 스토리지 변경 이벤트 리스너 추가
     const handleStorageChange = () => {
       checkLoginStatus()
     }
 
     window.addEventListener("storage", handleStorageChange)
 
-    // 컴포넌트 언마운트 시 이벤트 리스너 제거
     return () => {
       window.removeEventListener("storage", handleStorageChange)
+    }
+  }, [])
+
+  // 스크롤 감지 효과
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY
+      setIsScrolled(scrollTop > 10)
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  // 헤더가 있는 페이지임을 body에 표시
+  useEffect(() => {
+    document.body.classList.add("has-header")
+
+    return () => {
+      document.body.classList.remove("has-header")
     }
   }, [])
 
   const handleSearch = (e) => {
     e.preventDefault()
     console.log("검색어:", searchQuery)
-    // 검색 기능 구현
   }
 
   const handleLoginLogout = async () => {
     if (userLoggedIn) {
-      // 로그아웃 처리
       try {
         await logoutUser()
         setUserLoggedIn(false)
         setUserData(null)
-        // 홈페이지로 리다이렉트 (선택사항)
         navigate("/")
       } catch (error) {
         console.error("로그아웃 오류:", error)
         alert("로그아웃 중 오류가 발생했습니다.")
       }
     } else {
-      // 로그인 페이지로 이동
       navigate("/login")
     }
   }
 
   const toggleSidebar = () => {
-    // 스크롤바 너비를 계산하여 보정
     const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
 
     if (!sidebarOpen) {
-      // 사이드바 열기 전에 스크롤바 너비만큼 패딩 추가
       document.body.style.paddingRight = `${scrollbarWidth}px`
       document.body.style.overflow = "hidden"
     } else {
-      // 사이드바 닫을 때 원래대로 복원
       document.body.style.paddingRight = "0"
       document.body.style.overflow = ""
     }
@@ -88,7 +99,7 @@ const Header = () => {
 
   return (
     <>
-      <header className="header">
+      <header className={`header ${isScrolled ? "scrolled" : ""}`}>
         <div className="header-container">
           {/* 왼쪽 영역: 로고 + 검색창 */}
           <div className="header-left">
