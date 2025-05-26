@@ -86,7 +86,7 @@ const KakaoCallback = () => {
     } else if (!code) {
       console.log("인증 코드가 없음 - 회원가입 페이지로 이동")
       navigate("/register")
-    }
+    }// eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // 빈 의존성 배열로 한 번만 실행
 
   // 컴포넌트 언마운트 시 정리
