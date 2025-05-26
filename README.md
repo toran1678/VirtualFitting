@@ -41,8 +41,13 @@ npm start
 
 ### 💡 ``.env`` 파일 설정 (React용)
 ``frontend/`` 폴더 안에 ``.env`` 파일을 생성:
-```env
-REACT_APP_BACKEND_URL=http://localhost:8000
+```bash
+# 백엔드 API URL
+REACT_APP_API_URL=http://localhost:8000
+
+# 카카오 OAuth 설정 (프론트엔드용)
+REACT_APP_KAKAO_JAVASCRIPT_KEY=your-kakao-javascript-key
+REACT_APP_KAKAO_REDIRECT_URI=http://localhost:3000/auth/kakao/callback
 ```
 
 ***

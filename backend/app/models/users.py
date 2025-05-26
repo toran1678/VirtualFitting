@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Date, DateTime, Boolean, Enum, Text
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Enum, Text
 from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship
 from app.db.database import Base
 
 # 사용자 테이블 (Users Table)
@@ -28,3 +29,11 @@ class Users(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())    # 계정 생성 시간
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now()) # 계정 수정 시간
     last_login_at = Column(DateTime(timezone=True), nullable=True)  # 마지막 로그인 시간 (새로 추가)
+    
+    feed = relationship("Feeds", back_populates="user", cascade="all, delete")  # 피드 관계 설정
+    liked_feed = relationship("LikedFeeds", back_populates="user", cascade="all, delete") # 피드 좋아요 관계 설정
+    feed_comment = relationship("FeedComments", back_populates="user", cascade="all, delete")  # 댓글 관계 설정
+    liked_clothes = relationship("LikedClothes", back_populates="user", cascade="all, delete")  # 좋아요 관계 설정
+    user_clothes = relationship("UserClothes", back_populates="user", cascade="all, delete")  # 내 옷장 관계 설정
+    custom_clothing_item = relationship("CustomClothingItems", back_populates="user", cascade="all, delete")  # 커스텀 의류 관계 설정
+    virtual_fitting = relationship("VirtualFittings", back_populates="user", cascade="all, delete")  # 가상 피팅 관계 설정

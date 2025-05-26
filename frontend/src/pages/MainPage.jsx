@@ -8,6 +8,7 @@ import ImagePlaceholder from "../components/ImagePlaceholder"
 import { loginUser, isLoggedIn, getCurrentUser, logoutUser } from "../api/auth"
 import { useKakaoAuth } from "../hooks/useKakaoAuth" // 카카오 인증 훅 추가
 import "../styles/MainPage.css"
+import { getProfileImageUrl, handleImageError } from "../utils/imageUtils"
 
 const MainPage = () => {
   const [activeCategory, setActiveCategory] = useState("인기순")
@@ -299,7 +300,11 @@ const MainPage = () => {
                   <div className="user-profile-header">
                     <div className="profile-image-large">
                       {userData?.profile_picture ? (
-                        <img src={userData.profile_picture || "/placeholder.svg"} alt="프로필" />
+                        <img
+                          src={getProfileImageUrl(userData.profile_picture) || "/placeholder.svg"}
+                          alt="프로필"
+                          onError={(e) => handleImageError(e, "/placeholder.svg?height=60&width=60&query=user profile")}
+                        />
                       ) : (
                         <div className="profile-initial-large">{userData?.nickname?.charAt(0) || "U"}</div>
                       )}

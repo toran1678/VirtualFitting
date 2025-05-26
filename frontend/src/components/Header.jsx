@@ -6,6 +6,7 @@ import "../styles/Header.css"
 import { ThemeContext } from "../context/ThemeContext"
 import { useAuth } from "../context/AuthContext"
 import Sidebar from "./Sidebar"
+import { getProfileImageUrl, handleImageError } from "../utils/imageUtils"
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("")
@@ -185,7 +186,13 @@ const Header = () => {
                     <div className="user-profile">
                       <div className="profile-image">
                         {user?.profile_picture ? (
-                          <img src={user.profile_picture || "/placeholder.svg"} alt="프로필" />
+                          <img
+                            src={getProfileImageUrl(user.profile_picture) || "/placeholder.svg"}
+                            alt="프로필"
+                            onError={(e) =>
+                              handleImageError(e, "/placeholder.svg?height=32&width=32&query=user profile")
+                            }
+                          />
                         ) : (
                           <div className="profile-initial">{user?.nickname?.charAt(0) || "U"}</div>
                         )}

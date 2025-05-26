@@ -1,21 +1,23 @@
 from app.db.database import Base
 from .users import Users
-from .my_rooms import MyRoom
+from .user_clothes import UserClothes
 from .clothing_items import ClothingItems
 from .feeds import Feeds
 from .feed_comments import FeedComments
 from .virtual_fittings import VirtualFittings
 from .custom_clothing_items import CustomClothingItems
-from .good_wish_lists import GoodWishLists
+from .liked_clothes import LikedClothes
+from .liked_feeds import LikedFeeds
 from .verification import EmailVerification
 
 __all__ = ["Base",
            "Users",
-           "MyRoom",
+           "UserClothes",
            "ClothingItems",
            "Feeds",
            "FeedComments",
            "VirtualFittings",
            "CustomClothingItems",
-           "GoodWishLists",
+           "LikedClothes",
+           "LikedFeeds",
            "EmailVerification"]
