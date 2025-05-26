@@ -1,12 +1,12 @@
 from app.db.database import engine
 from app.models.users import Users
-from app.models.my_rooms import MyRoom
+from backend.app.models.user_clothes import MyRoom
 from app.models.clothing_items import ClothingItems
 from app.models.feeds import Feeds
 from app.models.feed_comments import FeedComments
 from app.models.virtual_fittings import VirtualFittings
 from app.models.custom_clothing_items import CustomClothingItems
-from app.models.good_wish_lists import GoodWishLists
+from backend.app.models.liked_clothes import GoodWishLists
 from app.models.verification import EmailVerification
 
 # 테이블 생성

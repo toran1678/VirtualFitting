@@ -14,12 +14,17 @@ const api = axios.create({
 
 /**
  * 카카오 OAuth 인증 URL 가져오기
+ * @param {boolean} forceLogin - 강제 로그인 여부 (기본값: true)
  * @returns {Promise<Object>} - 인증 URL과 state
  */
-export const getKakaoAuthUrl = async () => {
+export const getKakaoAuthUrl = async (forceLogin = true) => {
   try {
-    console.log("카카오 인증 URL 요청 중...")
-    const response = await api.get("/auth/kakao/authorization-url")
+    console.log("카카오 인증 URL 요청 중... (강제 로그인:", forceLogin, ")")
+
+    // forceLogin이 true면 prompt 파라미터 추가
+    const params = forceLogin ? { prompt: "login" } : {}
+
+    const response = await api.get("/auth/kakao/authorization-url", { params })
     console.log("카카오 인증 URL 응답:", response.data)
     return response.data
   } catch (error) {

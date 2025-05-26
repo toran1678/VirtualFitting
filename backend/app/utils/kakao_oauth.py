@@ -14,8 +14,8 @@ class KakaoOAuth:
         self.user_info_url = "https://kapi.kakao.com/v2/user/me"
         self.auth_url = "https://kauth.kakao.com/oauth/authorize"
 
-    def get_authorization_url(self, state: str = None) -> str:
-        """카카오 OAuth 인증 URL 생성"""
+    def get_authorization_url(self, state: str = None, prompt: str = None) -> str:
+        """카카오 OAuth 인증 URL 생성 - prompt 파라미터 지원"""
         params = {
             "client_id": self.client_id,
             "redirect_uri": self.redirect_uri,
@@ -24,8 +24,16 @@ class KakaoOAuth:
         if state:
             params["state"] = state
         
+        # prompt 파라미터 추가 (강제 로그인을 위해)
+        if prompt:
+            params["prompt"] = prompt
+            logger.info(f"카카오 인증 URL에 prompt 파라미터 추가: {prompt}")
+        
         query_string = "&".join([f"{k}={v}" for k, v in params.items()])
-        return f"{self.auth_url}?{query_string}"
+        auth_url = f"{self.auth_url}?{query_string}"
+        
+        logger.info(f"생성된 카카오 인증 URL: {auth_url}")
+        return auth_url
 
     async def get_access_token(self, authorization_code: str, retry_count: int = 0) -> Dict[str, Any]:
         """인증 코드로 액세스 토큰 획득 (재시도 로직 포함)"""

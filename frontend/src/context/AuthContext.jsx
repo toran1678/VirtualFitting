@@ -173,15 +173,39 @@ export const AuthProvider = ({ children }) => {
 
   // === 카카오 로그인 관련 함수들 ===
 
-  // 카카오 로그인 시작
-  const startKakaoLogin = async () => {
+  // 카카오 로그인 시작 - 매번 강제 로그인 모드 사용
+  const startKakaoLogin = async (forceLogin = true) => {
     try {
       setLoading(true)
       setError(null)
 
-      console.log("카카오 로그인 시작...")
-      const { authorization_url, state } = await getKakaoAuthUrl()
-      console.log("인증 URL:", authorization_url)
+      console.log("=== 카카오 로그인 완전 초기화 시작 ===")
+
+      // 1. 모든 카카오 관련 상태 초기화
+      setKakaoUserInfo(null)
+      setAuthSuccess(null)
+      setError(null)
+
+      // 2. 모든 저장소의 카카오 정보 삭제
+      sessionStorage.removeItem("kakao_user_info")
+      sessionStorage.removeItem("kakao_oauth_state")
+      localStorage.removeItem("temp_kakao_info")
+
+      // 3. 카카오 관련 쿠키 삭제 시도
+      document.cookie.split(";").forEach((c) => {
+        const eqPos = c.indexOf("=")
+        const name = eqPos > -1 ? c.substring(0, eqPos) : c
+        if (name.trim().toLowerCase().includes("kakao")) {
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=.kakao.com`
+          document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=kauth.kakao.com`
+        }
+      })
+
+      console.log("카카오 상태 초기화 완료 - 새로운 로그인 시작... (강제 로그인:", forceLogin, ")")
+
+      const { authorization_url, state } = await getKakaoAuthUrl(forceLogin)
+      console.log("새로운 인증 URL 생성:", authorization_url)
 
       // state를 세션 스토리지에 저장 (CSRF 방지)
       sessionStorage.setItem("kakao_oauth_state", state)
@@ -287,7 +311,7 @@ export const AuthProvider = ({ children }) => {
         errorMessage = "인증 코드가 만료되었습니다. 다시 로그인해주세요."
         // 새로운 인증 시작
         setTimeout(() => {
-          startKakaoLogin()
+          startKakaoLogin(true)
         }, 2000)
       } else if (err.response?.data?.detail) {
         errorMessage = err.response.data.detail
@@ -363,12 +387,22 @@ export const AuthProvider = ({ children }) => {
     }
   }
 
-  // 새로운 인증 시작 함수
+  // 새로운 인증 시작 함수 - 완전히 초기화 후 시작
   const restartKakaoAuth = () => {
+    console.log("카카오 인증 완전 초기화 및 재시작")
+
+    // 모든 카카오 관련 상태 초기화
     setKakaoUserInfo(null)
     setError(null)
     setAuthSuccess(null)
-    startKakaoLogin()
+
+    // 저장된 모든 카카오 정보 삭제
+    sessionStorage.removeItem("kakao_user_info")
+    sessionStorage.removeItem("kakao_oauth_state")
+    localStorage.removeItem("temp_kakao_info")
+
+    // 강제 로그인 모드로 새로운 인증 시작
+    startKakaoLogin(true)
   }
 
   const value = {
@@ -382,10 +416,10 @@ export const AuthProvider = ({ children }) => {
     checkAuthStatus,
     refreshAuth,
 
-    // 카카오 로그인 관련
+    // 카카오 로그인 관련 - forceLogin 파라미터 지원
     kakaoUserInfo,
     error,
-    startKakaoLogin,
+    startKakaoLogin, // 이제 forceLogin 파라미터를 받음
     handleKakaoCallback,
     completeKakaoSignup,
     restartKakaoAuth,

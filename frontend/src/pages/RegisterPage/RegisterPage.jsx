@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
 import styles from "./RegisterPage.module.css" // CSS 모듈 올바른 import
 import { verifyEmailCode, registerUser, requestEmailVerification } from "../../api/auth"
-import { useKakaoAuth } from "../../hooks/useKakaoAuth"
+import { useKakaoAuth } from "../../context/AuthContext" // 수정된 import 경로
 import KakaoSignupForm from "../../components/KakaoSignupForm/KakaoSignupForm"
 
 const RegisterPage = () => {
@@ -44,7 +44,7 @@ const RegisterPage = () => {
   const [verificationTimer, setVerificationTimer] = useState(0)
   const [timerActive, setTimerActive] = useState(false)
 
-  const { startKakaoLogin, isLoading: kakaoLoading } = useKakaoAuth()
+  const { startKakaoLogin, isLoading: kakaoLoading, error, setError } = useKakaoAuth()
 
   // 카카오 회원가입 모드인지 확인
   const isKakaoSignupMode = kakaoSignupState && kakaoInfo
@@ -310,11 +310,19 @@ const RegisterPage = () => {
     }
   }
 
+  // 카카오로 시작하기 버튼 클릭 - 완전 초기화 후 시작
   const handleKakaoLogin = async () => {
     try {
-      await startKakaoLogin()
+      console.log("=== 카카오로 시작하기 버튼 클릭 - 완전 초기화 시작 ===")
+
+      // 기존 에러 메시지 초기화
+      setError(null)
+
+      // 완전 초기화 후 새로운 카카오 로그인 시작 (강제 로그인 모드)
+      await startKakaoLogin(true) // forceLogin = true로 매번 새로운 로그인
     } catch (error) {
-      alert("카카오 로그인 중 오류가 발생했습니다.")
+      console.error("카카오 시작 오류:", error)
+      setError("카카오 로그인 시작 중 오류가 발생했습니다. 다시 시도해주세요.")
     }
   }
 
@@ -453,6 +461,9 @@ const RegisterPage = () => {
           <h1 className={styles.registerTitle}>Create Account</h1>
           <p className={styles.registerSubtitle}>패션 가이즈의 회원이 되어 다양한 서비스를 이용해보세요</p>
         </div>
+
+        {/* 에러 메시지 표시 */}
+        {error && <div className="error-banner">{error}</div>}
 
         {currentStep === 1 && (
           <>

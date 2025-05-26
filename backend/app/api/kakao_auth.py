@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Depends, HTTPException, status, Form, UploadFile, File
+from fastapi import APIRouter, Request, Depends, HTTPException, status, Form, UploadFile, File, Query
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas.kakao_auth import (
@@ -46,10 +46,10 @@ def save_profile_image(profile_picture, user_id):
         return None
 
 @router.get("/authorization-url", response_model=AuthorizationUrlResponse)
-async def get_kakao_authorization_url():
+async def get_kakao_authorization_url(prompt: str = Query(None, description="강제 로그인을 위한 prompt 파라미터")):
     """카카오 OAuth 인증 URL 생성"""
     state = str(uuid.uuid4())  # CSRF 방지를 위한 state 값
-    authorization_url = kakao_oauth.get_authorization_url(state=state)
+    authorization_url = kakao_oauth.get_authorization_url(state=state, prompt=prompt)
     
     return AuthorizationUrlResponse(
         authorization_url=authorization_url,
