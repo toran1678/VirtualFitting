@@ -1,0 +1,380 @@
+/* 카카오 콜백 페이지 - CSS 모듈 */
+.kakaoCallbackPage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: var(--bg-primary);
+  transition: background-color 0.3s;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 1000;
+}
+
+.kakaoCallbackContainer {
+  width: 100%;
+  max-width: 500px;
+  background-color: var(--card-bg);
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  padding: 2.5rem;
+  position: relative;
+  z-index: 10;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.5s ease-out;
+  text-align: center;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kakaoCallbackContent {
+  text-align: center;
+}
+
+/* 로딩 상태 */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.loadingSpinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.spinnerRing {
+  width: 60px;
+  height: 60px;
+  border: 4px solid rgba(254, 229, 0, 0.2);
+  border-top: 4px solid #fee500;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingTitle {
+  color: var(--text-primary);
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+  transition: color 0.3s;
+}
+
+.loadingMessage {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
+  transition: color 0.3s;
+  line-height: 1.5;
+}
+
+/* 로딩 섹션 (기존 스타일 유지) */
+.kakaoLoadingSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.kakaoCallbackTitle {
+  color: var(--text-primary);
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+  transition: color 0.3s;
+}
+
+.kakaoCallbackDescription {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
+  transition: color 0.3s;
+}
+
+/* 카카오 스피너 */
+.kakaoSpinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+}
+
+.kakaoSpinner > div {
+  width: 12px;
+  height: 12px;
+  background-color: #fee500;
+  border-radius: 100%;
+  display: inline-block;
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.kakaoSpinner .bounce1 {
+  animation-delay: -0.32s;
+}
+
+.kakaoSpinner .bounce2 {
+  animation-delay: -0.16s;
+}
+
+@keyframes bounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1.0);
+  }
+}
+
+/* 에러 상태 */
+.errorState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.errorIcon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.errorTitle {
+  color: #e74c3c;
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.errorMessage {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.5;
+  transition: color 0.3s;
+}
+
+.retryButton {
+  width: 100%;
+  padding: 1rem;
+  background-color: #fee500;
+  color: #000000;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.retryButton:hover {
+  background-color: #f6e000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(254, 229, 0, 0.2);
+}
+
+.retryButton:active {
+  transform: translateY(0);
+}
+
+/* 에러 섹션 (기존 스타일 유지) */
+.kakaoErrorSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.kakaoErrorIcon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.kakaoErrorTitle {
+  color: #e74c3c;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.5px;
+}
+
+.kakaoErrorMessage {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
+  line-height: 1.5;
+  transition: color 0.3s;
+}
+
+.kakaoErrorButton {
+  width: 100%;
+  padding: 1rem;
+  background-color: #fee500;
+  color: #000000;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.kakaoErrorButton:hover {
+  background-color: #f6e000;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(254, 229, 0, 0.2);
+}
+
+.kakaoErrorButton:active {
+  transform: translateY(0);
+}
+
+/* 처리 중 섹션 */
+.kakaoProcessingSection {
+  padding: 2rem 0;
+}
+
+.kakaoProcessingSection p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin: 0;
+  transition: color 0.3s;
+}
+
+/* 장식용 원들 */
+.kakaoDecoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.decorationCircle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.1;
+}
+
+.circle1 {
+  width: 300px;
+  height: 300px;
+  background: linear-gradient(135deg, var(--accent-color), #6a11cb);
+  top: -100px;
+  right: -100px;
+}
+
+.circle2 {
+  width: 200px;
+  height: 200px;
+  background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+  bottom: -50px;
+  left: -50px;
+}
+
+.circle3 {
+  width: 150px;
+  height: 150px;
+  background: linear-gradient(135deg, #a18cd1, #fbc2eb);
+  top: 50%;
+  left: 60%;
+}
+
+/* 다크 모드에서 원 색상 조정 */
+.dark-mode .circle1 {
+  opacity: 0.15;
+}
+
+.dark-mode .circle2 {
+  opacity: 0.15;
+}
+
+.dark-mode .circle3 {
+  opacity: 0.15;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .kakaoCallbackPage {
+    padding: 1.5rem;
+  }
+
+  .kakaoCallbackContainer {
+    padding: 2rem;
+  }
+
+  .loadingTitle,
+  .kakaoCallbackTitle,
+  .errorTitle,
+  .kakaoErrorTitle {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .kakaoCallbackPage {
+    padding: 1rem;
+  }
+
+  .kakaoCallbackContainer {
+    padding: 1.5rem;
+    border-radius: 12px;
+  }
+
+  .loadingTitle,
+  .kakaoCallbackTitle,
+  .errorTitle,
+  .kakaoErrorTitle {
+    font-size: 1.4rem;
+  }
+
+  .loadingMessage,
+  .kakaoCallbackDescription,
+  .errorMessage,
+  .kakaoErrorMessage {
+    font-size: 0.9rem;
+  }
+
+  .spinnerRing {
+    width: 50px;
+    height: 50px;
+  }
+}

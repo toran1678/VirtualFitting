@@ -16,3 +16,12 @@ from .verification import (
     VerificationVerifyRequest,
     VerificationVerifyResponse,
 )
+
+from .kakao_auth import (
+    KakaoAuthRequest,
+    KakaoAuthResponse,
+    KakaoUserInfo,
+    KakaoSignupRequest,
+    KakaoUserCheckResponse,
+    AuthorizationUrlResponse
+)

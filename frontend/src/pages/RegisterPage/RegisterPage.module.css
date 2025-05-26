@@ -1,4 +1,5 @@
-.register-page {
+/* CSS 모듈 - camelCase 클래스명으로 수정 */
+.registerPage {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -10,7 +11,7 @@
   overflow: hidden;
 }
 
-.register-container {
+.registerContainer {
   width: 100%;
   max-width: 500px;
   background-color: var(--card-bg);
@@ -34,12 +35,12 @@
   }
 }
 
-.register-header {
+.registerHeader {
   text-align: center;
   margin-bottom: 2.5rem;
 }
 
-.register-title {
+.registerTitle {
   color: var(--text-primary);
   font-size: 2rem;
   font-weight: 700;
@@ -47,16 +48,16 @@
   letter-spacing: -0.5px;
 }
 
-.register-subtitle {
+.registerSubtitle {
   color: var(--text-secondary);
   font-size: 1rem;
 }
 
-.social-login {
+.socialLogin {
   margin-bottom: 1.5rem;
 }
 
-.kakao-login-btn {
+.kakaoLoginBtn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -73,17 +74,17 @@
   gap: 0.75rem;
 }
 
-.kakao-login-btn:hover {
+.kakaoLoginBtn:hover {
   background-color: #f6e000;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(254, 229, 0, 0.2);
 }
 
-.kakao-login-btn:active {
+.kakaoLoginBtn:active {
   transform: translateY(0);
 }
 
-.kakao-icon {
+.kakaoIcon {
   flex-shrink: 0;
 }
 
@@ -106,45 +107,45 @@
   font-size: 0.9rem;
 }
 
-.register-form {
+.registerForm {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
-.form-step {
+.formStep {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
   animation: fadeIn 0.3s ease-out;
 }
 
-.form-group {
+.formGroup {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.form-row {
+.formRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-.input-container {
+.inputContainer {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-icon {
+.inputIcon {
   position: absolute;
   left: 1rem;
   color: var(--text-secondary);
   transition: color 0.3s;
 }
 
-input {
+.registerForm input {
   width: 100%;
   padding: 0.9rem 1rem 0.9rem 3rem;
   border: 1px solid var(--border-color);
@@ -153,34 +154,35 @@ input {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   transition: all 0.3s;
+  box-sizing: border-box;
 }
 
-input.date-input {
-  padding-right: 1rem;
+.dateInput {
+  padding-right: 1rem !important;
 }
 
-input:focus {
+.registerForm input:focus {
   outline: none;
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.15);
 }
 
-input:focus + .input-icon {
+.registerForm input:focus + .inputIcon {
   color: var(--accent-color);
 }
 
-input.error {
-  border-color: #e74c3c;
-  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+.error {
+  border-color: #e74c3c !important;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15) !important;
 }
 
-input:disabled {
+.registerForm input:disabled {
   background-color: var(--bg-secondary);
   cursor: not-allowed;
   opacity: 0.7;
 }
 
-.error-message {
+.errorMessage {
   color: #e74c3c;
   font-size: 0.8rem;
   margin-top: 0.25rem;
@@ -207,13 +209,13 @@ input:disabled {
   }
 }
 
-.profile-picture-section {
+.profilePictureSection {
   display: flex;
   justify-content: center;
   margin-bottom: 1rem;
 }
 
-.profile-picture-container {
+.profilePictureContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -222,12 +224,12 @@ input:disabled {
   transition: transform 0.3s;
 }
 
-.profile-picture-container:hover {
+.profilePictureContainer:hover {
   transform: translateY(-3px);
 }
 
-.profile-placeholder,
-.profile-preview {
+.profilePlaceholder,
+.profilePreview {
   width: 100px;
   height: 100px;
   border-radius: 50%;
@@ -241,33 +243,33 @@ input:disabled {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.profile-preview {
+.profilePreview {
   object-fit: cover;
 }
 
-.profile-input {
+.profileInput {
   display: none;
 }
 
-.profile-upload-text {
+.profileUploadText {
   color: var(--accent-color);
   font-size: 0.9rem;
   font-weight: 500;
 }
 
-.password-strength {
+.passwordStrength {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   margin-top: 0.5rem;
 }
 
-.strength-bars {
+.strengthBars {
   display: flex;
   gap: 4px;
 }
 
-.strength-bar {
+.strengthBar {
   height: 4px;
   flex: 1;
   background-color: var(--border-color);
@@ -275,62 +277,62 @@ input:disabled {
   transition: background-color 0.3s;
 }
 
-.strength-bar.very-weak {
+.strengthBar.veryWeak {
   background-color: #e74c3c;
 }
 
-.strength-bar.weak {
+.strengthBar.weak {
   background-color: #e67e22;
 }
 
-.strength-bar.medium {
+.strengthBar.medium {
   background-color: #f1c40f;
 }
 
-.strength-bar.strong {
+.strengthBar.strong {
   background-color: #2ecc71;
 }
 
-.strength-bar.very-strong {
+.strengthBar.veryStrong {
   background-color: #27ae60;
 }
 
-.strength-text {
+.strengthText {
   font-size: 0.8rem;
   text-align: right;
 }
 
-.strength-text.very-weak {
+.strengthText.veryWeak {
   color: #e74c3c;
 }
 
-.strength-text.weak {
+.strengthText.weak {
   color: #e67e22;
 }
 
-.strength-text.medium {
+.strengthText.medium {
   color: #f1c40f;
 }
 
-.strength-text.strong {
+.strengthText.strong {
   color: #2ecc71;
 }
 
-.strength-text.very-strong {
+.strengthText.veryStrong {
   color: #27ae60;
 }
 
 /* 이메일 인증 관련 스타일 */
-.email-verification-container {
+.emailVerificationContainer {
   display: flex;
   gap: 0.5rem;
 }
 
-.email-verification-container .input-container {
+.emailVerificationContainer .inputContainer {
   flex: 1;
 }
 
-.verification-button {
+.verificationButton {
   padding: 0 1rem;
   background-color: var(--accent-color);
   color: white;
@@ -347,44 +349,44 @@ input:disabled {
   min-width: 110px;
 }
 
-.verification-button:hover:not(:disabled) {
+.verificationButton:hover:not(:disabled) {
   background-color: var(--accent-hover);
   transform: translateY(-2px);
 }
 
-.verification-button:active:not(:disabled) {
+.verificationButton:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.verification-button:disabled {
+.verificationButton:disabled {
   background-color: var(--border-color);
   cursor: not-allowed;
 }
 
-.verification-button.verified {
+.verificationButton.verified {
   background-color: #2ecc71;
 }
 
-.verification-button.verified:hover {
+.verificationButton.verified:hover {
   background-color: #27ae60;
 }
 
-.verified-icon {
+.verifiedIcon {
   margin-right: 4px;
 }
 
-.verification-code-container {
+.verificationCodeContainer {
   margin-top: 0.75rem;
   display: flex;
   gap: 0.5rem;
   animation: fadeIn 0.3s ease-out;
 }
 
-.verification-code-container .input-container {
+.verificationCodeContainer .inputContainer {
   flex: 1;
 }
 
-.verify-code-button {
+.verifyCodeButton {
   padding: 0 1rem;
   background-color: var(--accent-color);
   color: white;
@@ -399,16 +401,16 @@ input:disabled {
   justify-content: center;
 }
 
-.verify-code-button:hover:not(:disabled) {
+.verifyCodeButton:hover:not(:disabled) {
   background-color: var(--accent-hover);
 }
 
-.verify-code-button:disabled {
+.verifyCodeButton:disabled {
   background-color: var(--border-color);
   cursor: not-allowed;
 }
 
-.verification-timer {
+.verificationTimer {
   position: absolute;
   right: 1rem;
   color: #e74c3c;
@@ -416,14 +418,14 @@ input:disabled {
   font-weight: 600;
 }
 
-.spinner-small {
+.spinnerSmall {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 3px;
 }
 
-.spinner-small > div {
+.spinnerSmall > div {
   width: 6px;
   height: 6px;
   background-color: white;
@@ -432,22 +434,22 @@ input:disabled {
   animation: bounce 1.4s infinite ease-in-out both;
 }
 
-.spinner-small .bounce1 {
+.spinnerSmall .bounce1 {
   animation-delay: -0.32s;
 }
 
-.spinner-small .bounce2 {
+.spinnerSmall .bounce2 {
   animation-delay: -0.16s;
 }
 
-.form-actions {
+.formActions {
   display: flex;
   gap: 1rem;
   margin-top: 0.5rem;
 }
 
-.next-button,
-.register-button {
+.nextButton,
+.registerButton {
   width: 100%;
   padding: 1rem;
   background-color: var(--accent-color);
@@ -465,19 +467,19 @@ input:disabled {
   overflow: hidden;
 }
 
-.next-button:hover,
-.register-button:hover {
+.nextButton:hover,
+.registerButton:hover {
   background-color: var(--accent-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(58, 134, 255, 0.2);
 }
 
-.next-button:active,
-.register-button:active {
+.nextButton:active,
+.registerButton:active {
   transform: translateY(0);
 }
 
-.back-button {
+.backButton {
   padding: 1rem;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
@@ -490,15 +492,15 @@ input:disabled {
   flex: 1;
 }
 
-.back-button:hover {
+.backButton:hover {
   background-color: var(--border-color);
 }
 
-.register-button {
+.registerButton {
   flex: 2;
 }
 
-.register-button:disabled {
+.registerButton:disabled {
   background-color: var(--border-color);
   cursor: not-allowed;
   transform: none;
@@ -540,27 +542,27 @@ input:disabled {
   }
 }
 
-.login-link {
+.loginLink {
   text-align: center;
   margin-top: 2rem;
   color: var(--text-secondary);
   font-size: 0.95rem;
 }
 
-.login-link a {
+.loginLink a {
   color: var(--accent-color);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s;
 }
 
-.login-link a:hover {
+.loginLink a:hover {
   color: var(--accent-hover);
   text-decoration: underline;
 }
 
 /* 장식용 원 */
-.register-decoration {
+.registerDecoration {
   position: absolute;
   top: 0;
   left: 0;
@@ -570,13 +572,13 @@ input:disabled {
   pointer-events: none;
 }
 
-.decoration-circle {
+.decorationCircle {
   position: absolute;
   border-radius: 50%;
   opacity: 0.1;
 }
 
-.circle-1 {
+.circle1 {
   width: 300px;
   height: 300px;
   background: linear-gradient(135deg, var(--accent-color), #6a11cb);
@@ -584,7 +586,7 @@ input:disabled {
   right: -100px;
 }
 
-.circle-2 {
+.circle2 {
   width: 200px;
   height: 200px;
   background: linear-gradient(135deg, #ff9a9e, #fad0c4);
@@ -592,7 +594,7 @@ input:disabled {
   left: -50px;
 }
 
-.circle-3 {
+.circle3 {
   width: 150px;
   height: 150px;
   background: linear-gradient(135deg, #a18cd1, #fbc2eb);
@@ -601,59 +603,59 @@ input:disabled {
 }
 
 /* 다크 모드에서 원 색상 조정 */
-.dark-mode .circle-1 {
+.dark-mode .circle1 {
   opacity: 0.15;
 }
 
-.dark-mode .circle-2 {
+.dark-mode .circle2 {
   opacity: 0.15;
 }
 
-.dark-mode .circle-3 {
+.dark-mode .circle3 {
   opacity: 0.15;
 }
 
 @media (max-width: 768px) {
-  .register-container {
+  .registerContainer {
     padding: 2rem;
   }
 
-  .register-title {
+  .registerTitle {
     font-size: 1.8rem;
   }
 
-  .form-row {
+  .formRow {
     grid-template-columns: 1fr;
   }
 
-  .email-verification-container {
+  .emailVerificationContainer {
     flex-direction: column;
   }
 
-  .verification-button {
+  .verificationButton {
     height: 45px;
   }
 
-  .verification-code-container {
+  .verificationCodeContainer {
     flex-direction: column;
   }
 
-  .verify-code-button {
+  .verifyCodeButton {
     height: 45px;
   }
 }
 
 @media (max-width: 480px) {
-  .register-container {
+  .registerContainer {
     padding: 1.5rem;
     border-radius: 12px;
   }
 
-  .register-title {
+  .registerTitle {
     font-size: 1.6rem;
   }
 
-  .register-subtitle {
+  .registerSubtitle {
     font-size: 0.9rem;
   }
 }

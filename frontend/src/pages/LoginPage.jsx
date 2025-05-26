@@ -3,12 +3,16 @@
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
+import { useKakaoAuth } from "../hooks/useKakaoAuth" // 카카오 인증 훅 추가
 import "../styles/LoginPage.css"
 import { saveRememberedId, getRememberedId } from "../api/auth"
 
 const LoginPage = () => {
   const navigate = useNavigate()
   const { login, isAuthenticated, loading: authLoading } = useAuth()
+
+  // 카카오 인증 관련 훅 추가
+  const { startKakaoLogin, isLoading: kakaoLoading, error: kakaoError } = useKakaoAuth()
 
   const [formData, setFormData] = useState({
     id: "",
@@ -35,6 +39,13 @@ const LoginPage = () => {
       setRememberMe(true)
     }
   }, [])
+
+  // 카카오 에러 처리
+  useEffect(() => {
+    if (kakaoError) {
+      setLoginError(kakaoError)
+    }
+  }, [kakaoError])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -106,10 +117,21 @@ const LoginPage = () => {
     }
   }
 
-  const handleKakaoLogin = () => {
-    // 카카오 로그인 API 연동 코드
-    console.log("카카오 로그인 시도")
-    alert("카카오 로그인 기능은 현재 개발 중입니다.")
+  // 카카오 로그인 핸들러 - 실제 기능 구현
+  const handleKakaoLogin = async () => {
+    try {
+      setLoginError("") // 기존 에러 메시지 초기화
+      console.log("카카오 로그인 시작...")
+
+      // useKakaoAuth 훅의 startKakaoLogin 함수 호출
+      await startKakaoLogin()
+
+      // startKakaoLogin은 카카오 인증 페이지로 리다이렉트하므로
+      // 여기서는 추가 처리가 필요하지 않음
+    } catch (error) {
+      console.error("카카오 로그인 오류:", error)
+      setLoginError("카카오 로그인 중 오류가 발생했습니다. 다시 시도해주세요.")
+    }
   }
 
   return (
@@ -121,7 +143,7 @@ const LoginPage = () => {
         </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
-          {/* 로그인 에러 메시지 표시 */}
+          {/* 로그인 에러 메시지 표시 (일반 로그인 + 카카오 로그인 에러 포함) */}
           {loginError && <div className="login-error-message">{loginError}</div>}
 
           <div className="form-group">
@@ -212,21 +234,37 @@ const LoginPage = () => {
             <span>또는</span>
           </div>
 
-          <button type="button" className="kakao-login-btn" onClick={handleKakaoLogin}>
-            <svg
-              className="kakao-icon"
-              width="18"
-              height="18"
-              viewBox="0 0 256 256"
-              xmlns="http://www.w3.org/2000/svg"
-              preserveAspectRatio="xMidYMid"
-            >
-              <path
-                d="M128 36C70.562 36 24 72.713 24 118c0 29.279 19.466 54.97 48.748 69.477-1.593 5.494-10.237 35.344-10.581 37.689 0 0-.207 1.762.934 2.434s2.483.15 2.483.15c3.272-.457 37.943-24.811 43.944-29.04 5.995.849 12.168 1.29 18.472 1.29 57.438 0 104-36.712 104-82 0-45.287-46.562-82-104-82z"
-                fill="#000"
-              />
-            </svg>
-            카카오로 로그인
+          {/* 카카오 로그인 버튼 - 실제 기능 연동 */}
+          <button
+            type="button"
+            className="kakao-login-btn"
+            onClick={handleKakaoLogin}
+            disabled={kakaoLoading || isSubmitting || authLoading}
+          >
+            {kakaoLoading ? (
+              <div className="spinner">
+                <div className="bounce1"></div>
+                <div className="bounce2"></div>
+                <div className="bounce3"></div>
+              </div>
+            ) : (
+              <>
+                <svg
+                  className="kakao-icon"
+                  width="18"
+                  height="18"
+                  viewBox="0 0 256 256"
+                  xmlns="http://www.w3.org/2000/svg"
+                  preserveAspectRatio="xMidYMid"
+                >
+                  <path
+                    d="M128 36C70.562 36 24 72.713 24 118c0 29.279 19.466 54.97 48.748 69.477-1.593 5.494-10.237 35.344-10.581 37.689 0 0-.207 1.762.934 2.434s2.483.15 2.483.15c3.272-.457 37.943-24.811 43.944-29.04 5.995.849 12.168 1.29 18.472 1.29 57.438 0 104-36.712 104-82 0-45.287-46.562-82-104-82z"
+                    fill="#000"
+                  />
+                </svg>
+                카카오로 로그인
+              </>
+            )}
           </button>
         </form>
 

@@ -1,18 +1,21 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-// import { useContext } from "react"
-import { Link, useNavigate } from "react-router-dom"
-// import { ThemeContext } from "../context/ThemeContext"
-import "../styles/RegisterPage.css"
-// import { requestEmailVerification } from "../api/auth"
-import { verifyEmailCode, registerUser } from "../api/auth"
+import { Link, useNavigate, useLocation } from "react-router-dom"
+import styles from "./RegisterPage.module.css" // CSS 모듈 올바른 import
+import { verifyEmailCode, registerUser, requestEmailVerification } from "../../api/auth"
+import { useKakaoAuth } from "../../hooks/useKakaoAuth"
+import KakaoSignupForm from "../../components/KakaoSignupForm/KakaoSignupForm"
 
 const RegisterPage = () => {
-  //const { darkMode } = useContext(ThemeContext)
   const navigate = useNavigate()
+  const location = useLocation()
   const fileInputRef = useRef(null)
   const verificationInputRef = useRef(null)
+
+  // 카카오 회원가입 상태 확인
+  const kakaoSignupState = location.state?.kakaoSignup
+  const kakaoInfo = location.state?.kakaoInfo
 
   const [formData, setFormData] = useState({
     id: "",
@@ -41,6 +44,11 @@ const RegisterPage = () => {
   const [verificationTimer, setVerificationTimer] = useState(0)
   const [timerActive, setTimerActive] = useState(false)
 
+  const { startKakaoLogin, isLoading: kakaoLoading } = useKakaoAuth()
+
+  // 카카오 회원가입 모드인지 확인
+  const isKakaoSignupMode = kakaoSignupState && kakaoInfo
+
   useEffect(() => {
     let interval = null
     if (timerActive && verificationTimer > 0) {
@@ -50,7 +58,6 @@ const RegisterPage = () => {
     } else if (verificationTimer === 0) {
       setTimerActive(false)
       if (emailVerificationSent && !emailVerified) {
-        // 인증 시간 만료
         setEmailVerificationSent(false)
       }
     }
@@ -61,7 +68,6 @@ const RegisterPage = () => {
     const { name, value } = e.target
 
     if (name === "phoneNumber") {
-      // 전화번호 입력 처리 - 숫자만 허용하고 자동으로 하이픈 추가
       const numericValue = value.replace(/[^0-9]/g, "")
       const formattedValue = formatPhoneNumber(numericValue)
       setFormData({
@@ -75,18 +81,13 @@ const RegisterPage = () => {
       })
     }
 
-    // 실시간 유효성 검사
     validateField(name, name === "phoneNumber" ? formatPhoneNumber(value.replace(/[^0-9]/g, "")) : value)
   }
 
-  // 전화번호 포맷팅 함수
   const formatPhoneNumber = (value) => {
     if (!value) return value
-
-    // 숫자만 추출
     const phoneNumber = value.replace(/[^\d]/g, "")
 
-    // 전화번호 형식에 맞게 하이픈 추가
     if (phoneNumber.length <= 3) {
       return phoneNumber
     } else if (phoneNumber.length <= 7) {
@@ -115,7 +116,6 @@ const RegisterPage = () => {
           newErrors.password = "비밀번호를 입력해주세요"
           setPasswordStrength(0)
         } else {
-          // 비밀번호 강도 측정
           let strength = 0
           if (value.length >= 8) strength += 1
           if (/[A-Z]/.test(value)) strength += 1
@@ -132,7 +132,6 @@ const RegisterPage = () => {
           }
         }
 
-        // 비밀번호 확인 필드도 검증
         if (formData.confirmPassword && value !== formData.confirmPassword) {
           newErrors.confirmPassword = "비밀번호가 일치하지 않습니다"
         } else if (formData.confirmPassword) {
@@ -173,7 +172,6 @@ const RegisterPage = () => {
           newErrors.email = "유효한 이메일 주소를 입력해주세요"
         } else {
           delete newErrors.email
-          // 이메일이 변경되면 인증 상태 초기화
           if (value !== formData.email) {
             setEmailVerified(false)
             setEmailVerificationSent(false)
@@ -214,7 +212,6 @@ const RegisterPage = () => {
         profilePicture: file,
       })
 
-      // 이미지 미리보기
       const reader = new FileReader()
       reader.onloadend = () => {
         setPreviewImage(reader.result)
@@ -278,7 +275,6 @@ const RegisterPage = () => {
       setIsSubmitting(true)
 
       try {
-        // 회원가입 데이터 준비
         const userData = {
           id: formData.id,
           name: formData.name,
@@ -288,33 +284,22 @@ const RegisterPage = () => {
           birth_date: formData.birthDate || null,
           phone_number: formData.phoneNumber.replace(/-/g, ""),
           address: formData.address || null,
-          is_verified: true, // 이미 이메일 인증을 완료했으므로 true로 설정
+          is_verified: true,
         }
 
-        // 프로필 이미지가 있는 경우 FormData로 변환하여 전송
         if (formData.profilePicture) {
           const formDataToSend = new FormData()
-
-          // JSON 데이터를 FormData에 추가
           formDataToSend.append("data", JSON.stringify(userData))
-
-          // 파일 추가
           formDataToSend.append("profile_picture", formData.profilePicture)
-
-          // 회원가입 API 호출 (FormData 사용)
           await registerUser(formDataToSend)
         } else {
-          // 프로필 이미지가 없는 경우 JSON으로 전송
           await registerUser(userData)
         }
 
-        // 성공 시 로그인 페이지로 이동
         alert("회원가입이 완료되었습니다. 로그인 페이지로 이동합니다.")
         navigate("/login")
       } catch (error) {
-        // 에러 처리
         if (error.response && error.response.data) {
-          // 서버에서 반환한 에러 메시지가 있는 경우
           alert(`회원가입 오류: ${error.response.data.detail || "알 수 없는 오류가 발생했습니다."}`)
         } else {
           alert("회원가입 중 오류가 발생했습니다. 다시 시도해주세요.")
@@ -325,9 +310,17 @@ const RegisterPage = () => {
     }
   }
 
-  const handleKakaoLogin = () => {
-    // 카카오 로그인 API 연동 코드
-    console.log("카카오 로그인 시도")
+  const handleKakaoLogin = async () => {
+    try {
+      await startKakaoLogin()
+    } catch (error) {
+      alert("카카오 로그인 중 오류가 발생했습니다.")
+    }
+  }
+
+  const handleKakaoSignupCancel = () => {
+    // 카카오 회원가입 취소 시 일반 회원가입 페이지로
+    navigate("/register", { replace: true })
   }
 
   const triggerFileInput = () => {
@@ -356,21 +349,20 @@ const RegisterPage = () => {
   const getPasswordStrengthClass = () => {
     switch (passwordStrength) {
       case 1:
-        return "very-weak"
+        return styles.veryWeak
       case 2:
-        return "weak"
+        return styles.weak
       case 3:
-        return "medium"
+        return styles.medium
       case 4:
-        return "strong"
+        return styles.strong
       case 5:
-        return "very-strong"
+        return styles.veryStrong
       default:
         return ""
     }
   }
 
-  // 이메일 인증 코드 발송 함수
   const sendVerificationCode = async () => {
     if (!formData.email || errors.email) {
       alert("유효한 이메일 주소를 입력해주세요.")
@@ -380,20 +372,17 @@ const RegisterPage = () => {
     setIsVerifying(true)
 
     try {
-      // 실제 API 호출로 이메일 인증 코드 요청
-      // const response = await requestEmailVerification(formData.email)
-
       setEmailVerificationSent(true)
-      setVerificationTimer(180) // 3분 타이머 설정
+      setVerificationTimer(180)
       setTimerActive(true)
       alert(`${formData.email}로 인증 코드가 발송되었습니다. 3분 내에 입력해주세요.`)
 
-      // 인증 코드 입력 필드에 포커스
       if (verificationInputRef.current) {
         verificationInputRef.current.focus()
       }
+
+      await requestEmailVerification(formData.email)
     } catch (error) {
-      // 에러 처리
       if (error.response && error.response.data) {
         alert(`인증 코드 발송 오류: ${error.response.data.detail || "알 수 없는 오류가 발생했습니다."}`)
       } else {
@@ -404,7 +393,6 @@ const RegisterPage = () => {
     }
   }
 
-  // 이메일 인증 코드 확인 함수
   const verifyCode = async () => {
     if (!formData.verificationCode) {
       setErrors({
@@ -417,7 +405,6 @@ const RegisterPage = () => {
     setIsVerifying(true)
 
     try {
-      // 실제 API 호출로 이메일 인증 코드 확인
       const response = await verifyEmailCode(formData.email, formData.verificationCode)
 
       if (response.success) {
@@ -431,7 +418,6 @@ const RegisterPage = () => {
         })
       }
     } catch (error) {
-      // 에러 처리
       if (error.response && error.response.data) {
         setErrors({
           ...errors,
@@ -448,27 +434,32 @@ const RegisterPage = () => {
     }
   }
 
-  // 타이머 포맷팅 함수
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`
   }
 
+  // 카카오 회원가입 모드인 경우 - 헤더 제거하고 KakaoSignupForm만 렌더링
+  if (isKakaoSignupMode) {
+    return <KakaoSignupForm kakaoInfo={kakaoInfo} onCancel={handleKakaoSignupCancel} />
+  }
+
+  // 일반 회원가입 모드
   return (
-    <div className="register-page">
-      <div className="register-container">
-        <div className="register-header">
-          <h1 className="register-title">Create Account</h1>
-          <p className="register-subtitle">패션 가이즈의 회원이 되어 다양한 서비스를 이용해보세요</p>
+    <div className={styles.registerPage}>
+      <div className={styles.registerContainer}>
+        <div className={styles.registerHeader}>
+          <h1 className={styles.registerTitle}>Create Account</h1>
+          <p className={styles.registerSubtitle}>패션 가이즈의 회원이 되어 다양한 서비스를 이용해보세요</p>
         </div>
 
         {currentStep === 1 && (
           <>
-            <div className="social-login">
-              <button className="kakao-login-btn" onClick={handleKakaoLogin}>
+            <div className={styles.socialLogin}>
+              <button className={styles.kakaoLoginBtn} onClick={handleKakaoLogin} disabled={kakaoLoading}>
                 <svg
-                  className="kakao-icon"
+                  className={styles.kakaoIcon}
                   width="18"
                   height="18"
                   viewBox="0 0 256 256"
@@ -480,23 +471,23 @@ const RegisterPage = () => {
                     fill="#000"
                   />
                 </svg>
-                카카오로 시작하기
+                {kakaoLoading ? "처리 중..." : "카카오로 시작하기"}
               </button>
             </div>
 
-            <div className="divider">
+            <div className={styles.divider}>
               <span>또는</span>
             </div>
           </>
         )}
 
-        <form className="register-form" onSubmit={handleSubmit}>
+        <form className={styles.registerForm} onSubmit={handleSubmit}>
           {currentStep === 1 && (
-            <div className="form-step">
-              <div className="form-group">
-                <div className="input-container">
+            <div className={styles.formStep}>
+              <div className={styles.formGroup}>
+                <div className={styles.inputContainer}>
                   <svg
-                    className="input-icon"
+                    className={styles.inputIcon}
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
                     height="20"
@@ -517,16 +508,16 @@ const RegisterPage = () => {
                     placeholder="아이디"
                     value={formData.id}
                     onChange={handleChange}
-                    className={errors.id ? "error" : ""}
+                    className={errors.id ? styles.error : ""}
                   />
                 </div>
-                {errors.id && <span className="error-message">{errors.id}</span>}
+                {errors.id && <span className={styles.errorMessage}>{errors.id}</span>}
               </div>
 
-              <div className="form-group">
-                <div className="input-container">
+              <div className={styles.formGroup}>
+                <div className={styles.inputContainer}>
                   <svg
-                    className="input-icon"
+                    className={styles.inputIcon}
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
                     height="20"
@@ -547,28 +538,40 @@ const RegisterPage = () => {
                     placeholder="비밀번호"
                     value={formData.password}
                     onChange={handleChange}
-                    className={errors.password ? "error" : ""}
+                    className={errors.password ? styles.error : ""}
                   />
                 </div>
                 {formData.password && (
-                  <div className="password-strength">
-                    <div className="strength-bars">
-                      <div className={`strength-bar ${passwordStrength >= 1 ? getPasswordStrengthClass() : ""}`}></div>
-                      <div className={`strength-bar ${passwordStrength >= 2 ? getPasswordStrengthClass() : ""}`}></div>
-                      <div className={`strength-bar ${passwordStrength >= 3 ? getPasswordStrengthClass() : ""}`}></div>
-                      <div className={`strength-bar ${passwordStrength >= 4 ? getPasswordStrengthClass() : ""}`}></div>
-                      <div className={`strength-bar ${passwordStrength >= 5 ? getPasswordStrengthClass() : ""}`}></div>
+                  <div className={styles.passwordStrength}>
+                    <div className={styles.strengthBars}>
+                      <div
+                        className={`${styles.strengthBar} ${passwordStrength >= 1 ? getPasswordStrengthClass() : ""}`}
+                      ></div>
+                      <div
+                        className={`${styles.strengthBar} ${passwordStrength >= 2 ? getPasswordStrengthClass() : ""}`}
+                      ></div>
+                      <div
+                        className={`${styles.strengthBar} ${passwordStrength >= 3 ? getPasswordStrengthClass() : ""}`}
+                      ></div>
+                      <div
+                        className={`${styles.strengthBar} ${passwordStrength >= 4 ? getPasswordStrengthClass() : ""}`}
+                      ></div>
+                      <div
+                        className={`${styles.strengthBar} ${passwordStrength >= 5 ? getPasswordStrengthClass() : ""}`}
+                      ></div>
                     </div>
-                    <span className={`strength-text ${getPasswordStrengthClass()}`}>{getPasswordStrengthText()}</span>
+                    <span className={`${styles.strengthText} ${getPasswordStrengthClass()}`}>
+                      {getPasswordStrengthText()}
+                    </span>
                   </div>
                 )}
-                {errors.password && <span className="error-message">{errors.password}</span>}
+                {errors.password && <span className={styles.errorMessage}>{errors.password}</span>}
               </div>
 
-              <div className="form-group">
-                <div className="input-container">
+              <div className={styles.formGroup}>
+                <div className={styles.inputContainer}>
                   <svg
-                    className="input-icon"
+                    className={styles.inputIcon}
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
                     height="20"
@@ -589,26 +592,30 @@ const RegisterPage = () => {
                     placeholder="비밀번호 확인"
                     value={formData.confirmPassword}
                     onChange={handleChange}
-                    className={errors.confirmPassword ? "error" : ""}
+                    className={errors.confirmPassword ? styles.error : ""}
                   />
                 </div>
-                {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
+                {errors.confirmPassword && <span className={styles.errorMessage}>{errors.confirmPassword}</span>}
               </div>
 
-              <button type="button" className="next-button" onClick={nextStep}>
+              <button type="button" className={styles.nextButton} onClick={nextStep}>
                 다음 단계
               </button>
             </div>
           )}
 
           {currentStep === 2 && (
-            <div className="form-step">
-              <div className="profile-picture-section">
-                <div className="profile-picture-container" onClick={triggerFileInput}>
+            <div className={styles.formStep}>
+              <div className={styles.profilePictureSection}>
+                <div className={styles.profilePictureContainer} onClick={triggerFileInput}>
                   {previewImage ? (
-                    <img src={previewImage || "/placeholder.svg"} alt="프로필 미리보기" className="profile-preview" />
+                    <img
+                      src={previewImage || "/placeholder.svg"}
+                      alt="프로필 미리보기"
+                      className={styles.profilePreview}
+                    />
                   ) : (
-                    <div className="profile-placeholder">
+                    <div className={styles.profilePlaceholder}>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         width="40"
@@ -631,18 +638,18 @@ const RegisterPage = () => {
                     name="profilePicture"
                     accept="image/*"
                     onChange={handleProfilePictureChange}
-                    className="profile-input"
+                    className={styles.profileInput}
                     ref={fileInputRef}
                   />
-                  <span className="profile-upload-text">프로필 사진 선택</span>
+                  <span className={styles.profileUploadText}>프로필 사진 선택</span>
                 </div>
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <div className="input-container">
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <div className={styles.inputContainer}>
                     <svg
-                      className="input-icon"
+                      className={styles.inputIcon}
                       xmlns="http://www.w3.org/2000/svg"
                       width="20"
                       height="20"
@@ -663,16 +670,16 @@ const RegisterPage = () => {
                       placeholder="이름"
                       value={formData.name}
                       onChange={handleChange}
-                      className={errors.name ? "error" : ""}
+                      className={errors.name ? styles.error : ""}
                     />
                   </div>
-                  {errors.name && <span className="error-message">{errors.name}</span>}
+                  {errors.name && <span className={styles.errorMessage}>{errors.name}</span>}
                 </div>
 
-                <div className="form-group">
-                  <div className="input-container">
+                <div className={styles.formGroup}>
+                  <div className={styles.inputContainer}>
                     <svg
-                      className="input-icon"
+                      className={styles.inputIcon}
                       xmlns="http://www.w3.org/2000/svg"
                       width="20"
                       height="20"
@@ -693,18 +700,18 @@ const RegisterPage = () => {
                       placeholder="닉네임"
                       value={formData.nickname}
                       onChange={handleChange}
-                      className={errors.nickname ? "error" : ""}
+                      className={errors.nickname ? styles.error : ""}
                     />
                   </div>
-                  {errors.nickname && <span className="error-message">{errors.nickname}</span>}
+                  {errors.nickname && <span className={styles.errorMessage}>{errors.nickname}</span>}
                 </div>
               </div>
 
-              <div className="form-group">
-                <div className="email-verification-container">
-                  <div className="input-container">
+              <div className={styles.formGroup}>
+                <div className={styles.emailVerificationContainer}>
+                  <div className={styles.inputContainer}>
                     <svg
-                      className="input-icon"
+                      className={styles.inputIcon}
                       xmlns="http://www.w3.org/2000/svg"
                       width="20"
                       height="20"
@@ -725,26 +732,26 @@ const RegisterPage = () => {
                       placeholder="이메일"
                       value={formData.email}
                       onChange={handleChange}
-                      className={errors.email ? "error" : ""}
+                      className={errors.email ? styles.error : ""}
                       disabled={emailVerified}
                     />
                   </div>
                   <button
                     type="button"
-                    className={`verification-button ${emailVerified ? "verified" : ""}`}
+                    className={`${styles.verificationButton} ${emailVerified ? styles.verified : ""}`}
                     onClick={sendVerificationCode}
                     disabled={isVerifying || emailVerified || !formData.email || !!errors.email}
                   >
                     {isVerifying ? (
-                      <div className="spinner-small">
-                        <div className="bounce1"></div>
-                        <div className="bounce2"></div>
-                        <div className="bounce3"></div>
+                      <div className={styles.spinnerSmall}>
+                        <div className={styles.bounce1}></div>
+                        <div className={styles.bounce2}></div>
+                        <div className={styles.bounce3}></div>
                       </div>
                     ) : emailVerified ? (
                       <>
                         <svg
-                          className="verified-icon"
+                          className={styles.verifiedIcon}
                           xmlns="http://www.w3.org/2000/svg"
                           width="16"
                           height="16"
@@ -765,13 +772,13 @@ const RegisterPage = () => {
                     )}
                   </button>
                 </div>
-                {errors.email && <span className="error-message">{errors.email}</span>}
+                {errors.email && <span className={styles.errorMessage}>{errors.email}</span>}
 
                 {emailVerificationSent && !emailVerified && (
-                  <div className="verification-code-container">
-                    <div className="input-container">
+                  <div className={styles.verificationCodeContainer}>
+                    <div className={styles.inputContainer}>
                       <svg
-                        className="input-icon"
+                        className={styles.inputIcon}
                         xmlns="http://www.w3.org/2000/svg"
                         width="20"
                         height="20"
@@ -792,37 +799,37 @@ const RegisterPage = () => {
                         placeholder="인증 코드 입력"
                         value={formData.verificationCode}
                         onChange={handleChange}
-                        className={errors.verificationCode ? "error" : ""}
+                        className={errors.verificationCode ? styles.error : ""}
                         ref={verificationInputRef}
                       />
-                      {timerActive && <span className="verification-timer">{formatTime(verificationTimer)}</span>}
+                      {timerActive && <span className={styles.verificationTimer}>{formatTime(verificationTimer)}</span>}
                     </div>
                     <button
                       type="button"
-                      className="verify-code-button"
+                      className={styles.verifyCodeButton}
                       onClick={verifyCode}
                       disabled={isVerifying || !formData.verificationCode}
                     >
                       {isVerifying ? (
-                        <div className="spinner-small">
-                          <div className="bounce1"></div>
-                          <div className="bounce2"></div>
-                          <div className="bounce3"></div>
+                        <div className={styles.spinnerSmall}>
+                          <div className={styles.bounce1}></div>
+                          <div className={styles.bounce2}></div>
+                          <div className={styles.bounce3}></div>
                         </div>
                       ) : (
                         "확인"
                       )}
                     </button>
-                    {errors.verificationCode && <span className="error-message">{errors.verificationCode}</span>}
+                    {errors.verificationCode && <span className={styles.errorMessage}>{errors.verificationCode}</span>}
                   </div>
                 )}
               </div>
 
-              <div className="form-row">
-                <div className="form-group">
-                  <div className="input-container">
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <div className={styles.inputContainer}>
                     <svg
-                      className="input-icon"
+                      className={styles.inputIcon}
                       xmlns="http://www.w3.org/2000/svg"
                       width="20"
                       height="20"
@@ -844,15 +851,15 @@ const RegisterPage = () => {
                       name="birthDate"
                       value={formData.birthDate}
                       onChange={handleChange}
-                      className="date-input"
+                      className={styles.dateInput}
                     />
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <div className="input-container">
+                <div className={styles.formGroup}>
+                  <div className={styles.inputContainer}>
                     <svg
-                      className="input-icon"
+                      className={styles.inputIcon}
                       xmlns="http://www.w3.org/2000/svg"
                       width="20"
                       height="20"
@@ -872,17 +879,17 @@ const RegisterPage = () => {
                       placeholder="전화번호"
                       value={formData.phoneNumber}
                       onChange={handleChange}
-                      className={errors.phoneNumber ? "error" : ""}
+                      className={errors.phoneNumber ? styles.error : ""}
                     />
                   </div>
-                  {errors.phoneNumber && <span className="error-message">{errors.phoneNumber}</span>}
+                  {errors.phoneNumber && <span className={styles.errorMessage}>{errors.phoneNumber}</span>}
                 </div>
               </div>
 
-              <div className="form-group">
-                <div className="input-container">
+              <div className={styles.formGroup}>
+                <div className={styles.inputContainer}>
                   <svg
-                    className="input-icon"
+                    className={styles.inputIcon}
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
                     height="20"
@@ -907,16 +914,16 @@ const RegisterPage = () => {
                 </div>
               </div>
 
-              <div className="form-actions">
-                <button type="button" className="back-button" onClick={prevStep}>
+              <div className={styles.formActions}>
+                <button type="button" className={styles.backButton} onClick={prevStep}>
                   이전
                 </button>
-                <button type="submit" className="register-button" disabled={isSubmitting || !emailVerified}>
+                <button type="submit" className={styles.registerButton} disabled={isSubmitting || !emailVerified}>
                   {isSubmitting ? (
-                    <div className="spinner">
-                      <div className="bounce1"></div>
-                      <div className="bounce2"></div>
-                      <div className="bounce3"></div>
+                    <div className={styles.spinner}>
+                      <div className={styles.bounce1}></div>
+                      <div className={styles.bounce2}></div>
+                      <div className={styles.bounce3}></div>
                     </div>
                   ) : (
                     "회원가입"
@@ -927,15 +934,15 @@ const RegisterPage = () => {
           )}
         </form>
 
-        <div className="login-link">
+        <div className={styles.loginLink}>
           이미 계정이 있으신가요? <Link to="/login">로그인</Link>
         </div>
       </div>
 
-      <div className="register-decoration">
-        <div className="decoration-circle circle-1"></div>
-        <div className="decoration-circle circle-2"></div>
-        <div className="decoration-circle circle-3"></div>
+      <div className={styles.registerDecoration}>
+        <div className={`${styles.decorationCircle} ${styles.circle1}`}></div>
+        <div className={`${styles.decorationCircle} ${styles.circle2}`}></div>
+        <div className={`${styles.decorationCircle} ${styles.circle3}`}></div>
       </div>
     </div>
   )

@@ -6,7 +6,8 @@ import { AuthProvider} from "./context/AuthContext"
 
 // Importing pages
 import MainPage from "./pages/MainPage"
-import RegisterPage from "./pages/RegisterPage"
+import RegisterPage from "./pages/RegisterPage/RegisterPage"
+import KakaoCallback from "./components/KakaoCallback/KakaoCallback"
 import LoginPage from "./pages/LoginPage"
 import VirtualFittingPage from "./pages/VirtualFittingPage"
 import "./App.css"
@@ -19,6 +20,7 @@ function App() {
           <Routes>
             <Route path="/" element={<MainPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/auth/kakao/callback" element={<KakaoCallback />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/virtual-fitting" element={<VirtualFittingPage />} />
             <Route path="/feed" element={<div>Feed Page (Coming Soon)</div>} />

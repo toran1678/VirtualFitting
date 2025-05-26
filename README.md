@@ -76,6 +76,12 @@ DB_HOST=localhost
 DB_PORT=3307
 DB_NAME=capstone
 
+# 카카오 API 설정
+KAKAO_CLIENT_ID=your-kakao-client-id # 카카오 앱의 REST API 키
+KAKAO_JAVASCRIPT_KEY=your-kakao-javascript-key # 카카오 앱의 JavaScript 키
+KAKAO_CLIENT_SECRET=your-kakao-client-secret # 카카오 앱의 클라이언트 시크릿 키
+KAKAO_REDIRECT_URI=http://localhost:3000/oauth/kakao/callback
+
 # SMTP 설정
 EMAIL_HOST=smtp.gmail.com
 EMAIL_PORT=587

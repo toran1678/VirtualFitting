@@ -6,6 +6,7 @@ import Header from "../components/Header"
 import Footer from "../components/Footer"
 import ImagePlaceholder from "../components/ImagePlaceholder"
 import { loginUser, isLoggedIn, getCurrentUser, logoutUser } from "../api/auth"
+import { useKakaoAuth } from "../hooks/useKakaoAuth" // 카카오 인증 훅 추가
 import "../styles/MainPage.css"
 
 const MainPage = () => {
@@ -17,6 +18,9 @@ const MainPage = () => {
   const [userData, setUserData] = useState(null)
   const [recentProducts, setRecentProducts] = useState([])
   const navigate = useNavigate()
+
+  // 카카오 인증 관련 훅 추가
+  const { startKakaoLogin, isLoading: kakaoLoading, error: kakaoError } = useKakaoAuth()
 
   // 컴포넌트 마운트 시 로그인 상태 확인
   useEffect(() => {
@@ -57,6 +61,13 @@ const MainPage = () => {
       window.removeEventListener("storage", handleStorageChange)
     }
   }, [])
+
+  // 카카오 에러 처리
+  useEffect(() => {
+    if (kakaoError) {
+      setLoginError(kakaoError)
+    }
+  }, [kakaoError])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -107,6 +118,23 @@ const MainPage = () => {
       }
     } finally {
       setLoading(false)
+    }
+  }
+
+  // 카카오 로그인 핸들러 - 실제 기능 구현
+  const handleKakaoLogin = async () => {
+    try {
+      setLoginError("") // 기존 에러 메시지 초기화
+      console.log("메인페이지에서 카카오 로그인 시작...")
+
+      // useKakaoAuth 훅의 startKakaoLogin 함수 호출
+      await startKakaoLogin()
+
+      // startKakaoLogin은 카카오 인증 페이지로 리다이렉트하므로
+      // 여기서는 추가 처리가 필요하지 않음
+    } catch (error) {
+      console.error("카카오 로그인 오류:", error)
+      setLoginError("카카오 로그인 중 오류가 발생했습니다. 다시 시도해주세요.")
     }
   }
 
@@ -249,8 +277,13 @@ const MainPage = () => {
                     <button type="submit" className="login-submit-btn" disabled={loading}>
                       {loading ? "로그인 중..." : "로그인"}
                     </button>
-                    <button type="button" className="kakao-login-btn">
-                      카카오 로그인
+                    <button
+                      type="button"
+                      className="kakao-login-btn"
+                      onClick={handleKakaoLogin}
+                      disabled={kakaoLoading || loading}
+                    >
+                      {kakaoLoading ? "카카오 로그인 중..." : "카카오 로그인"}
                     </button>
                   </form>
                   <div className="login-links">

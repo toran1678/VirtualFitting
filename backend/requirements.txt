@@ -9,6 +9,7 @@ cryptography
 python-dotenv
 email-validator
 python-multipart
+redis
 
 # crawling
 requests
