@@ -14,12 +14,13 @@ from app.db.database import SessionLocal, engine, get_db
 from app.api.routes import auth_router
 from app.api.routes import register_router
 from app.api import kakao_auth_router
+from app.api.routes import clothing_items_router
 
 # 환경 변수 로드
 load_dotenv()
 
 # 데이터베이스 테이블 생성
-Base.metadata.drop_all(bind=engine) # 기존 테이블 삭제(테스트용)
+# Base.metadata.drop_all(bind=engine) # 기존 테이블 삭제(테스트용)
 Base.metadata.create_all(bind=engine)
 
 # 로깅 설정
@@ -66,6 +67,7 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 app.include_router(auth_router)
 app.include_router(register_router)
 app.include_router(kakao_auth_router)
+app.include_router(clothing_items_router)
 
 # 서버 상태 확인 엔드포인트
 @app.get("/health")

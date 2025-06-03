@@ -10,6 +10,13 @@ from .users import (
     EmailVerificationCheck,
 )
 
+from .clothing_items import (
+    ClothingItemBase,
+    ClothingItemCreate,
+    ClothingItemResponse,
+    ClothingItemsListResponse,
+)
+
 from .verification import (
     VerificationRequest,
     VerificationResponse,

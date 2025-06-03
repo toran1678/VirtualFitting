@@ -6,7 +6,8 @@ import Header from "../components/Header"
 import Footer from "../components/Footer"
 import ImagePlaceholder from "../components/ImagePlaceholder"
 import { loginUser, isLoggedIn, getCurrentUser, logoutUser } from "../api/auth"
-import { useKakaoAuth } from "../hooks/useKakaoAuth" // 카카오 인증 훅 추가
+import { getPopularItems, getLatestItems } from "../api/clothing_items"
+import { useKakaoAuth } from "../hooks/useKakaoAuth"
 import "../styles/MainPage.css"
 import { getProfileImageUrl, handleImageError } from "../utils/imageUtils"
 
@@ -18,12 +19,59 @@ const MainPage = () => {
   const [userLoggedIn, setUserLoggedIn] = useState(false)
   const [userData, setUserData] = useState(null)
   const [recentProducts, setRecentProducts] = useState([])
+  const [products, setProducts] = useState([])
+  const [productsLoading, setProductsLoading] = useState(true)
+  const [productsError, setProductsError] = useState("")
   const navigate = useNavigate()
 
-  // 카카오 인증 관련 훅 추가
+  // 카카오 인증 관련 훅
   const { startKakaoLogin, isLoading: kakaoLoading, error: kakaoError } = useKakaoAuth()
 
-  // 컴포넌트 마운트 시 로그인 상태 확인
+  // 상품 데이터 로드 함수
+  const loadProducts = async (category) => {
+    setProductsLoading(true)
+    setProductsError("")
+
+    try {
+      let data = []
+
+      switch (category) {
+        case "인기순":
+          data = await getPopularItems(6)
+          break
+        case "최신순":
+          data = await getLatestItems(6)
+          break
+        default:
+          data = await getPopularItems(6)
+      }
+
+      // 데이터 형식을 기존 products 형식에 맞게 변환
+      const formattedProducts = data.map((item) => ({
+        id: item.product_id,
+        name: item.product_name,
+        price: Math.floor(Math.random() * 200000) + 50000, // 임시 가격 (실제로는 가격 필드 추가 필요)
+        image: item.product_image_url,
+        brand: item.brand_name,
+        likes: item.likes,
+        gender: item.gender,
+        category: item.main_category,
+        subCategory: item.sub_category,
+        productUrl: item.product_url,
+      }))
+
+      setProducts(formattedProducts)
+    } catch (error) {
+      console.error("상품 로드 실패:", error)
+      setProductsError("상품을 불러오는데 실패했습니다.")
+      // 에러 시 빈 배열로 설정
+      setProducts([])
+    } finally {
+      setProductsLoading(false)
+    }
+  }
+
+  // 컴포넌트 마운트 시 로그인 상태 확인 및 상품 로드
   useEffect(() => {
     const checkLoginStatus = () => {
       const loginStatus = isLoggedIn()
@@ -50,6 +98,9 @@ const MainPage = () => {
     // 초기 로그인 상태 확인
     checkLoginStatus()
 
+    // 초기 상품 로드
+    loadProducts(activeCategory)
+
     // 로컬 스토리지 변경 이벤트 리스너 추가
     const handleStorageChange = () => {
       checkLoginStatus()
@@ -62,6 +113,11 @@ const MainPage = () => {
       window.removeEventListener("storage", handleStorageChange)
     }
   }, [])
+
+  // 카테고리 변경 시 상품 다시 로드
+  useEffect(() => {
+    loadProducts(activeCategory)
+  }, [activeCategory])
 
   // 카카오 에러 처리
   useEffect(() => {
@@ -122,17 +178,12 @@ const MainPage = () => {
     }
   }
 
-  // 카카오 로그인 핸들러 - 실제 기능 구현
+  // 카카오 로그인 핸들러
   const handleKakaoLogin = async () => {
     try {
-      setLoginError("") // 기존 에러 메시지 초기화
+      setLoginError("")
       console.log("메인페이지에서 카카오 로그인 시작...")
-
-      // useKakaoAuth 훅의 startKakaoLogin 함수 호출
       await startKakaoLogin()
-
-      // startKakaoLogin은 카카오 인증 페이지로 리다이렉트하므로
-      // 여기서는 추가 처리가 필요하지 않음
     } catch (error) {
       console.error("카카오 로그인 오류:", error)
       setLoginError("카카오 로그인 중 오류가 발생했습니다. 다시 시도해주세요.")
@@ -145,8 +196,6 @@ const MainPage = () => {
       setUserLoggedIn(false)
       setUserData(null)
       setRecentProducts([])
-
-      // 페이지 새로고침
       window.location.reload()
     } catch (error) {
       console.error("로그아웃 오류:", error)
@@ -154,51 +203,12 @@ const MainPage = () => {
     }
   }
 
-  const products = [
-    {
-      id: 1,
-      name: "MOUVEMENT W QUILTING JACKET navy",
-      price: 199000,
-      image: "/images/product1.jpg",
-    },
-    {
-      id: 2,
-      name: "레터링 아트 오버핏 카디건(블랙)",
-      price: 178000,
-      image: "/images/product2.jpg",
-    },
-    {
-      id: 3,
-      name: "AUTHENTIC COMFORT HOOD ZIP SWEAT_NAVY",
-      price: 94000,
-      image: "/images/product3.jpg",
-    },
-    {
-      id: 4,
-      name: "빅지 레더 오버핏 블루종 [블랙]",
-      price: 66000,
-      image: null, // 이미지 없음 테스트
-    },
-    {
-      id: 5,
-      name: "피그먼트 주차 작업 베이지 SJOT1479",
-      price: 154500,
-      image: null, // 이미지 없음 테스트
-    },
-    {
-      id: 6,
-      name: "ASI 2WAY 어센틱 후드 윈드브레이커 자켓_블랙",
-      price: 85900,
-      image: "/images/product6.jpg",
-    },
-  ]
-
   // 상품 클릭 시 최근 본 상품에 추가
   const handleProductClick = (product) => {
     if (!userLoggedIn) return
 
     // 최근 본 상품 목록 업데이트
-    const updatedRecentProducts = [product, ...recentProducts.filter((item) => item.id !== product.id)].slice(0, 3) // 최대 3개만 유지
+    const updatedRecentProducts = [product, ...recentProducts.filter((item) => item.id !== product.id)].slice(0, 3)
 
     setRecentProducts(updatedRecentProducts)
 
@@ -219,38 +229,50 @@ const MainPage = () => {
             <button className={activeCategory === "최신순" ? "active" : ""} onClick={() => setActiveCategory("최신순")}>
               최신순
             </button>
-            <button
-              className={activeCategory === "낮은 가격순" ? "active" : ""}
-              onClick={() => setActiveCategory("낮은 가격순")}
-            >
-              낮은 가격순
-            </button>
-            <button
-              className={activeCategory === "높은 가격순" ? "active" : ""}
-              onClick={() => setActiveCategory("높은 가격순")}
-            >
-              높은 가격순
-            </button>
           </div>
 
           <div className="main-layout">
             <div className="products-section">
-              <div className="product-grid">
-                {products.map((product) => (
-                  <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
-                    <div className="product-image">
-                      {product.image ? (
-                        <img src={product.image || "/placeholder.svg"} alt={product.name} className="product-img" />
-                      ) : (
-                        <ImagePlaceholder productName={product.name} />
-                      )}
-                      <button className="try-on-button">가상 피팅</button>
+              {productsLoading ? (
+                <div className="loading-container">
+                  <p>상품을 불러오는 중...</p>
+                </div>
+              ) : productsError ? (
+                <div className="error-container">
+                  <p>{productsError}</p>
+                  <button onClick={() => loadProducts(activeCategory)}>다시 시도</button>
+                </div>
+              ) : (
+                <div className="product-grid">
+                  {products.map((product) => (
+                    <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
+                      <div className="product-image">
+                        {product.image ? (
+                          <img
+                            src={product.image || "/placeholder.svg"}
+                            alt={product.name}
+                            className="product-img"
+                            onError={(e) => {
+                              e.target.style.display = "none"
+                              e.target.nextSibling.style.display = "flex"
+                            }}
+                          />
+                        ) : null}
+                        <div style={{ display: product.image ? "none" : "flex" }}>
+                          <ImagePlaceholder productName={product.name} />
+                        </div>
+                        <button className="try-on-button">가상 피팅</button>
+                      </div>
+                      <h3>{product.name}</h3>
+                      <p>{product.price.toLocaleString()}원</p>
+                      <div className="product-meta">
+                        <span className="brand">{product.brand}</span>
+                        <span className="likes">❤️ {product.likes}</span>
+                      </div>
                     </div>
-                    <h3>{product.name}</h3>
-                    <p>{product.price.toLocaleString()}원</p>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="login-section">
@@ -303,7 +325,7 @@ const MainPage = () => {
                         <img
                           src={getProfileImageUrl(userData.profile_picture) || "/placeholder.svg"}
                           alt="프로필"
-                          onError={(e) => handleImageError(e, "/placeholder.svg?height=60&width=60&query=user profile")}
+                          onError={(e) => handleImageError(e, "/placeholder.svg?height=60&width=60")}
                         />
                       ) : (
                         <div className="profile-initial-large">{userData?.nickname?.charAt(0) || "U"}</div>
@@ -355,7 +377,7 @@ const MainPage = () => {
               )}
 
               <div className="recent-products">
-                <h3>최근 본 상품</h3>
+                <h3>좋아요 한 상품</h3>
                 {userLoggedIn && recentProducts.length > 0 ? (
                   <div className="recent-products-grid">
                     {recentProducts.map((product) => (
@@ -376,7 +398,7 @@ const MainPage = () => {
                   </div>
                 ) : (
                   <p className="empty-recent">
-                    {userLoggedIn ? "최근 본 상품이 없습니다." : "로그인 후 이용 가능합니다"}
+                    {userLoggedIn ? "좋아요한 상품이 없습니다." : "로그인 후 이용 가능합니다"}
                   </p>
                 )}
               </div>

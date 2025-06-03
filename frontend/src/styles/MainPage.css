@@ -484,3 +484,28 @@
     flex-direction: column;
   }
 }
+
+.loading-container, .error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  flex-direction: column;
+}
+
+.product-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.brand {
+  font-weight: 500;
+}
+
+.likes {
+  color: #e91e63;
+}
