@@ -1,4 +1,4 @@
-.sidebar-overlay {
+.sidebarOverlay {
   position: fixed;
   top: 0;
   left: 0;
@@ -12,7 +12,7 @@
   will-change: opacity;
 }
 
-.sidebar-overlay.active {
+.sidebarOverlay.active {
   opacity: 1;
   visibility: visible;
 }
@@ -39,7 +39,7 @@
   left: -300px; /* left 속성은 변경하지 않고 transform만 사용 */
 }
 
-.sidebar-header {
+.sidebarHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -47,14 +47,14 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.sidebar-logo {
+.sidebarLogo {
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--text-primary);
   font-family: "Courier New", Courier, monospace;
 }
 
-.close-button {
+.closeButton {
   background: none;
   border: none;
   font-size: 1.8rem;
@@ -70,26 +70,26 @@
   transition: background-color 0.2s;
 }
 
-.close-button:hover {
+.closeButton:hover {
   background-color: var(--bg-secondary);
 }
 
-.sidebar-nav {
+.sidebarNav {
   flex: 1;
   padding: 1.5rem;
 }
 
-.sidebar-nav ul {
+.sidebarNav ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.sidebar-nav li {
+.sidebarNav li {
   margin-bottom: 1rem;
 }
 
-.sidebar-nav a {
+.sidebarNav a {
   display: block;
   padding: 0.75rem 1rem;
   color: var(--text-primary);
@@ -98,28 +98,28 @@
   transition: background-color 0.2s, color 0.2s;
 }
 
-.sidebar-nav a:hover {
+.sidebarNav a:hover {
   background-color: var(--bg-secondary);
   color: var(--accent-color);
 }
 
-.sidebar-footer {
+.sidebarFooter {
   padding: 1.5rem;
   border-top: 1px solid var(--border-color);
 }
 
-.theme-toggle-container {
+.themeToggleContainer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.theme-toggle-container span {
+.themeToggleContainer span {
   color: var(--text-primary);
 }
 
-.theme-toggle-sidebar {
+.themeToggleSidebar {
   background: none;
   border: none;
   cursor: pointer;
@@ -132,11 +132,11 @@
   transition: background-color 0.3s;
 }
 
-.theme-toggle-sidebar:hover {
+.themeToggleSidebar:hover {
   background-color: var(--bg-secondary);
 }
 
-.sidebar-login-button {
+.sidebarLoginButton {
   width: 100%;
   background-color: var(--accent-color);
   color: white;
@@ -148,6 +148,6 @@
   transition: background-color 0.3s;
 }
 
-.sidebar-login-button:hover {
+.sidebarLoginButton:hover {
   background-color: var(--accent-hover);
 }

@@ -1,12 +1,13 @@
-.clothing-browse-page {
+.clothingBrowsePage {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-primary);
   transition: background-color 0.3s;
+  padding-top: 70px; /* 헤더 높이만큼 */
 }
 
-.browse-main {
+.browseMain {
   flex: 1;
   padding: 2rem 0;
 }
@@ -20,13 +21,13 @@
 }
 
 /* 페이지 헤더 */
-.page-header {
+.pageHeader {
   text-align: center;
   margin-bottom: 3rem;
   padding: 2rem 0;
 }
 
-.page-header h1 {
+.pageHeader h1 {
   font-size: 2.5rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -34,14 +35,14 @@
   transition: color 0.3s;
 }
 
-.page-header p {
+.pageHeader p {
   font-size: 1.1rem;
   color: var(--text-secondary);
   transition: color 0.3s;
 }
 
 /* 레이아웃 */
-.browse-layout {
+.browseLayout {
   display: grid;
   grid-template-columns: 300px 1fr;
   gap: 2rem;
@@ -49,7 +50,7 @@
 }
 
 /* 필터 사이드바 */
-.filter-sidebar {
+.filterSidebar {
   background-color: var(--card-bg);
   border-radius: 12px;
   padding: 1.5rem;
@@ -58,7 +59,7 @@
   transition: background-color 0.3s, box-shadow 0.3s;
 }
 
-.filter-header {
+.filterHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -67,7 +68,7 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.filter-header h3 {
+.filterHeader h3 {
   font-size: 1.3rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -75,7 +76,7 @@
   transition: color 0.3s;
 }
 
-.reset-button {
+.resetButton {
   background: none;
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
@@ -87,22 +88,22 @@
   font-weight: 500;
 }
 
-.reset-button:hover {
+.resetButton:hover {
   background-color: var(--accent-color);
   color: white;
   border-color: var(--accent-color);
   transform: translateY(-1px);
 }
 
-.filter-section {
+.filterSection {
   margin-bottom: 2rem;
 }
 
-.filter-section:last-child {
+.filterSection:last-child {
   margin-bottom: 0;
 }
 
-.filter-section h4 {
+.filterSection h4 {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -111,12 +112,12 @@
 }
 
 /* 검색 폼 */
-.search-form {
+.searchForm {
   display: flex;
   gap: 0.5rem;
 }
 
-.search-input {
+.searchInput {
   flex: 1;
   padding: 0.75rem;
   border: 1px solid var(--border-color);
@@ -127,17 +128,17 @@
   transition: all 0.3s;
 }
 
-.search-input:focus {
+.searchInput:focus {
   outline: none;
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-.search-input::placeholder {
+.searchInput::placeholder {
   color: var(--text-secondary);
 }
 
-.search-button {
+.searchButton {
   padding: 0.75rem 1rem;
   border: none;
   background-color: var(--accent-color);
@@ -148,19 +149,19 @@
   font-size: 1rem;
 }
 
-.search-button:hover {
+.searchButton:hover {
   background-color: var(--accent-hover);
   transform: translateY(-1px);
 }
 
 /* 정렬 옵션 - 커스텀 라디오 버튼 */
-.sort-options {
+.sortOptions {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.sort-option {
+.sortOption {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -174,12 +175,12 @@
   border: 1px solid transparent;
 }
 
-.sort-option:hover {
+.sortOption:hover {
   background-color: var(--bg-secondary);
   border-color: var(--accent-color);
 }
 
-.sort-option input[type="radio"] {
+.sortOption input[type="radio"] {
   position: absolute;
   opacity: 0;
   cursor: pointer;
@@ -187,7 +188,7 @@
   height: 0;
 }
 
-.sort-option::before {
+.sortOption::before {
   content: "";
   width: 18px;
   height: 18px;
@@ -198,31 +199,25 @@
   flex-shrink: 0;
 }
 
-.sort-option:hover::before {
+.sortOption:hover::before {
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-.sort-option input[type="radio"]:checked + *::before,
-.sort-option:has(input[type="radio"]:checked)::before {
+.sortOption:has(input[type="radio"]:checked)::before {
   background-color: var(--accent-color);
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
-}
-
-.sort-option input[type="radio"]:checked + *::after,
-.sort-option:has(input[type="radio"]:checked)::after {
-  content: none;
 }
 
 /* 필터 옵션 - 커스텀 라디오 버튼 */
-.filter-options {
+.filterOptions {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.filter-option {
+.filterOption {
   display: flex;
   align-items: center;
   gap: 0.75rem;
@@ -236,12 +231,12 @@
   border: 1px solid transparent;
 }
 
-.filter-option:hover {
+.filterOption:hover {
   background-color: var(--bg-secondary);
   border-color: var(--accent-color);
 }
 
-.filter-option input[type="radio"] {
+.filterOption input[type="radio"] {
   position: absolute;
   opacity: 0;
   cursor: pointer;
@@ -249,7 +244,7 @@
   height: 0;
 }
 
-.filter-option::before {
+.filterOption::before {
   content: "";
   width: 18px;
   height: 18px;
@@ -260,64 +255,27 @@
   flex-shrink: 0;
 }
 
-.filter-option:hover::before {
+.filterOption:hover::before {
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
-.filter-option input[type="radio"]:checked + *::before,
-.filter-option:has(input[type="radio"]:checked)::before {
+.filterOption:has(input[type="radio"]:checked)::before {
   background-color: var(--accent-color);
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
 }
 
-.filter-option input[type="radio"]:checked + *::after,
-.filter-option:has(input[type="radio"]:checked)::after {
-  content: none;
-}
-
 /* 선택된 옵션 스타일 강화 */
-.sort-option:has(input[type="radio"]:checked),
-.filter-option:has(input[type="radio"]:checked) {
+.sortOption:has(input[type="radio"]:checked),
+.filterOption:has(input[type="radio"]:checked) {
   background-color: rgba(0, 123, 255, 0.1);
   border-color: var(--accent-color);
   color: var(--accent-color);
   font-weight: 600;
 }
 
-/* 다크모드 지원 */
-.dark-mode .sort-option::before,
-.dark-mode .filter-option::before {
-  border-color: var(--border-color);
-  background-color: var(--card-bg);
-}
-
-.dark-mode .sort-option:hover::before,
-.dark-mode .filter-option:hover::before {
-  border-color: var(--accent-color);
-}
-
-.dark-mode .sort-option:has(input[type="radio"]:checked),
-.dark-mode .filter-option:has(input[type="radio"]:checked) {
-  background-color: rgba(0, 123, 255, 0.15);
-}
-
-/* 접근성 개선 */
-.sort-option:focus-within,
-.filter-option:focus-within {
-  outline: 2px solid var(--accent-color);
-  outline-offset: 2px;
-}
-
-.sort-option input[type="radio"]:focus + *::before,
-.filter-option input[type="radio"]:focus + *::before,
-.sort-option:focus-within::before,
-.filter-option:focus-within::before {
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.3);
-}
-
-.filter-select {
+.filterSelect {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid var(--border-color);
@@ -329,18 +287,18 @@
   cursor: pointer;
 }
 
-.filter-select:focus {
+.filterSelect:focus {
   outline: none;
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
 }
 
 /* 메인 콘텐츠 */
-.browse-content {
+.browseContent {
   min-height: 600px;
 }
 
-.results-header {
+.resultsHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -349,7 +307,7 @@
   border-bottom: 1px solid var(--border-color);
 }
 
-.results-info {
+.resultsInfo {
   font-size: 1rem;
   color: var(--text-secondary);
   font-weight: 500;
@@ -357,14 +315,14 @@
 }
 
 /* 상품 그리드 */
-.product-grid {
+.productGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 2rem;
   margin-bottom: 3rem;
 }
 
-.product-card {
+.productCard {
   background-color: var(--card-bg);
   border-radius: 16px;
   overflow: hidden;
@@ -375,35 +333,35 @@
   border: 1px solid transparent;
   display: flex;
   flex-direction: column;
-  height: 100%; /* 카드 높이를 일정하게 만들기 */
+  height: 100%;
 }
 
-.product-card:hover {
+.productCard:hover {
   transform: translateY(-8px);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   border-color: var(--accent-color);
 }
 
-.product-image {
+.productImage {
   height: 320px;
   position: relative;
   overflow: hidden;
   background-color: var(--bg-secondary);
-  flex-shrink: 0; /* 이미지 영역 크기 고정 */
+  flex-shrink: 0;
 }
 
-.product-img {
+.productImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.3s ease;
 }
 
-.product-card:hover .product-img {
+.productCard:hover .productImg {
   transform: scale(1.05);
 }
 
-.image-placeholder {
+.imagePlaceholder {
   width: 100%;
   height: 100%;
   display: flex;
@@ -413,7 +371,7 @@
   color: var(--text-secondary);
 }
 
-.product-overlay {
+.productOverlay {
   position: absolute;
   top: 0;
   left: 0;
@@ -429,12 +387,12 @@
   transition: opacity 0.3s ease;
 }
 
-.product-card:hover .product-overlay {
+.productCard:hover .productOverlay {
   opacity: 1;
 }
 
-.try-on-button,
-.like-button {
+.tryOnButton,
+.likeButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -445,7 +403,7 @@
   backdrop-filter: blur(10px);
 }
 
-.try-on-button {
+.tryOnButton {
   background-color: rgba(255, 255, 255, 0.95);
   color: var(--text-primary);
   padding: 0.75rem 1.5rem;
@@ -456,14 +414,14 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.try-on-button:hover {
+.tryOnButton:hover {
   background-color: var(--accent-color);
   color: white;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.like-button {
+.likeButton {
   background-color: rgba(255, 255, 255, 0.9);
   color: var(--text-primary);
   padding: 0.75rem;
@@ -473,14 +431,14 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.like-button:hover {
+.likeButton:hover {
   background-color: #ff6b6b;
   color: white;
   transform: translateY(-2px) scale(1.05);
   box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
 }
 
-.product-badge {
+.productBadge {
   position: absolute;
   top: 1rem;
   left: 1rem;
@@ -494,15 +452,15 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.product-info {
+.productInfo {
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
-  flex: 1; /* 남은 공간을 모두 차지 */
-  min-height: 140px; /* 최소 높이 설정 */
+  flex: 1;
+  min-height: 140px;
 }
 
-.product-brand {
+.productBrand {
   font-size: 0.9rem;
   color: var(--text-secondary);
   font-weight: 500;
@@ -510,10 +468,10 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   transition: color 0.3s;
-  flex-shrink: 0; /* 브랜드명 크기 고정 */
+  flex-shrink: 0;
 }
 
-.product-name {
+.productName {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text-primary);
@@ -525,19 +483,19 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   transition: color 0.3s;
-  flex: 1; /* 상품명이 가변적으로 공간 차지 */
-  min-height: 2.8rem; /* 2줄 기준 최소 높이 */
+  flex: 1;
+  min-height: 2.8rem;
 }
 
-.product-meta {
+.productMeta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: auto; /* 항상 아래쪽에 위치 */
-  flex-shrink: 0; /* 메타 정보 크기 고정 */
+  margin-top: auto;
+  flex-shrink: 0;
 }
 
-.likes-count {
+.likesCount {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -547,12 +505,12 @@
   transition: color 0.3s;
 }
 
-.likes-icon {
+.likesIcon {
   color: #ff6b6b;
   font-size: 1rem;
 }
 
-.gender-tag {
+.genderTag {
   background-color: var(--bg-secondary);
   color: var(--text-secondary);
   padding: 0.25rem 0.75rem;
@@ -562,7 +520,7 @@
   transition: all 0.3s;
 }
 
-/* 페이지네이션 - 완전 중앙 정렬 */
+/* 페이지네이션 */
 .pagination {
   display: flex;
   justify-content: center;
@@ -574,7 +532,7 @@
   max-width: 100%;
 }
 
-.pagination-button {
+.paginationButton {
   padding: 0.75rem 1.5rem;
   border: 1px solid var(--border-color);
   background-color: var(--card-bg);
@@ -586,26 +544,26 @@
   font-size: 0.9rem;
 }
 
-.pagination-button:hover:not(:disabled) {
+.paginationButton:hover:not(:disabled) {
   background-color: var(--accent-color);
   color: white;
   border-color: var(--accent-color);
   transform: translateY(-2px);
 }
 
-.pagination-button:disabled {
+.paginationButton:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
 
-.pagination-numbers {
+.paginationNumbers {
   display: flex;
   gap: 0.25rem;
   margin: 0 1rem;
 }
 
-.pagination-number {
+.paginationNumber {
   padding: 0.75rem 1rem;
   border: 1px solid var(--border-color);
   background-color: var(--card-bg);
@@ -619,14 +577,14 @@
   font-size: 0.9rem;
 }
 
-.pagination-number:hover {
+.paginationNumber:hover {
   background-color: var(--accent-color);
   color: white;
   border-color: var(--accent-color);
   transform: translateY(-2px);
 }
 
-.pagination-number.active {
+.paginationNumber.active {
   background-color: var(--accent-color);
   color: white;
   border-color: var(--accent-color);
@@ -634,9 +592,9 @@
 }
 
 /* 로딩, 에러, 빈 상태 */
-.loading-container,
-.error-container,
-.empty-container {
+.loadingContainer,
+.errorContainer,
+.emptyContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -646,7 +604,7 @@
   min-height: 400px;
 }
 
-.loading-spinner {
+.loadingSpinner {
   width: 50px;
   height: 50px;
   border: 4px solid var(--bg-secondary);
@@ -665,34 +623,34 @@
   }
 }
 
-.loading-container p,
-.error-container p,
-.empty-container p {
+.loadingContainer p,
+.errorContainer p,
+.emptyContainer p {
   color: var(--text-secondary);
   font-size: 1.1rem;
   margin: 0;
   transition: color 0.3s;
 }
 
-.error-icon,
-.empty-icon {
+.errorIcon,
+.emptyIcon {
   font-size: 4rem;
   margin-bottom: 1.5rem;
   opacity: 0.7;
 }
 
-.empty-container h3 {
+.emptyContainer h3 {
   font-size: 1.5rem;
   color: var(--text-primary);
   margin-bottom: 0.5rem;
   transition: color 0.3s;
 }
 
-.empty-container p {
+.emptyContainer p {
   margin-bottom: 2rem;
 }
 
-.retry-button {
+.retryButton {
   background-color: var(--accent-color);
   color: white;
   border: none;
@@ -704,41 +662,41 @@
   font-size: 0.9rem;
 }
 
-.retry-button:hover {
+.retryButton:hover {
   background-color: var(--accent-hover);
   transform: translateY(-2px);
 }
 
 /* 반응형 디자인 */
 @media (max-width: 1200px) {
-  .browse-layout {
+  .browseLayout {
     grid-template-columns: 280px 1fr;
     gap: 1.5rem;
   }
 
-  .product-grid {
+  .productGrid {
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.5rem;
   }
 }
 
 @media (max-width: 1024px) {
-  .browse-layout {
+  .browseLayout {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
 
-  .filter-sidebar {
+  .filterSidebar {
     position: static;
     margin-bottom: 2rem;
     order: -1;
   }
 
-  .product-grid {
+  .productGrid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 
-  .page-header h1 {
+  .pageHeader h1 {
     font-size: 2rem;
   }
 }
@@ -748,33 +706,33 @@
     padding: 0 0.5rem;
   }
 
-  .page-header {
+  .pageHeader {
     padding: 1rem 0;
     margin-bottom: 2rem;
   }
 
-  .page-header h1 {
+  .pageHeader h1 {
     font-size: 1.8rem;
   }
 
-  .filter-sidebar {
+  .filterSidebar {
     padding: 1rem;
   }
 
-  .filter-section {
+  .filterSection {
     margin-bottom: 1.5rem;
   }
 
-  .product-grid {
+  .productGrid {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1rem;
   }
 
-  .product-image {
+  .productImage {
     height: 250px;
   }
 
-  .product-info {
+  .productInfo {
     min-height: 120px;
   }
 
@@ -784,7 +742,7 @@
     justify-content: center;
   }
 
-  .pagination-numbers {
+  .paginationNumbers {
     order: -1;
     width: 100%;
     justify-content: center;
@@ -793,33 +751,33 @@
 }
 
 @media (max-width: 480px) {
-  .product-grid {
+  .productGrid {
     grid-template-columns: 1fr;
   }
 
-  .product-image {
+  .productImage {
     height: 300px;
   }
 
-  .product-info {
+  .productInfo {
     min-height: 110px;
   }
 
-  .filter-section h4 {
+  .filterSection h4 {
     font-size: 0.9rem;
   }
 
-  .sort-option,
-  .filter-option {
+  .sortOption,
+  .filterOption {
     font-size: 0.85rem;
   }
 
-  .try-on-button {
+  .tryOnButton {
     padding: 0.5rem 1rem;
     font-size: 0.8rem;
   }
 
-  .like-button {
+  .likeButton {
     width: 40px;
     height: 40px;
     padding: 0.5rem;
@@ -830,55 +788,71 @@
     padding: 1rem 0;
   }
 
-  .pagination-button {
+  .paginationButton {
     padding: 0.5rem 1rem;
     font-size: 0.8rem;
   }
 
-  .pagination-number {
+  .paginationNumber {
     padding: 0.5rem 0.75rem;
     min-width: 36px;
     font-size: 0.8rem;
   }
 }
 
-/* 다크모드 호버 효과 개선 */
-.dark-mode .product-card:hover {
+/* 다크모드 지원 */
+.dark-mode .sortOption::before,
+.dark-mode .filterOption::before {
+  border-color: var(--border-color);
+  background-color: var(--card-bg);
+}
+
+.dark-mode .sortOption:hover::before,
+.dark-mode .filterOption:hover::before {
+  border-color: var(--accent-color);
+}
+
+.dark-mode .sortOption:has(input[type="radio"]:checked),
+.dark-mode .filterOption:has(input[type="radio"]:checked) {
+  background-color: rgba(0, 123, 255, 0.15);
+}
+
+.dark-mode .productCard:hover {
   box-shadow: 0 20px 40px rgba(255, 255, 255, 0.1);
 }
 
-.dark-mode .product-overlay {
+.dark-mode .productOverlay {
   background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.8) 100%);
 }
 
-.dark-mode .try-on-button {
+.dark-mode .tryOnButton {
   background-color: rgba(0, 0, 0, 0.8);
   color: white;
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.dark-mode .try-on-button:hover {
+.dark-mode .tryOnButton:hover {
   background-color: var(--accent-color);
 }
 
-.dark-mode .like-button {
+.dark-mode .likeButton {
   background-color: rgba(0, 0, 0, 0.7);
   color: white;
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-.dark-mode .like-button:hover {
+.dark-mode .likeButton:hover {
   background-color: #ff6b6b;
 }
 
 /* 접근성 개선 */
-.product-card:focus {
+.productCard:focus {
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
 }
 
-.filter-option:focus-within,
-.sort-option:focus-within {
+.filterOption:focus-within,
+.sortOption:focus-within {
   background-color: var(--bg-secondary);
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
@@ -886,29 +860,29 @@
 }
 
 /* 애니메이션 성능 최적화 */
-.product-card,
-.try-on-button,
-.like-button,
-.pagination-button,
-.pagination-number {
+.productCard,
+.tryOnButton,
+.likeButton,
+.paginationButton,
+.paginationNumber {
   will-change: transform;
 }
 
 /* 스크롤바 스타일링 */
-.filter-sidebar::-webkit-scrollbar {
+.filterSidebar::-webkit-scrollbar {
   width: 6px;
 }
 
-.filter-sidebar::-webkit-scrollbar-track {
+.filterSidebar::-webkit-scrollbar-track {
   background: var(--bg-secondary);
   border-radius: 3px;
 }
 
-.filter-sidebar::-webkit-scrollbar-thumb {
+.filterSidebar::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: 3px;
 }
 
-.filter-sidebar::-webkit-scrollbar-thumb:hover {
+.filterSidebar::-webkit-scrollbar-thumb:hover {
   background: var(--text-secondary);
 }

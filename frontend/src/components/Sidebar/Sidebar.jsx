@@ -2,25 +2,25 @@
 
 import { useContext } from "react"
 import { Link } from "react-router-dom"
-import { ThemeContext } from "../context/ThemeContext"
-import "../styles/Sidebar.css"
+import { ThemeContext } from "../../context/ThemeContext"
+import styles from "./Sidebar.module.css"
 
 const Sidebar = ({ isOpen, toggleSidebar, children }) => {
   const { darkMode, toggleTheme } = useContext(ThemeContext)
 
   return (
     <>
-      <div className={`sidebar-overlay ${isOpen ? "active" : ""}`} onClick={toggleSidebar}></div>
-      <div className={`sidebar ${isOpen ? "open" : ""}`}>
+      <div className={`${styles.sidebarOverlay} ${isOpen ? styles.active : ""}`} onClick={toggleSidebar}></div>
+      <div className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}>
         {children}
-        <div className="sidebar-header">
-          <div className="sidebar-logo">FASHION GUYS</div>
-          <button className="close-button" onClick={toggleSidebar} aria-label="사이드바 닫기">
+        <div className={styles.sidebarHeader}>
+          <div className={styles.sidebarLogo}>FASHION GUYS</div>
+          <button className={styles.closeButton} onClick={toggleSidebar} aria-label="사이드바 닫기">
             &times;
           </button>
         </div>
 
-        <nav className="sidebar-nav">
+        <nav className={styles.sidebarNav}>
           <ul>
             <li>
               <Link to="/clothing-browse?main_category=상의" onClick={toggleSidebar}>
@@ -60,10 +60,10 @@ const Sidebar = ({ isOpen, toggleSidebar, children }) => {
           </ul>
         </nav>
 
-        <div className="sidebar-footer">
-          <div className="theme-toggle-container">
+        <div className={styles.sidebarFooter}>
+          <div className={styles.themeToggleContainer}>
             <span>다크 모드</span>
-            <button className="theme-toggle-sidebar" onClick={toggleTheme} aria-label="테마 전환">
+            <button className={styles.themeToggleSidebar} onClick={toggleTheme} aria-label="테마 전환">
               {darkMode ? (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -103,7 +103,7 @@ const Sidebar = ({ isOpen, toggleSidebar, children }) => {
               )}
             </button>
           </div>
-          {/* <button className="sidebar-login-button" onClick={toggleSidebar}>
+          {/* <button className={styles.sidebarLoginButton} onClick={toggleSidebar}>
             로그인
           </button> */}
         </div>

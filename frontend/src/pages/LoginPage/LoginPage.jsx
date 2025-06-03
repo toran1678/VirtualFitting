@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { useAuth } from "../context/AuthContext"
-import { useKakaoAuth } from "../hooks/useKakaoAuth" // 카카오 인증 훅 추가
-import "../styles/LoginPage.css"
-import { saveRememberedId, getRememberedId } from "../api/auth"
+import { useAuth } from "../../context/AuthContext"
+import { useKakaoAuth } from "../../hooks/useKakaoAuth" // 카카오 인증 훅 추가
+import styles from "./LoginPage.module.css"
+import { saveRememberedId, getRememberedId } from "../../api/auth"
 
 const LoginPage = () => {
   const navigate = useNavigate()
@@ -135,21 +135,21 @@ const LoginPage = () => {
   }
 
   return (
-    <div className="login-page">
-      <div className="login-container">
-        <div className="login-header">
-          <h1 className="login-title">Welcome Back</h1>
-          <p className="login-subtitle">패션 가이즈에 오신 것을 환영합니다</p>
+    <div className={styles.loginPage}>
+      <div className={styles.loginContainer}>
+        <div className={styles.loginHeader}>
+          <h1 className={styles.loginTitle}>Welcome Back</h1>
+          <p className={styles.loginSubtitle}>패션 가이즈에 오신 것을 환영합니다</p>
         </div>
 
-        <form className="login-form" onSubmit={handleSubmit}>
+        <form className={styles.loginForm} onSubmit={handleSubmit}>
           {/* 로그인 에러 메시지 표시 (일반 로그인 + 카카오 로그인 에러 포함) */}
-          {loginError && <div className="login-error-message">{loginError}</div>}
+          {loginError && <div className={styles.loginErrorMessage}>{loginError}</div>}
 
-          <div className="form-group">
-            <div className="input-container">
+          <div className={styles.formGroup}>
+            <div className={styles.inputContainer}>
               <svg
-                className="input-icon"
+                className={styles.inputIcon}
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
                 height="20"
@@ -170,17 +170,17 @@ const LoginPage = () => {
                 placeholder="아이디"
                 value={formData.id}
                 onChange={handleChange}
-                className={errors.id ? "error" : ""}
+                className={errors.id ? styles.error : ""}
                 autoComplete="username"
               />
             </div>
-            {errors.id && <span className="error-message">{errors.id}</span>}
+            {errors.id && <span className={styles.errorMessage}>{errors.id}</span>}
           </div>
 
-          <div className="form-group">
-            <div className="input-container">
+          <div className={styles.formGroup}>
+            <div className={styles.inputContainer}>
               <svg
-                className="input-icon"
+                className={styles.inputIcon}
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
                 height="20"
@@ -201,56 +201,56 @@ const LoginPage = () => {
                 placeholder="비밀번호"
                 value={formData.password}
                 onChange={handleChange}
-                className={errors.password ? "error" : ""}
+                className={errors.password ? styles.error : ""}
                 autoComplete="current-password"
               />
             </div>
-            {errors.password && <span className="error-message">{errors.password}</span>}
+            {errors.password && <span className={styles.errorMessage}>{errors.password}</span>}
           </div>
 
-          <div className="remember-forgot">
-            <div className="remember-me">
+          <div className={styles.rememberForgot}>
+            <div className={styles.rememberMe}>
               <input type="checkbox" id="remember" checked={rememberMe} onChange={() => setRememberMe(!rememberMe)} />
               <label htmlFor="remember">아이디 저장</label>
             </div>
-            <Link to="/forgot-password" className="forgot-password">
+            <Link to="/forgot-password" className={styles.forgotPassword}>
               비밀번호 찾기
             </Link>
           </div>
 
-          <button type="submit" className="login-button" disabled={isSubmitting || authLoading}>
+          <button type="submit" className={styles.loginButton} disabled={isSubmitting || authLoading}>
             {isSubmitting || authLoading ? (
-              <div className="spinner">
-                <div className="bounce1"></div>
-                <div className="bounce2"></div>
-                <div className="bounce3"></div>
+              <div className={styles.spinner}>
+                <div className={styles.bounce1}></div>
+                <div className={styles.bounce2}></div>
+                <div className={styles.bounce3}></div>
               </div>
             ) : (
               "로그인"
             )}
           </button>
 
-          <div className="divider">
+          <div className={styles.divider}>
             <span>또는</span>
           </div>
 
           {/* 카카오 로그인 버튼 - 실제 기능 연동 */}
           <button
             type="button"
-            className="kakao-login-btn"
+            className={styles.kakaoLoginBtn}
             onClick={handleKakaoLogin}
             disabled={kakaoLoading || isSubmitting || authLoading}
           >
             {kakaoLoading ? (
-              <div className="spinner">
-                <div className="bounce1"></div>
-                <div className="bounce2"></div>
-                <div className="bounce3"></div>
+              <div className={styles.spinner}>
+                <div className={styles.bounce1}></div>
+                <div className={styles.bounce2}></div>
+                <div className={styles.bounce3}></div>
               </div>
             ) : (
               <>
                 <svg
-                  className="kakao-icon"
+                  className={styles.kakaoIcon}
                   width="18"
                   height="18"
                   viewBox="0 0 256 256"
@@ -268,15 +268,15 @@ const LoginPage = () => {
           </button>
         </form>
 
-        <div className="register-link">
+        <div className={styles.registerLink}>
           계정이 없으신가요? <Link to="/register">회원가입</Link>
         </div>
       </div>
 
-      <div className="login-decoration">
-        <div className="decoration-circle circle-1"></div>
-        <div className="decoration-circle circle-2"></div>
-        <div className="decoration-circle circle-3"></div>
+      <div className={styles.loginDecoration}>
+        <div className={`${styles.decorationCircle} ${styles.circle1}`}></div>
+        <div className={`${styles.decorationCircle} ${styles.circle2}`}></div>
+        <div className={`${styles.decorationCircle} ${styles.circle3}`}></div>
       </div>
     </div>
   )

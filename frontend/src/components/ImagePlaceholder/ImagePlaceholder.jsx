@@ -1,8 +1,8 @@
 "use client"
 
 import { useContext } from "react"
-import { ThemeContext } from "../context/ThemeContext"
-import "../styles/ImagePlaceholder.css"
+import { ThemeContext } from "../../context/ThemeContext"
+import styles from "./ImagePlaceholder.module.css"
 
 const ImagePlaceholder = ({ productName }) => {
   const { darkMode } = useContext(ThemeContext)
@@ -28,11 +28,14 @@ const ImagePlaceholder = ({ productName }) => {
   const initials = getInitials(productName)
 
   return (
-    <div className={`image-placeholder ${darkMode ? "dark" : "light"}`} aria-label={`${productName} 이미지 준비 중`}>
-      <div className="placeholder-content">
-        <span className="placeholder-initials">{initials}</span>
+    <div
+      className={`${styles.imagePlaceholder} ${darkMode ? styles.dark : styles.light}`}
+      aria-label={`${productName} 이미지 준비 중`}
+    >
+      <div className={styles.placeholderContent}>
+        <span className={styles.placeholderInitials}>{initials}</span>
       </div>
-      <div className="placeholder-brand">FASHION GUYS</div>
+      <div className={styles.placeholderBrand}>FASHION GUYS</div>
     </div>
   )
 }

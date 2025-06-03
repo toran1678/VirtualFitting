@@ -2,11 +2,11 @@
 
 import { useState, useContext, useEffect } from "react"
 import { Link, useNavigate, useLocation } from "react-router-dom"
-import "../styles/Header.css"
-import { ThemeContext } from "../context/ThemeContext"
-import { useAuth } from "../context/AuthContext"
-import Sidebar from "./Sidebar"
-import { getProfileImageUrl, handleImageError } from "../utils/imageUtils"
+import styles from "./Header.module.css"
+import { ThemeContext } from "../../context/ThemeContext"
+import { useAuth } from "../../context/AuthContext"
+import Sidebar from "../Sidebar/Sidebar"
+import { getProfileImageUrl, handleImageError } from "../../utils/imageUtils"
 
 const Header = () => {
   const [searchQuery, setSearchQuery] = useState("")
@@ -94,26 +94,26 @@ const Header = () => {
 
   return (
     <>
-      <header className={`header ${isScrolled ? "scrolled" : ""}`}>
-        <div className="header-container">
+      <header className={`${styles.header} ${isScrolled ? styles.scrolled : ""}`}>
+        <div className={styles.headerContainer}>
           {/* 왼쪽 영역: 로고 + 검색창 */}
-          <div className="header-left">
-            <div className="logo-container">
+          <div className={styles.headerLeft}>
+            <div className={styles.logoContainer}>
               <button
-                className={`hamburger-button ${sidebarOpen ? "active" : ""}`}
+                className={`${styles.hamburgerButton} ${sidebarOpen ? styles.active : ""}`}
                 onClick={toggleSidebar}
                 aria-label="메뉴 열기"
               >
-                <span className="hamburger-line"></span>
-                <span className="hamburger-line"></span>
-                <span className="hamburger-line"></span>
+                <span className={styles.hamburgerLine}></span>
+                <span className={styles.hamburgerLine}></span>
+                <span className={styles.hamburgerLine}></span>
               </button>
-              <div className="logo">
+              <div className={styles.logo}>
                 <Link to="/">FASHION GUYS</Link>
               </div>
             </div>
 
-            <div className="search-bar">
+            <div className={styles.searchBar}>
               <form onSubmit={handleSearch}>
                 <input
                   type="text"
@@ -142,30 +142,30 @@ const Header = () => {
           </div>
 
           {/* 오른쪽 영역: 네비게이션 + 로그인/프로필 */}
-          <div className="header-right">
-            <nav className="navigation">
+          <div className={styles.headerRight}>
+            <nav className={styles.navigation}>
               <ul>
-                <li className="nav-item">
+                <li className={styles.navItem}>
                   <Link to="/clothing-browse">의류</Link>
                 </li>
-                <li className="nav-item">
+                <li className={styles.navItem}>
                   <Link to="/virtual-fitting">가상피팅</Link>
                 </li>
-                <li className="nav-item">
+                <li className={styles.navItem}>
                   <Link to="/custom">커스텀</Link>
                 </li>
-                <li className="nav-item">
+                <li className={styles.navItem}>
                   <Link to="/feed">피드</Link>
                 </li>
 
                 {isAuthenticated && (
-                  <li className="nav-item">
+                  <li className={styles.navItem}>
                     <Link to="/mypage">마이페이지</Link>
                   </li>
                 )}
 
                 <li>
-                  <button className="theme-toggle" onClick={toggleTheme} aria-label="테마 전환">
+                  <button className={styles.themeToggle} onClick={toggleTheme} aria-label="테마 전환">
                     {darkMode ? (
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -207,9 +207,9 @@ const Header = () => {
                 </li>
 
                 {isAuthenticated ? (
-                  <li className="user-profile-container">
-                    <div className="user-profile">
-                      <div className="profile-image">
+                  <li className={styles.userProfileContainer}>
+                    <div className={styles.userProfile}>
+                      <div className={styles.profileImage}>
                         {user?.profile_picture ? (
                           <img
                             src={getProfileImageUrl(user.profile_picture) || "/placeholder.svg"}
@@ -217,11 +217,11 @@ const Header = () => {
                             onError={(e) => handleImageError(e, "/placeholder.svg?height=32&width=32")}
                           />
                         ) : (
-                          <div className="profile-initial">{user?.nickname?.charAt(0) || "U"}</div>
+                          <div className={styles.profileInitial}>{user?.nickname?.charAt(0) || "U"}</div>
                         )}
                       </div>
-                      <span className="user-name">{user?.nickname || "사용자"}</span>
-                      <button className="logout-button" onClick={handleLoginLogout}>
+                      <span className={styles.userName}>{user?.nickname || "사용자"}</span>
+                      <button className={styles.logoutButton} onClick={handleLoginLogout}>
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="16"
@@ -242,8 +242,8 @@ const Header = () => {
                     </div>
                   </li>
                 ) : (
-                  <li className="auth-buttons">
-                    <button className="header-login-button" onClick={handleLoginLogout}>
+                  <li className={styles.authButtons}>
+                    <button className={styles.headerLoginButton} onClick={handleLoginLogout}>
                       로그인
                     </button>
                   </li>

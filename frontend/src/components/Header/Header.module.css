@@ -1,4 +1,4 @@
-/* Header.css */
+/* Header.module.css */
 :root {
   --header-height: 70px;
 }
@@ -42,7 +42,7 @@ body.has-header {
   }
 }
 
-.header-container {
+.headerContainer {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -53,7 +53,7 @@ body.has-header {
 }
 
 /* 왼쪽 영역 (로고 + 검색창) */
-.header-left {
+.headerLeft {
   display: flex;
   align-items: center;
   gap: 1.5rem;
@@ -61,7 +61,7 @@ body.has-header {
   flex: 1;
 }
 
-.logo-container {
+.logoContainer {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -84,17 +84,17 @@ body.has-header {
 }
 
 /* 검색창 스타일 */
-.search-bar {
+.searchBar {
   max-width: 300px;
   width: 100%;
 }
 
-.search-bar form {
+.searchBar form {
   display: flex;
   position: relative;
 }
 
-.search-bar input {
+.searchBar input {
   width: 100%;
   padding: 0.6rem 1rem;
   border: 1px solid var(--border-color);
@@ -105,13 +105,13 @@ body.has-header {
   transition: all 0.3s ease;
 }
 
-.search-bar input:focus {
+.searchBar input:focus {
   outline: none;
   border-color: var(--accent-color);
   box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
 }
 
-.search-bar button {
+.searchBar button {
   position: absolute;
   right: 12px;
   top: 50%;
@@ -126,12 +126,12 @@ body.has-header {
   transition: color 0.3s ease;
 }
 
-.search-bar button:hover {
+.searchBar button:hover {
   color: var(--accent-color);
 }
 
 /* 오른쪽 영역 (네비게이션 + 로그인/프로필) */
-.header-right {
+.headerRight {
   display: flex;
   align-items: center;
   height: 100%;
@@ -169,7 +169,7 @@ body.has-header {
   background-color: var(--bg-secondary);
 }
 
-.theme-toggle {
+.themeToggle {
   background: none;
   border: none;
   cursor: pointer;
@@ -182,21 +182,21 @@ body.has-header {
   transition: background-color 0.3s;
 }
 
-.theme-toggle:hover {
+.themeToggle:hover {
   background-color: var(--bg-secondary);
   color: var(--accent-color);
 }
 
 /* 로그인/회원가입 버튼 스타일 */
-.auth-buttons {
+.authButtons {
   display: flex;
   gap: 0.8rem;
   align-items: center;
   height: 36px;
 }
 
-.header .login-button,
-.header-login-button {
+.loginButton,
+.headerLoginButton {
   background-color: var(--accent-color);
   color: white;
   border: none;
@@ -214,32 +214,14 @@ body.has-header {
   white-space: nowrap;
 }
 
-.header .login-button:hover,
-.header-login-button:hover {
+.loginButton:hover,
+.headerLoginButton:hover {
   background-color: var(--accent-hover);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }
 
-.login-button {
-  background-color: transparent;
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-}
-
-.login-button:hover {
-  background-color: var(--bg-secondary);
-  border-color: var(--accent-color);
-  color: var(--accent-color);
-}
-
-.register-button {
+.registerButton {
   background-color: transparent;
   color: var(--text-primary);
   border: 1px solid var(--border-color);
@@ -256,21 +238,21 @@ body.has-header {
   white-space: nowrap;
 }
 
-.register-button:hover {
+.registerButton:hover {
   background-color: var(--bg-secondary);
   border-color: var(--accent-color);
   color: var(--accent-color);
 }
 
 /* 사용자 프로필 스타일 */
-.user-profile-container {
+.userProfileContainer {
   margin-left: 0.5rem;
   height: 36px;
   display: flex;
   align-items: center;
 }
 
-.user-profile {
+.userProfile {
   display: flex;
   align-items: center;
   gap: 0.8rem;
@@ -280,11 +262,11 @@ body.has-header {
   height: 100%;
 }
 
-.user-profile:hover {
+.userProfile:hover {
   background-color: var(--bg-secondary);
 }
 
-.profile-image {
+.profileImage {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -297,18 +279,18 @@ body.has-header {
   font-weight: bold;
 }
 
-.profile-image img {
+.profileImage img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.profile-initial {
+.profileInitial {
   font-size: 1rem;
   text-transform: uppercase;
 }
 
-.user-name {
+.userName {
   font-size: 0.9rem;
   font-weight: 500;
   color: var(--text-primary);
@@ -318,7 +300,7 @@ body.has-header {
   text-overflow: ellipsis;
 }
 
-.logout-button {
+.logoutButton {
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -333,17 +315,17 @@ body.has-header {
   height: 32px;
 }
 
-.logout-button:hover {
+.logoutButton:hover {
   background-color: rgba(244, 67, 54, 0.1);
   color: #f44336;
 }
 
-.logout-button span {
+.logoutButton span {
   display: none;
 }
 
 /* 햄버거 버튼 스타일 */
-.hamburger-button {
+.hamburgerButton {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -356,44 +338,44 @@ body.has-header {
   z-index: 10;
 }
 
-.hamburger-line {
+.hamburgerLine {
   width: 100%;
   height: 2px;
   background-color: var(--text-primary);
   transition: all 0.3s ease;
 }
 
-.hamburger-button.active .hamburger-line:nth-child(1) {
+.hamburgerButton.active .hamburgerLine:nth-child(1) {
   transform: translateY(8px) rotate(45deg);
 }
 
-.hamburger-button.active .hamburger-line:nth-child(2) {
+.hamburgerButton.active .hamburgerLine:nth-child(2) {
   opacity: 0;
 }
 
-.hamburger-button.active .hamburger-line:nth-child(3) {
+.hamburgerButton.active .hamburgerLine:nth-child(3) {
   transform: translateY(-8px) rotate(-45deg);
 }
 
 /* 반응형 스타일 */
 @media (max-width: 1024px) {
-  .hamburger-button {
+  .hamburgerButton {
     display: flex;
   }
 
-  .navigation .nav-item {
+  .navItem {
     display: none;
   }
 
-  .header-container {
+  .headerContainer {
     padding: 0 1rem;
   }
 
-  .search-bar {
+  .searchBar {
     max-width: 200px;
   }
 
-  .logout-button span {
+  .logoutButton span {
     display: inline;
   }
 }
@@ -403,32 +385,32 @@ body.has-header {
     height: auto;
   }
 
-  .header-container {
+  .headerContainer {
     flex-wrap: wrap;
     padding: 0.8rem 1rem;
     height: auto;
   }
 
-  .header-left {
+  .headerLeft {
     width: 100%;
     justify-content: space-between;
     margin-bottom: 0.8rem;
   }
 
-  .logo-container {
+  .logoContainer {
     width: auto;
     justify-content: flex-start;
     height: auto;
   }
 
-  .search-bar {
+  .searchBar {
     order: 3;
     margin: 0.8rem 0;
     max-width: 100%;
     width: 100%;
   }
 
-  .header-right {
+  .headerRight {
     width: 100%;
     justify-content: flex-end;
     height: auto;
@@ -444,34 +426,34 @@ body.has-header {
     height: auto;
   }
 
-  .user-profile {
+  .userProfile {
     padding: 0.2rem;
   }
 
-  .user-name {
+  .userName {
     display: none;
   }
 
-  .auth-buttons {
+  .authButtons {
     gap: 0.5rem;
   }
 
-  .header .login-button,
-  .header-login-button,
-  .register-button {
+  .loginButton,
+  .headerLoginButton,
+  .registerButton {
     padding: 0 0.8rem;
     font-size: 0.85rem;
   }
 }
 
 @media (max-width: 480px) {
-  .auth-buttons {
+  .authButtons {
     flex-direction: row;
     gap: 0.4rem;
     align-items: center;
   }
 
-  .theme-toggle {
+  .themeToggle {
     padding: 0.3rem;
   }
 

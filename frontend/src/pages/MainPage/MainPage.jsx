@@ -2,14 +2,14 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
-import Header from "../components/Header"
-import Footer from "../components/Footer"
-import { isLoggedIn } from "../api/auth"
-import { toggleClothingLike, getMyLikedClothingIds } from "../api/likedClothes"
-import "../styles/MainPage.css"
-import { getPopularItems, getLatestItems, getCategories, browseClothingItems } from "../api/clothing_items"
-import { getMyLikedClothes } from "../api/likedClothes"
-import ImagePlaceholder from "../components/ImagePlaceholder"
+import Header from "../../components/Header/Header"
+import Footer from "../../components/Footer/Footer"
+import { isLoggedIn } from "../../api/auth"
+import { toggleClothingLike, getMyLikedClothingIds } from "../../api/likedClothes"
+import styles from "./MainPage.module.css"
+import { getPopularItems, getLatestItems, getCategories, browseClothingItems } from "../../api/clothing_items"
+import { getMyLikedClothes } from "../../api/likedClothes"
+import ImagePlaceholder from "../../components/ImagePlaceholder/ImagePlaceholder"
 
 const MainPage = () => {
   const navigate = useNavigate()
@@ -286,7 +286,7 @@ const MainPage = () => {
     setUserLoggedIn(loggedIn)
     loadRecommendedProducts(recommendFilter)
     loadCategories() // 카테고리 로드 추가
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // 카테고리 로드 후 카테고리별 상품 로드
@@ -294,14 +294,14 @@ const MainPage = () => {
     if (categories.main_categories.length > 0) {
       loadCategoryProducts()
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categories])
 
   // 로그인 상태 변경 시 좋아요 목록 로드
   useEffect(() => {
     loadLikedClothingIds()
     loadLikedProducts()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userLoggedIn])
 
   // 필터 변경 시 추천 상품 다시 로드
@@ -310,22 +310,25 @@ const MainPage = () => {
   }, [recommendFilter])
 
   return (
-    <div className="main-page">
+    <div className={styles.mainPage}>
       <Header />
 
-      <main className="main-content">
+      <main className={styles.mainContent}>
         {/* 히어로 배너 섹션 */}
-        <section className="hero-banner">
-          <div className="banner-container">
+        <section className={styles.heroBanner}>
+          <div className={styles.bannerContainer}>
             {bannerData.map((banner, index) => (
-              <div key={banner.id} className={`banner-slide ${index === currentBannerIndex ? "active" : ""}`}>
-                <div className="banner-background">
-                  <div className="banner-overlay"></div>
+              <div
+                key={banner.id}
+                className={`${styles.bannerSlide} ${index === currentBannerIndex ? styles.active : ""}`}
+              >
+                <div className={styles.bannerBackground}>
+                  <div className={styles.bannerOverlay}></div>
                 </div>
-                <div className="banner-content">
-                  <h1 className="banner-title">{banner.title}</h1>
-                  <p className="banner-subtitle">{banner.subtitle}</p>
-                  <button className="banner-button" onClick={banner.buttonAction}>
+                <div className={styles.bannerContent}>
+                  <h1 className={styles.bannerTitle}>{banner.title}</h1>
+                  <p className={styles.bannerSubtitle}>{banner.subtitle}</p>
+                  <button className={styles.bannerButton} onClick={banner.buttonAction}>
                     {banner.buttonText}
                   </button>
                 </div>
@@ -334,11 +337,11 @@ const MainPage = () => {
           </div>
 
           {/* 배너 인디케이터 */}
-          <div className="banner-indicators">
+          <div className={styles.bannerIndicators}>
             {bannerData.map((_, index) => (
               <button
                 key={index}
-                className={`indicator ${index === currentBannerIndex ? "active" : ""}`}
+                className={`${styles.indicator} ${index === currentBannerIndex ? styles.active : ""}`}
                 onClick={() => setCurrentBannerIndex(index)}
               />
             ))}
@@ -346,19 +349,19 @@ const MainPage = () => {
         </section>
 
         {/* 추천 상품 섹션 */}
-        <section className="recommended-section">
-          <div className="container">
-            <div className="section-header">
-              <h2 className="section-title">추천 상품</h2>
-              <div className="filter-buttons">
+        <section className={styles.recommendedSection}>
+          <div className={styles.container}>
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>추천 상품</h2>
+              <div className={styles.filterButtons}>
                 <button
-                  className={`filter-btn ${recommendFilter === "popular" ? "active" : ""}`}
+                  className={`${styles.filterBtn} ${recommendFilter === "popular" ? styles.active : ""}`}
                   onClick={() => setRecommendFilter("popular")}
                 >
                   인기순
                 </button>
                 <button
-                  className={`filter-btn ${recommendFilter === "latest" ? "active" : ""}`}
+                  className={`${styles.filterBtn} ${recommendFilter === "latest" ? styles.active : ""}`}
                   onClick={() => setRecommendFilter("latest")}
                 >
                   최신순
@@ -366,24 +369,24 @@ const MainPage = () => {
               </div>
             </div>
 
-            <div className="products-grid">
+            <div className={styles.productsGrid}>
               {productsLoading ? (
-                <div className="loading-container">
-                  <div className="loading-spinner"></div>
+                <div className={styles.loadingContainer}>
+                  <div className={styles.loadingSpinner}></div>
                   <p>상품을 불러오는 중...</p>
                 </div>
               ) : productsError ? (
-                <div className="error-container">
-                  <div className="error-icon">⚠️</div>
+                <div className={styles.errorContainer}>
+                  <div className={styles.errorIcon}>⚠️</div>
                   <p>{productsError}</p>
-                  <button className="retry-button" onClick={() => loadRecommendedProducts(recommendFilter)}>
+                  <button className={styles.retryButton} onClick={() => loadRecommendedProducts(recommendFilter)}>
                     다시 시도
                   </button>
                 </div>
               ) : (
                 recommendedProducts.map((product) => (
-                  <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
-                    <div className="product-image">
+                  <div key={product.id} className={styles.productCard} onClick={() => handleProductClick(product)}>
+                    <div className={styles.productImage}>
                       {product.image ? (
                         <img
                           src={product.image || "/placeholder.svg"}
@@ -394,33 +397,33 @@ const MainPage = () => {
                           }}
                         />
                       ) : null}
-                      <div style={{ display: product.image ? "none" : "flex" }} className="image-placeholder">
+                      <div style={{ display: product.image ? "none" : "flex" }} className={styles.imagePlaceholder}>
                         <ImagePlaceholder productName={product.name} />
                       </div>
 
-                      <div className="product-overlay">
-                        <button className="try-on-button" onClick={(e) => handleTryOn(e, product)}>
+                      <div className={styles.productOverlay}>
+                        <button className={styles.tryOnButton} onClick={(e) => handleTryOn(e, product)}>
                           가상 피팅
                         </button>
                         <button
-                          className={`like-button ${likedClothingIds.has(product.id) ? "liked" : ""}`}
+                          className={`${styles.likeButton} ${likedClothingIds.has(product.id) ? styles.liked : ""}`}
                           onClick={(e) => handleLikeToggle(e, product.id)}
                           disabled={likingInProgress.has(product.id)}
                         >
-                          <span className="heart-icon">
+                          <span className={styles.heartIcon}>
                             {likingInProgress.has(product.id) ? "⏳" : likedClothingIds.has(product.id) ? "❤️" : "🤍"}
                           </span>
                         </button>
                       </div>
                     </div>
 
-                    <div className="product-info">
-                      <div className="product-brand">{product.brand}</div>
-                      <h3 className="product-name">{product.name}</h3>
-                      <div className="product-meta">
-                        <span className="product-category">{product.category}</span>
-                        <span className="likes-count">
-                          <span className="likes-icon">❤️</span>
+                    <div className={styles.productInfo}>
+                      <div className={styles.productBrand}>{product.brand}</div>
+                      <h3 className={styles.productName}>{product.name}</h3>
+                      <div className={styles.productMeta}>
+                        <span className={styles.productCategory}>{product.category}</span>
+                        <span className={styles.likesCount}>
+                          <span className={styles.likesIcon}>❤️</span>
                           {product.likes.toLocaleString()}
                         </span>
                       </div>
@@ -430,8 +433,8 @@ const MainPage = () => {
               )}
             </div>
 
-            <div className="section-footer">
-              <button className="view-all-button" onClick={() => navigate("/clothing-browse")}>
+            <div className={styles.sectionFooter}>
+              <button className={styles.viewAllButton} onClick={() => navigate("/clothing-browse")}>
                 모든 상품 보기
               </button>
             </div>
@@ -439,40 +442,40 @@ const MainPage = () => {
         </section>
 
         {/* 카테고리별 상품 섹션 */}
-        <section className="category-section">
-          <div className="container">
-            <h2 className="section-title">카테고리별 상품</h2>
+        <section className={styles.categorySection}>
+          <div className={styles.container}>
+            <h2 className={styles.sectionTitle}>카테고리별 상품</h2>
 
             {categoryLoading ? (
-              <div className="loading-container">
-                <div className="loading-spinner"></div>
+              <div className={styles.loadingContainer}>
+                <div className={styles.loadingSpinner}></div>
                 <p>카테고리별 상품을 불러오는 중...</p>
               </div>
             ) : categoryError ? (
-              <div className="error-container">
-                <div className="error-icon">⚠️</div>
+              <div className={styles.errorContainer}>
+                <div className={styles.errorIcon}>⚠️</div>
                 <p>{categoryError}</p>
-                <button className="retry-button" onClick={loadCategoryProducts}>
+                <button className={styles.retryButton} onClick={loadCategoryProducts}>
                   다시 시도
                 </button>
               </div>
             ) : (
               categoryProducts.map((category) => (
-                <div key={category.category} className="category-group">
-                  <div className="category-header">
-                    <h3 className="category-title">{category.category}</h3>
+                <div key={category.category} className={styles.categoryGroup}>
+                  <div className={styles.categoryHeader}>
+                    <h3 className={styles.categoryTitle}>{category.category}</h3>
                     <button
-                      className="category-more-btn"
+                      className={styles.categoryMoreBtn}
                       onClick={() => navigate(`/clothing-browse?main_category=${category.category}`)}
                     >
                       더보기 →
                     </button>
                   </div>
 
-                  <div className="category-products">
+                  <div className={styles.categoryProducts}>
                     {category.products.map((product) => (
-                      <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
-                        <div className="product-image">
+                      <div key={product.id} className={styles.productCard} onClick={() => handleProductClick(product)}>
+                        <div className={styles.productImage}>
                           {product.image ? (
                             <img
                               src={product.image || "/placeholder.svg"}
@@ -483,20 +486,20 @@ const MainPage = () => {
                               }}
                             />
                           ) : null}
-                          <div style={{ display: product.image ? "none" : "flex" }} className="image-placeholder">
+                          <div style={{ display: product.image ? "none" : "flex" }} className={styles.imagePlaceholder}>
                             <ImagePlaceholder productName={product.name} />
                           </div>
 
-                          <div className="product-overlay">
-                            <button className="try-on-button" onClick={(e) => handleTryOn(e, product)}>
+                          <div className={styles.productOverlay}>
+                            <button className={styles.tryOnButton} onClick={(e) => handleTryOn(e, product)}>
                               가상 피팅
                             </button>
                             <button
-                              className={`like-button ${likedClothingIds.has(product.id) ? "liked" : ""}`}
+                              className={`${styles.likeButton} ${likedClothingIds.has(product.id) ? styles.liked : ""}`}
                               onClick={(e) => handleLikeToggle(e, product.id)}
                               disabled={likingInProgress.has(product.id)}
                             >
-                              <span className="heart-icon">
+                              <span className={styles.heartIcon}>
                                 {likingInProgress.has(product.id)
                                   ? "⏳"
                                   : likedClothingIds.has(product.id)
@@ -507,13 +510,13 @@ const MainPage = () => {
                           </div>
                         </div>
 
-                        <div className="product-info">
-                          <div className="product-brand">{product.brand}</div>
-                          <h3 className="product-name">{product.name}</h3>
-                          <div className="product-meta">
-                            <span className="product-category">{product.gender}</span>
-                            <span className="likes-count">
-                              <span className="likes-icon">❤️</span>
+                        <div className={styles.productInfo}>
+                          <div className={styles.productBrand}>{product.brand}</div>
+                          <h3 className={styles.productName}>{product.name}</h3>
+                          <div className={styles.productMeta}>
+                            <span className={styles.productCategory}>{product.gender}</span>
+                            <span className={styles.likesCount}>
+                              <span className={styles.likesIcon}>❤️</span>
                               {product.likes.toLocaleString()}
                             </span>
                           </div>
@@ -529,54 +532,54 @@ const MainPage = () => {
 
         {/* 좋아요한 의류 섹션 (로그인 시에만 표시) */}
         {userLoggedIn && (
-          <section className="liked-section">
-            <div className="container">
-              <div className="section-header">
-                <h2 className="section-title">좋아요한 의류</h2>
-                <button className="view-more-btn" onClick={() => navigate("/mypage?tab=like")}>
+          <section className={styles.likedSection}>
+            <div className={styles.container}>
+              <div className={styles.sectionHeader}>
+                <h2 className={styles.sectionTitle}>좋아요한 의류</h2>
+                <button className={styles.viewMoreBtn} onClick={() => navigate("/mypage?tab=like")}>
                   더보기 →
                 </button>
               </div>
 
-              <div className="liked-products">
+              <div className={styles.likedProducts}>
                 {likedProductsLoading ? (
-                  <div className="loading-container">
-                    <div className="loading-spinner"></div>
+                  <div className={styles.loadingContainer}>
+                    <div className={styles.loadingSpinner}></div>
                     <p>좋아요한 의류를 불러오는 중...</p>
                   </div>
                 ) : likedProducts.length === 0 ? (
-                  <div className="empty-content">
-                    <div className="empty-icon">💝</div>
+                  <div className={styles.emptyContent}>
+                    <div className={styles.emptyIcon}>💝</div>
                     <h3>좋아요한 의류가 없습니다</h3>
                     <p>마음에 드는 상품에 좋아요를 눌러보세요!</p>
                   </div>
                 ) : (
                   likedProducts.map((product) => (
-                    <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
-                      <div className="product-image">
+                    <div key={product.id} className={styles.productCard} onClick={() => handleProductClick(product)}>
+                      <div className={styles.productImage}>
                         <img src={product.image || "/placeholder.svg"} alt={product.name} />
 
-                        <div className="product-overlay">
-                          <button className="try-on-button" onClick={(e) => handleTryOn(e, product)}>
+                        <div className={styles.productOverlay}>
+                          <button className={styles.tryOnButton} onClick={(e) => handleTryOn(e, product)}>
                             가상 피팅
                           </button>
                           <button
-                            className={`like-button liked`}
+                            className={`${styles.likeButton} ${styles.liked}`}
                             onClick={(e) => handleLikeToggle(e, product.id)}
                             disabled={likingInProgress.has(product.id)}
                           >
-                            <span className="heart-icon">{likingInProgress.has(product.id) ? "⏳" : "❤️"}</span>
+                            <span className={styles.heartIcon}>{likingInProgress.has(product.id) ? "⏳" : "❤️"}</span>
                           </button>
                         </div>
                       </div>
 
-                      <div className="product-info">
-                        <div className="product-brand">{product.brand}</div>
-                        <h3 className="product-name">{product.name}</h3>
-                        <div className="product-meta">
-                          <span className="product-category">{product.category}</span>
-                          <span className="likes-count">
-                            <span className="likes-icon">❤️</span>
+                      <div className={styles.productInfo}>
+                        <div className={styles.productBrand}>{product.brand}</div>
+                        <h3 className={styles.productName}>{product.name}</h3>
+                        <div className={styles.productMeta}>
+                          <span className={styles.productCategory}>{product.category}</span>
+                          <span className={styles.likesCount}>
+                            <span className={styles.likesIcon}>❤️</span>
                             {product.likes.toLocaleString()}
                           </span>
                         </div>

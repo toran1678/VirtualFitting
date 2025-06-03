@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom"
-import Header from "../../components/Header"
-import Footer from "../../components/Footer"
-import ImagePlaceholder from "../../components/ImagePlaceholder"
+import Header from "../../components/Header/Header"
+import Footer from "../../components/Footer/Footer"
+import ImagePlaceholder from "../../components/ImagePlaceholder/ImagePlaceholder"
 import { isLoggedIn, getCurrentUser } from "../../api/auth"
 import { getMyLikedClothes, toggleClothingLike } from "../../api/likedClothes"
 import styles from "./MyPage.module.css"

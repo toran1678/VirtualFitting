@@ -2,13 +2,13 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import Header from "../components/Header"
-import Footer from "../components/Footer"
-import ImagePlaceholder from "../components/ImagePlaceholder"
-import { browseClothingItems, getCategories } from "../api/clothing_items"
-import { toggleClothingLike, getMyLikedClothingIds } from "../api/likedClothes"
-import { isLoggedIn } from "../api/auth"
-import "../styles/ClothingBrowsePage.css"
+import Header from "../../components/Header/Header"
+import Footer from "../../components/Footer/Footer"
+import ImagePlaceholder from "../../components/ImagePlaceholder/ImagePlaceholder"
+import { browseClothingItems, getCategories } from "../../api/clothing_items"
+import { toggleClothingLike, getMyLikedClothingIds } from "../../api/likedClothes"
+import { isLoggedIn } from "../../api/auth"
+import styles from "./ClothingBrowsePage.module.css"
 
 const ClothingBrowsePage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -280,50 +280,50 @@ const ClothingBrowsePage = () => {
   }
 
   return (
-    <div className="clothing-browse-page">
+    <div className={styles.clothingBrowsePage}>
       <Header />
 
-      <main className="browse-main">
-        <div className="container">
+      <main className={styles.browseMain}>
+        <div className={styles.container}>
           {/* 페이지 헤더 */}
-          <div className="page-header">
+          <div className={styles.pageHeader}>
             <h1>의류 둘러보기</h1>
             <p>다양한 브랜드의 최신 패션 아이템을 만나보세요</p>
           </div>
 
-          <div className="browse-layout">
+          <div className={styles.browseLayout}>
             {/* 사이드바 필터 */}
-            <aside className="filter-sidebar">
-              <div className="filter-header">
+            <aside className={styles.filterSidebar}>
+              <div className={styles.filterHeader}>
                 <h3>필터</h3>
-                <button className="reset-button" onClick={resetFilters}>
+                <button className={styles.resetButton} onClick={resetFilters}>
                   초기화
                 </button>
               </div>
 
               {/* 검색 */}
-              <div className="filter-section">
+              <div className={styles.filterSection}>
                 <h4>검색</h4>
-                <form onSubmit={handleSearch} className="search-form">
+                <form onSubmit={handleSearch} className={styles.searchForm}>
                   <input
                     type="text"
                     name="search"
                     placeholder="상품명, 브랜드 검색..."
                     value={filters.search}
                     onChange={(e) => handleFilterChange("search", e.target.value)}
-                    className="search-input"
+                    className={styles.searchInput}
                   />
-                  <button type="submit" className="search-button">
+                  <button type="submit" className={styles.searchButton}>
                     🔍
                   </button>
                 </form>
               </div>
 
               {/* 정렬 */}
-              <div className="filter-section">
+              <div className={styles.filterSection}>
                 <h4>정렬</h4>
-                <div className="sort-options">
-                  <label className="sort-option">
+                <div className={styles.sortOptions}>
+                  <label className={styles.sortOption}>
                     <input
                       type="radio"
                       name="sort"
@@ -333,7 +333,7 @@ const ClothingBrowsePage = () => {
                     />
                     인기순
                   </label>
-                  <label className="sort-option">
+                  <label className={styles.sortOption}>
                     <input
                       type="radio"
                       name="sort"
@@ -343,7 +343,7 @@ const ClothingBrowsePage = () => {
                     />
                     최신순
                   </label>
-                  <label className="sort-option">
+                  <label className={styles.sortOption}>
                     <input
                       type="radio"
                       name="sort"
@@ -357,10 +357,10 @@ const ClothingBrowsePage = () => {
               </div>
 
               {/* 성별 필터 */}
-              <div className="filter-section">
+              <div className={styles.filterSection}>
                 <h4>성별</h4>
-                <div className="filter-options">
-                  <label className="filter-option">
+                <div className={styles.filterOptions}>
+                  <label className={styles.filterOption}>
                     <input
                       type="radio"
                       name="gender"
@@ -371,7 +371,7 @@ const ClothingBrowsePage = () => {
                     전체
                   </label>
                   {categories.genders.map((gender) => (
-                    <label key={gender} className="filter-option">
+                    <label key={gender} className={styles.filterOption}>
                       <input
                         type="radio"
                         name="gender"
@@ -386,12 +386,12 @@ const ClothingBrowsePage = () => {
               </div>
 
               {/* 메인 카테고리 필터 */}
-              <div className="filter-section">
+              <div className={styles.filterSection}>
                 <h4>메인 카테고리</h4>
                 <select
                   value={filters.main_category}
                   onChange={(e) => handleFilterChange("main_category", e.target.value)}
-                  className="filter-select"
+                  className={styles.filterSelect}
                 >
                   <option value="">전체</option>
                   {categories.main_categories.map((category) => (
@@ -403,12 +403,12 @@ const ClothingBrowsePage = () => {
               </div>
 
               {/* 서브 카테고리 필터 */}
-              <div className="filter-section">
+              <div className={styles.filterSection}>
                 <h4>서브 카테고리</h4>
                 <select
                   value={filters.sub_category}
                   onChange={(e) => handleFilterChange("sub_category", e.target.value)}
-                  className="filter-select"
+                  className={styles.filterSelect}
                 >
                   <option value="">전체</option>
                   {categories.sub_categories.map((category) => (
@@ -420,12 +420,12 @@ const ClothingBrowsePage = () => {
               </div>
 
               {/* 브랜드 필터 */}
-              <div className="filter-section">
+              <div className={styles.filterSection}>
                 <h4>브랜드</h4>
                 <select
                   value={filters.brand}
                   onChange={(e) => handleFilterChange("brand", e.target.value)}
-                  className="filter-select"
+                  className={styles.filterSelect}
                 >
                   <option value="">전체</option>
                   {categories.brands.map((brand) => (
@@ -438,10 +438,10 @@ const ClothingBrowsePage = () => {
             </aside>
 
             {/* 메인 콘텐츠 */}
-            <div className="browse-content">
+            <div className={styles.browseContent}>
               {/* 결과 헤더 */}
-              <div className="results-header">
-                <div className="results-info">
+              <div className={styles.resultsHeader}>
+                <div className={styles.resultsInfo}>
                   {loading ? (
                     <span>로딩 중...</span>
                   ) : (
@@ -455,56 +455,56 @@ const ClothingBrowsePage = () => {
 
               {/* 상품 그리드 */}
               {loading ? (
-                <div className="loading-container">
-                  <div className="loading-spinner"></div>
+                <div className={styles.loadingContainer}>
+                  <div className={styles.loadingSpinner}></div>
                   <p>상품을 불러오는 중...</p>
                 </div>
               ) : error ? (
-                <div className="error-container">
-                  <div className="error-icon">⚠️</div>
+                <div className={styles.errorContainer}>
+                  <div className={styles.errorIcon}>⚠️</div>
                   <p>{error}</p>
-                  <button className="retry-button" onClick={() => loadProducts(filters)}>
+                  <button className={styles.retryButton} onClick={() => loadProducts(filters)}>
                     다시 시도
                   </button>
                 </div>
               ) : products.length === 0 ? (
-                <div className="empty-container">
-                  <div className="empty-icon">🔍</div>
+                <div className={styles.emptyContainer}>
+                  <div className={styles.emptyIcon}>🔍</div>
                   <h3>검색 결과가 없습니다</h3>
                   <p>다른 검색어나 필터를 시도해보세요</p>
-                  <button className="reset-button" onClick={resetFilters}>
+                  <button className={styles.resetButton} onClick={resetFilters}>
                     필터 초기화
                   </button>
                 </div>
               ) : (
                 <>
-                  <div className="product-grid">
+                  <div className={styles.productGrid}>
                     {products.map((product) => (
-                      <div key={product.id} className="product-card" onClick={() => handleProductClick(product)}>
-                        <div className="product-image">
+                      <div key={product.id} className={styles.productCard} onClick={() => handleProductClick(product)}>
+                        <div className={styles.productImage}>
                           {product.image ? (
                             <img
                               src={product.image || "/placeholder.svg"}
                               alt={product.name}
-                              className="product-img"
+                              className={styles.productImg}
                               onError={(e) => {
                                 e.target.style.display = "none"
                                 e.target.nextSibling.style.display = "flex"
                               }}
                             />
                           ) : null}
-                          <div style={{ display: product.image ? "none" : "flex" }} className="image-placeholder">
+                          <div style={{ display: product.image ? "none" : "flex" }} className={styles.imagePlaceholder}>
                             <ImagePlaceholder productName={product.name} />
                           </div>
 
-                          <div className="product-overlay">
-                            <button className="try-on-button">가상 피팅</button>
+                          <div className={styles.productOverlay}>
+                            <button className={styles.tryOnButton}>가상 피팅</button>
                             <button
-                              className={`like-button ${likedClothingIds.has(product.id) ? "liked" : ""}`}
+                              className={`${styles.likeButton} ${likedClothingIds.has(product.id) ? styles.liked : ""}`}
                               onClick={(e) => handleLikeToggle(e, product.id)}
                               disabled={likingInProgress.has(product.id)}
                             >
-                              <span className="heart-icon">
+                              <span className={styles.heartIcon}>
                                 {likingInProgress.has(product.id)
                                   ? "⏳"
                                   : likedClothingIds.has(product.id)
@@ -514,18 +514,18 @@ const ClothingBrowsePage = () => {
                             </button>
                           </div>
 
-                          <div className="product-badge">{product.category}</div>
+                          <div className={styles.productBadge}>{product.category}</div>
                         </div>
 
-                        <div className="product-info">
-                          <div className="product-brand">{product.brand}</div>
-                          <h3 className="product-name">{product.name}</h3>
-                          <div className="product-meta">
-                            <span className="likes-count">
-                              <span className="likes-icon">❤️</span>
+                        <div className={styles.productInfo}>
+                          <div className={styles.productBrand}>{product.brand}</div>
+                          <h3 className={styles.productName}>{product.name}</h3>
+                          <div className={styles.productMeta}>
+                            <span className={styles.likesCount}>
+                              <span className={styles.likesIcon}>❤️</span>
                               {product.likes.toLocaleString()} {/* 크롤링한 원래 좋아요 수 유지 */}
                             </span>
-                            <span className="gender-tag">{product.gender}</span>
+                            <span className={styles.genderTag}>{product.gender}</span>
                           </div>
                         </div>
                       </div>
@@ -534,16 +534,16 @@ const ClothingBrowsePage = () => {
 
                   {/* 페이지네이션 */}
                   {pagination.total_pages > 1 && (
-                    <div className="pagination">
+                    <div className={styles.pagination}>
                       <button
-                        className="pagination-button"
+                        className={styles.paginationButton}
                         disabled={pagination.current_page === 1}
                         onClick={() => handlePageChange(pagination.current_page - 1)}
                       >
                         이전
                       </button>
 
-                      <div className="pagination-numbers">
+                      <div className={styles.paginationNumbers}>
                         {Array.from({ length: Math.min(5, pagination.total_pages) }, (_, i) => {
                           const startPage = Math.max(1, pagination.current_page - 2)
                           const pageNumber = startPage + i
@@ -553,7 +553,7 @@ const ClothingBrowsePage = () => {
                           return (
                             <button
                               key={pageNumber}
-                              className={`pagination-number ${pageNumber === pagination.current_page ? "active" : ""}`}
+                              className={`${styles.paginationNumber} ${pageNumber === pagination.current_page ? styles.active : ""}`}
                               onClick={() => handlePageChange(pageNumber)}
                             >
                               {pageNumber}
@@ -563,7 +563,7 @@ const ClothingBrowsePage = () => {
                       </div>
 
                       <button
-                        className="pagination-button"
+                        className={styles.paginationButton}
                         disabled={pagination.current_page === pagination.total_pages}
                         onClick={() => handlePageChange(pagination.current_page + 1)}
                       >

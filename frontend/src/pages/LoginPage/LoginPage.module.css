@@ -1,4 +1,4 @@
-.login-page {
+.loginPage {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -10,7 +10,7 @@
   overflow: hidden;
 }
 
-.login-container {
+.loginContainer {
   width: 100%;
   max-width: 420px;
   background-color: var(--card-bg);
@@ -34,12 +34,12 @@
   }
 }
 
-.login-header {
+.loginHeader {
   text-align: center;
   margin-bottom: 2.5rem;
 }
 
-.login-title {
+.loginTitle {
   color: var(--text-primary);
   font-size: 2rem;
   font-weight: 700;
@@ -47,37 +47,37 @@
   letter-spacing: -0.5px;
 }
 
-.login-subtitle {
+.loginSubtitle {
   color: var(--text-secondary);
   font-size: 1rem;
 }
 
-.login-form {
+.loginForm {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
 }
 
-.form-group {
+.formGroup {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.input-container {
+.inputContainer {
   position: relative;
   display: flex;
   align-items: center;
 }
 
-.input-icon {
+.inputIcon {
   position: absolute;
   left: 1rem;
   color: var(--text-secondary);
   transition: color 0.3s;
 }
 
-input {
+.loginForm input {
   width: 100%;
   padding: 0.9rem 1rem 0.9rem 3rem;
   border: 1px solid var(--border-color);
@@ -88,22 +88,22 @@ input {
   transition: all 0.3s;
 }
 
-input:focus {
+.loginForm input:focus {
   outline: none;
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.15);
 }
 
-input:focus + .input-icon {
+.loginForm input:focus + .inputIcon {
   color: var(--accent-color);
 }
 
-input.error {
+.loginForm input.error {
   border-color: #e74c3c;
   box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
 }
 
-.error-message {
+.errorMessage {
   color: #e74c3c;
   font-size: 0.8rem;
   margin-top: 0.25rem;
@@ -111,7 +111,7 @@ input.error {
 }
 
 /* 로그인 에러 메시지 스타일 */
-.login-error-message {
+.loginErrorMessage {
   background-color: #fff0f0;
   color: #e53e3e;
   padding: 10px;
@@ -122,7 +122,7 @@ input.error {
 }
 
 /* 다크 모드에서의 에러 메시지 */
-.dark .login-error-message {
+.dark .loginErrorMessage {
   background-color: rgba(229, 62, 62, 0.1);
   border-color: rgba(229, 62, 62, 0.3);
 }
@@ -147,43 +147,43 @@ input.error {
   }
 }
 
-.remember-forgot {
+.rememberForgot {
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 0.9rem;
 }
 
-.remember-me {
+.rememberMe {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   color: var(--text-secondary);
 }
 
-.remember-me input[type="checkbox"] {
+.rememberMe input[type="checkbox"] {
   width: auto;
   margin: 0;
   accent-color: var(--accent-color);
   cursor: pointer;
 }
 
-.remember-me label {
+.rememberMe label {
   cursor: pointer;
 }
 
-.forgot-password {
+.forgotPassword {
   color: var(--accent-color);
   text-decoration: none;
   transition: color 0.2s;
 }
 
-.forgot-password:hover {
+.forgotPassword:hover {
   color: var(--accent-hover);
   text-decoration: underline;
 }
 
-.login-button {
+.loginButton {
   width: 100%;
   padding: 1rem;
   background-color: var(--accent-color);
@@ -201,24 +201,24 @@ input.error {
   overflow: hidden;
 }
 
-.login-button:hover {
+.loginButton:hover {
   background-color: var(--accent-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(58, 134, 255, 0.2);
 }
 
-.login-button:active {
+.loginButton:active {
   transform: translateY(0);
 }
 
-.login-button:disabled {
+.loginButton:disabled {
   background-color: var(--border-color);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
 }
 
-.login-button::after {
+.loginButton::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -232,7 +232,7 @@ input.error {
   transform-origin: 50% 50%;
 }
 
-.login-button:focus:not(:active)::after {
+.loginButton:focus:not(:active)::after {
   animation: ripple 1s ease-out;
 }
 
@@ -305,7 +305,7 @@ input.error {
   font-size: 0.9rem;
 }
 
-.kakao-login-btn {
+.kakaoLoginBtn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -322,41 +322,41 @@ input.error {
   gap: 0.75rem;
 }
 
-.kakao-login-btn:hover {
+.kakaoLoginBtn:hover {
   background-color: #f6e000;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(254, 229, 0, 0.2);
 }
 
-.kakao-login-btn:active {
+.kakaoLoginBtn:active {
   transform: translateY(0);
 }
 
-.kakao-icon {
+.kakaoIcon {
   flex-shrink: 0;
 }
 
-.register-link {
+.registerLink {
   text-align: center;
   margin-top: 2rem;
   color: var(--text-secondary);
   font-size: 0.95rem;
 }
 
-.register-link a {
+.registerLink a {
   color: var(--accent-color);
   text-decoration: none;
   font-weight: 600;
   transition: color 0.2s;
 }
 
-.register-link a:hover {
+.registerLink a:hover {
   color: var(--accent-hover);
   text-decoration: underline;
 }
 
 /* 장식용 원 */
-.login-decoration {
+.loginDecoration {
   position: absolute;
   top: 0;
   left: 0;
@@ -366,13 +366,13 @@ input.error {
   pointer-events: none;
 }
 
-.decoration-circle {
+.decorationCircle {
   position: absolute;
   border-radius: 50%;
   opacity: 0.1;
 }
 
-.circle-1 {
+.circle1 {
   width: 300px;
   height: 300px;
   background: linear-gradient(135deg, var(--accent-color), #6a11cb);
@@ -380,7 +380,7 @@ input.error {
   right: -100px;
 }
 
-.circle-2 {
+.circle2 {
   width: 200px;
   height: 200px;
   background: linear-gradient(135deg, #ff9a9e, #fad0c4);
@@ -388,7 +388,7 @@ input.error {
   left: -50px;
 }
 
-.circle-3 {
+.circle3 {
   width: 150px;
   height: 150px;
   background: linear-gradient(135deg, #a18cd1, #fbc2eb);
@@ -397,39 +397,39 @@ input.error {
 }
 
 /* 다크 모드에서 원 색상 조정 */
-.dark-mode .circle-1 {
+.dark-mode .circle1 {
   opacity: 0.15;
 }
 
-.dark-mode .circle-2 {
+.dark-mode .circle2 {
   opacity: 0.15;
 }
 
-.dark-mode .circle-3 {
+.dark-mode .circle3 {
   opacity: 0.15;
 }
 
 @media (max-width: 768px) {
-  .login-container {
+  .loginContainer {
     padding: 2rem;
   }
 
-  .login-title {
+  .loginTitle {
     font-size: 1.8rem;
   }
 }
 
 @media (max-width: 480px) {
-  .login-container {
+  .loginContainer {
     padding: 1.5rem;
     border-radius: 12px;
   }
 
-  .login-title {
+  .loginTitle {
     font-size: 1.6rem;
   }
 
-  .login-subtitle {
+  .loginSubtitle {
     font-size: 0.9rem;
   }
 }

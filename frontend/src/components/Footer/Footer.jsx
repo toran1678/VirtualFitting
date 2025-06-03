@@ -1,27 +1,23 @@
 "use client"
 
-// import { useContext } from "react"
 import { Link } from "react-router-dom"
-// import { ThemeContext } from "../context/ThemeContext"
-import "../styles/Footer.css"
+import styles from "./Footer.module.css"
 
 const Footer = () => {
-  // const { darkMode } = useContext(ThemeContext)
-
   return (
-    <footer className="footer">
-      <div className="footer-container">
-        <div className="footer-section">
-          <h3 className="footer-title">FASHION GUYS</h3>
-          <p className="footer-description">
+    <footer className={styles.footer}>
+      <div className={styles.footerContainer}>
+        <div className={styles.footerSection}>
+          <h3 className={styles.footerTitle}>FASHION GUYS</h3>
+          <p className={styles.footerDescription}>
             가상 피팅 서비스로 구매 전 옷을 가상으로 입어볼 수 있습니다. AI 기술을 활용한 온라인 쇼핑의 미래를
             경험해보세요.
           </p>
         </div>
 
-        <div className="footer-section">
-          <h4 className="footer-heading">바로가기</h4>
-          <ul className="footer-links">
+        <div className={styles.footerSection}>
+          <h4 className={styles.footerHeading}>바로가기</h4>
+          <ul className={styles.footerLinks}>
             <li>
               <Link to="/">홈</Link>
             </li>
@@ -37,9 +33,9 @@ const Footer = () => {
           </ul>
         </div>
 
-        <div className="footer-section">
-          <h4 className="footer-heading">소개</h4>
-          <ul className="footer-links">
+        <div className={styles.footerSection}>
+          <h4 className={styles.footerHeading}>소개</h4>
+          <ul className={styles.footerLinks}>
             <li>
               <Link to="/about">회사 소개</Link>
             </li>
@@ -55,13 +51,19 @@ const Footer = () => {
           </ul>
         </div>
 
-        <div className="footer-section">
-          <h4 className="footer-heading">고객센터</h4>
-          <address className="footer-contact">
+        <div className={styles.footerSection}>
+          <h4 className={styles.footerHeading}>고객센터</h4>
+          <address className={styles.footerContact}>
             <p>이메일: toran16784@gmail.com</p>
             <p>전화: 010-1234-1234</p>
-            <div className="social-links">
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+            <div className={styles.socialLinks}>
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Twitter"
+                className={styles.socialIcon}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -76,7 +78,13 @@ const Footer = () => {
                   <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
                 </svg>
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className={styles.socialIcon}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -93,7 +101,13 @@ const Footer = () => {
                   <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
                 </svg>
               </a>
-              <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className={styles.socialIcon}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -113,9 +127,9 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="footer-bottom">
-        <p className="copyright">&copy; {new Date().getFullYear()} Fashion Guys. All rights reserved.</p>
-        <p className="tech-stack">React & FastAPI 기반</p>
+      <div className={styles.footerBottom}>
+        <p className={styles.copyright}>&copy; {new Date().getFullYear()} Fashion Guys. All rights reserved.</p>
+        <p className={styles.techStack}>React & FastAPI 기반</p>
       </div>
     </footer>
   )

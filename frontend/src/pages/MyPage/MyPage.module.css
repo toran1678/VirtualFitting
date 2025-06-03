@@ -4,6 +4,7 @@
   flex-direction: column;
   background-color: var(--bg-primary);
   transition: background-color 0.3s;
+  padding-top: 90px; /* 헤더 높이만큼 */
 }
 
 .mypageMain {

@@ -1,13 +1,13 @@
 "use client"
 
 import { useState, useContext, useEffect } from "react"
-import { ThemeContext } from "../context/ThemeContext"
-import Header from "../components/Header"
-import Footer from "../components/Footer"
+import { ThemeContext } from "../../context/ThemeContext"
+import Header from "../../components/Header/Header"
+import Footer from "../../components/Footer/Footer"
 import { User, Shirt, Heart, ImageIcon, Camera, Upload, Palette } from "lucide-react"
-import { isLoggedIn } from "../api/auth"
-import { getMyLikedClothes } from "../api/likedClothes"
-import "../styles/VirtualFittingPage.css"
+import { isLoggedIn } from "../../api/auth"
+import { getMyLikedClothes } from "../../api/likedClothes"
+import styles from "./VirtualFittingPage.module.css"
 
 const VirtualFittingPage = () => {
   const { darkMode } = useContext(ThemeContext)
@@ -144,27 +144,8 @@ const VirtualFittingPage = () => {
       case "liked":
         if (likedClothingLoading) {
           return (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                minHeight: "300px",
-                color: "var(--text-secondary)",
-              }}
-            >
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  border: "3px solid var(--bg-secondary)",
-                  borderTop: "3px solid var(--accent-color)",
-                  borderRadius: "50%",
-                  animation: "spin 1s linear infinite",
-                  marginBottom: "1rem",
-                }}
-              ></div>
+            <div className={styles.loadingContainer}>
+              <div className={styles.loadingSpinner}></div>
               <p>좋아요한 의류를 불러오는 중...</p>
             </div>
           )
@@ -172,48 +153,28 @@ const VirtualFittingPage = () => {
 
         if (!isLoggedIn()) {
           return (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                minHeight: "300px",
-                textAlign: "center",
-                color: "var(--text-secondary)",
-              }}
-            >
-              <Heart style={{ width: "4rem", height: "4rem", marginBottom: "1rem", opacity: 0.7 }} />
-              <h3 style={{ color: "var(--text-primary)", margin: "0 0 0.5rem 0" }}>로그인이 필요합니다</h3>
-              <p style={{ margin: 0 }}>좋아요한 의류를 보려면 로그인해주세요.</p>
+            <div className={styles.emptyState}>
+              <Heart className={styles.emptyIcon} />
+              <h3>로그인이 필요합니다</h3>
+              <p>좋아요한 의류를 보려면 로그인해주세요.</p>
             </div>
           )
         }
 
         if (likedClothing.length === 0) {
           return (
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                minHeight: "300px",
-                textAlign: "center",
-                color: "var(--text-secondary)",
-              }}
-            >
-              <Heart style={{ width: "4rem", height: "4rem", marginBottom: "1rem", opacity: 0.7 }} />
-              <h3 style={{ color: "var(--text-primary)", margin: "0 0 0.5rem 0" }}>좋아요한 의류가 없습니다</h3>
-              <p style={{ margin: 0 }}>의류를 좋아요하고 가상 피팅을 시도해보세요!</p>
+            <div className={styles.emptyState}>
+              <Heart className={styles.emptyIcon} />
+              <h3>좋아요한 의류가 없습니다</h3>
+              <p>의류를 좋아요하고 가상 피팅을 시도해보세요!</p>
             </div>
           )
         }
 
         return (
-          <div className="items-grid">
+          <div className={styles.itemsGrid}>
             {likedClothing.map((item) => (
-              <div key={item.id} className="grid-item" onClick={() => handleClothingSelect(item)}>
+              <div key={item.id} className={styles.gridItem} onClick={() => handleClothingSelect(item)}>
                 <img
                   src={item.image || "/placeholder.svg"}
                   alt={item.name}
@@ -221,11 +182,11 @@ const VirtualFittingPage = () => {
                     e.target.src = "/placeholder.svg?height=200&width=200&text=" + encodeURIComponent(item.name)
                   }}
                 />
-                <div className="item-info">
+                <div className={styles.itemInfo}>
                   <h4>{item.name}</h4>
-                  <div className="item-meta">
-                    <span className="category">{item.category}</span>
-                    {item.brand && <div className="brand">{item.brand}</div>}
+                  <div className={styles.itemMeta}>
+                    <span className={styles.category}>{item.category}</span>
+                    {item.brand && <div className={styles.brand}>{item.brand}</div>}
                   </div>
                 </div>
               </div>
@@ -234,11 +195,11 @@ const VirtualFittingPage = () => {
         )
       case "images":
         return (
-          <div className="items-grid">
+          <div className={styles.itemsGrid}>
             {userImages.map((item) => (
-              <div key={item.id} className="grid-item" onClick={() => handleUserImageSelect(item)}>
+              <div key={item.id} className={styles.gridItem} onClick={() => handleUserImageSelect(item)}>
                 <img src={item.image || "/placeholder.svg"} alt={item.name} />
-                <div className="item-info">
+                <div className={styles.itemInfo}>
                   <h4>{item.name}</h4>
                 </div>
               </div>
@@ -247,14 +208,14 @@ const VirtualFittingPage = () => {
         )
       case "custom":
         return (
-          <div className="items-grid">
+          <div className={styles.itemsGrid}>
             {customClothing.map((item) => (
-              <div key={item.id} className="grid-item" onClick={() => handleClothingSelect(item)}>
+              <div key={item.id} className={styles.gridItem} onClick={() => handleClothingSelect(item)}>
                 <img src={item.image || "/placeholder.svg"} alt={item.name} />
-                <div className="item-info">
+                <div className={styles.itemInfo}>
                   <h4>{item.name}</h4>
-                  <div className="item-meta">
-                    <span className="category">{item.category}</span>
+                  <div className={styles.itemMeta}>
+                    <span className={styles.category}>{item.category}</span>
                   </div>
                 </div>
               </div>
@@ -267,43 +228,46 @@ const VirtualFittingPage = () => {
   }
 
   return (
-    <div className={`virtual-fitting-page ${darkMode ? "dark-mode" : ""}`}>
+    <div className={`${styles.virtualFittingPage} ${darkMode ? "dark-mode" : ""}`}>
       <Header />
 
-      <div className="virtual-fitting-container">
+      <div className={styles.virtualFittingContainer}>
         {/* 메인 업로드 섹션 */}
-        <div className="main-upload-section">
+        <div className={styles.mainUploadSection}>
           {/* 왼쪽: 사람 이미지 업로드 */}
-          <div className="upload-area">
+          <div className={styles.uploadArea}>
             <h2>
-              <User className="inline-icon" /> 사람 이미지
+              <User className={styles.inlineIcon} /> 사람 이미지
             </h2>
-            <div className="image-upload-box">
+            <div className={styles.imageUploadBox}>
               {selectedPersonImage ? (
-                <div className="uploaded-image">
+                <div className={styles.uploadedImage}>
                   <img
                     src={selectedPersonImage || "/placeholder.svg"}
                     alt="업로드된 사람 이미지"
                     style={{ objectFit: personImageFit }}
                   />
-                  <div className="image-controls">
+                  <div className={styles.imageControls}>
                     <button
-                      className="control-btn change-image-btn"
+                      className={`${styles.controlBtn} ${styles.changeImageBtn}`}
                       onClick={() => document.getElementById("person-image-input").click()}
                     >
                       변경
                     </button>
-                    <button className={`control-btn fit-toggle-btn ${personImageFit}`} onClick={togglePersonImageFit}>
+                    <button
+                      className={`${styles.controlBtn} ${styles.fitToggleBtn} ${styles[personImageFit]}`}
+                      onClick={togglePersonImageFit}
+                    >
                       {personImageFit === "contain" ? "맞춤" : "채움"}
                     </button>
                   </div>
                 </div>
               ) : (
                 <div
-                  className="upload-placeholder"
+                  className={styles.uploadPlaceholder}
                   onClick={() => document.getElementById("person-image-input").click()}
                 >
-                  <Camera className="upload-icon-svg" />
+                  <Camera className={styles.uploadIconSvg} />
                   <p>사람 사진을 업로드하세요</p>
                   <span>클릭하여 이미지 선택</span>
                 </div>
@@ -319,27 +283,27 @@ const VirtualFittingPage = () => {
           </div>
 
           {/* 오른쪽: 의류 이미지 업로드 */}
-          <div className="upload-area">
+          <div className={styles.uploadArea}>
             <h2>
-              <Shirt className="inline-icon" /> 의류 이미지
+              <Shirt className={styles.inlineIcon} /> 의류 이미지
             </h2>
-            <div className="image-upload-box">
+            <div className={styles.imageUploadBox}>
               {selectedClothingImage ? (
-                <div className="uploaded-image">
+                <div className={styles.uploadedImage}>
                   <img
                     src={selectedClothingImage || "/placeholder.svg"}
                     alt="업로드된 의류 이미지"
                     style={{ objectFit: clothingImageFit }}
                   />
-                  <div className="image-controls">
+                  <div className={styles.imageControls}>
                     <button
-                      className="control-btn change-image-btn"
+                      className={`${styles.controlBtn} ${styles.changeImageBtn}`}
                       onClick={() => document.getElementById("clothing-image-input").click()}
                     >
                       변경
                     </button>
                     <button
-                      className={`control-btn fit-toggle-btn ${clothingImageFit}`}
+                      className={`${styles.controlBtn} ${styles.fitToggleBtn} ${styles[clothingImageFit]}`}
                       onClick={toggleClothingImageFit}
                     >
                       {clothingImageFit === "contain" ? "맞춤" : "채움"}
@@ -348,10 +312,10 @@ const VirtualFittingPage = () => {
                 </div>
               ) : (
                 <div
-                  className="upload-placeholder"
+                  className={styles.uploadPlaceholder}
                   onClick={() => document.getElementById("clothing-image-input").click()}
                 >
-                  <Upload className="upload-icon-svg" />
+                  <Upload className={styles.uploadIconSvg} />
                   <p>의류 사진을 업로드하세요</p>
                   <span>클릭하여 이미지 선택</span>
                 </div>
@@ -368,9 +332,9 @@ const VirtualFittingPage = () => {
         </div>
 
         {/* 피팅 버튼 */}
-        <div className="fitting-button-section">
+        <div className={styles.fittingButtonSection}>
           <button
-            className="fitting-btn"
+            className={styles.fittingBtn}
             onClick={handleVirtualFitting}
             disabled={!selectedPersonImage || !selectedClothingImage}
           >
@@ -379,41 +343,34 @@ const VirtualFittingPage = () => {
         </div>
 
         {/* 하단 탭 섹션 */}
-        <div className="bottom-section">
-          <div className="tab-navigation">
+        <div className={styles.bottomSection}>
+          <div className={styles.tabNavigation}>
             <button
-              className={`tab-btn ${activeTab === "liked" ? "active" : ""}`}
+              className={`${styles.tabBtn} ${activeTab === "liked" ? styles.active : ""}`}
               onClick={() => setActiveTab("liked")}
             >
-              <Heart className="inline-icon" /> 좋아요한 의류
+              <Heart className={styles.inlineIcon} /> 좋아요한 의류
               {likedClothingLoading && <span style={{ marginLeft: "0.5rem", color: "var(--accent-color)" }}>...</span>}
             </button>
             <button
-              className={`tab-btn ${activeTab === "images" ? "active" : ""}`}
+              className={`${styles.tabBtn} ${activeTab === "images" ? styles.active : ""}`}
               onClick={() => setActiveTab("images")}
             >
-              <ImageIcon className="inline-icon" /> 내 이미지
+              <ImageIcon className={styles.inlineIcon} /> 내 이미지
             </button>
             <button
-              className={`tab-btn ${activeTab === "custom" ? "active" : ""}`}
+              className={`${styles.tabBtn} ${activeTab === "custom" ? styles.active : ""}`}
               onClick={() => setActiveTab("custom")}
             >
-              <Palette className="inline-icon" /> 커스터마이징 의류
+              <Palette className={styles.inlineIcon} /> 커스터마이징 의류
             </button>
           </div>
 
-          <div className="tab-content">{renderTabContent()}</div>
+          <div className={styles.tabContent}>{renderTabContent()}</div>
         </div>
       </div>
 
       <Footer />
-
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   )
 }

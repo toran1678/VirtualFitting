@@ -7,12 +7,12 @@ import { AuthProvider} from "./context/AuthContext"
 import ScrollToTop from "./components/ScrollToTop"
 
 // Importing pages
-import MainPage from "./pages/MainPage"
+import MainPage from "./pages/MainPage/MainPage"
 import RegisterPage from "./pages/RegisterPage/RegisterPage"
 import KakaoCallback from "./components/KakaoCallback/KakaoCallback"
-import LoginPage from "./pages/LoginPage"
-import VirtualFittingPage from "./pages/VirtualFittingPage"
-import ClothingBrowsePage from "./pages/ClothingBrowsePage"
+import LoginPage from "./pages/LoginPage/LoginPage"
+import VirtualFittingPage from "./pages/VirtualFittingPage/VirtualFittingPage"
+import ClothingBrowsePage from "./pages/ClothingBrowsePage/ClothingBrowsePage"
 import MyPage from "./pages/MyPage/MyPage"
 
 import "./App.css"
