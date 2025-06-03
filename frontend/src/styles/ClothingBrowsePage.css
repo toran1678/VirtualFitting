@@ -373,6 +373,9 @@
   cursor: pointer;
   position: relative;
   border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* 카드 높이를 일정하게 만들기 */
 }
 
 .product-card:hover {
@@ -386,6 +389,7 @@
   position: relative;
   overflow: hidden;
   background-color: var(--bg-secondary);
+  flex-shrink: 0; /* 이미지 영역 크기 고정 */
 }
 
 .product-img {
@@ -492,6 +496,10 @@
 
 .product-info {
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* 남은 공간을 모두 차지 */
+  min-height: 140px; /* 최소 높이 설정 */
 }
 
 .product-brand {
@@ -502,6 +510,7 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   transition: color 0.3s;
+  flex-shrink: 0; /* 브랜드명 크기 고정 */
 }
 
 .product-name {
@@ -512,15 +521,20 @@
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   transition: color 0.3s;
+  flex: 1; /* 상품명이 가변적으로 공간 차지 */
+  min-height: 2.8rem; /* 2줄 기준 최소 높이 */
 }
 
 .product-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: auto; /* 항상 아래쪽에 위치 */
+  flex-shrink: 0; /* 메타 정보 크기 고정 */
 }
 
 .likes-count {
@@ -758,6 +772,10 @@
     height: 250px;
   }
 
+  .product-info {
+    min-height: 120px;
+  }
+
   .pagination {
     flex-wrap: wrap;
     gap: 0.25rem;
@@ -778,6 +796,10 @@
 
   .product-image {
     height: 300px;
+  }
+
+  .product-info {
+    min-height: 110px;
   }
 
   .filter-section h4 {

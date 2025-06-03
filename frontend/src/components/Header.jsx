@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useContext, useEffect } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useLocation } from "react-router-dom"
 import "../styles/Header.css"
 import { ThemeContext } from "../context/ThemeContext"
 import { useAuth } from "../context/AuthContext"
@@ -15,6 +15,7 @@ const Header = () => {
   const { darkMode, toggleTheme } = useContext(ThemeContext)
   const { user, isAuthenticated, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   // 스크롤 감지 효과
   useEffect(() => {
@@ -36,9 +37,30 @@ const Header = () => {
     }
   }, [])
 
+  // URL에서 검색어 파라미터 가져오기
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const searchParam = params.get("search")
+    if (searchParam) {
+      setSearchQuery(searchParam)
+    }
+  }, [location.search])
+
   const handleSearch = (e) => {
     e.preventDefault()
-    console.log("검색어:", searchQuery)
+    if (!searchQuery.trim()) return
+
+    // 현재 경로가 clothing-browse인지 확인
+    if (location.pathname === "/clothing-browse") {
+      // 현재 URL 파라미터 유지하면서 검색어만 업데이트
+      const params = new URLSearchParams(location.search)
+      params.set("search", searchQuery)
+      params.set("page", "1") // 검색 시 첫 페이지로 이동
+      navigate(`/clothing-browse?${params.toString()}`)
+    } else {
+      // 다른 페이지에서는 clothing-browse로 이동하면서 검색어 전달
+      navigate(`/clothing-browse?search=${encodeURIComponent(searchQuery)}&page=1`)
+    }
   }
 
   const handleLoginLogout = async () => {
@@ -192,9 +214,7 @@ const Header = () => {
                           <img
                             src={getProfileImageUrl(user.profile_picture) || "/placeholder.svg"}
                             alt="프로필"
-                            onError={(e) =>
-                              handleImageError(e, "/placeholder.svg?height=32&width=32&query=user profile")
-                            }
+                            onError={(e) => handleImageError(e, "/placeholder.svg?height=32&width=32")}
                           />
                         ) : (
                           <div className="profile-initial">{user?.nickname?.charAt(0) || "U"}</div>

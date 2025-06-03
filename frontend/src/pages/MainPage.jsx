@@ -13,12 +13,33 @@ const MainPage = () => {
   const [activeFilter, setActiveFilter] = useState("인기순")
   const [userLoggedIn, setUserLoggedIn] = useState(false)
   const [userData, setUserData] = useState(null)
-  const [recentProducts, setRecentProducts] = useState([])
+  // 상태 추가
+  const [likedProducts, setLikedProducts] = useState([])
   const [products, setProducts] = useState([])
   const [productsLoading, setProductsLoading] = useState(true)
   const [productsError, setProductsError] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const navigate = useNavigate()
+
+  // 로컬 스토리지에서 좋아요한 상품 ID 목록 가져오기
+  const getLikedProductIds = () => {
+    try {
+      const liked = localStorage.getItem("likedProducts")
+      return liked ? JSON.parse(liked) : []
+    } catch (error) {
+      console.error("좋아요 목록 파싱 오류:", error)
+      return []
+    }
+  }
+
+  // 로컬 스토리지에 좋아요한 상품 ID 저장
+  const saveLikedProductIds = (likedIds) => {
+    try {
+      localStorage.setItem("likedProducts", JSON.stringify(likedIds))
+    } catch (error) {
+      console.error("좋아요 목록 저장 오류:", error)
+    }
+  }
 
   // 상품 데이터 로드 함수
   const loadProducts = async (filter) => {
@@ -62,6 +83,24 @@ const MainPage = () => {
     }
   }
 
+  // 좋아요한 상품 로드 함수
+  const loadLikedProducts = () => {
+    if (!userLoggedIn) {
+      setLikedProducts([])
+      return
+    }
+
+    const likedIds = getLikedProductIds()
+    const likedProductsFromCurrent = products.filter((product) => likedIds.includes(product.id))
+    setLikedProducts(likedProductsFromCurrent.slice(0, 3))
+  }
+
+  // 상품이 좋아요 되었는지 확인
+  const isProductLiked = (productId) => {
+    const likedIds = getLikedProductIds()
+    return likedIds.includes(productId)
+  }
+
   // 컴포넌트 마운트 시 실행
   useEffect(() => {
     const checkLoginStatus = () => {
@@ -69,19 +108,11 @@ const MainPage = () => {
       setUserLoggedIn(loginStatus)
 
       if (loginStatus) {
-        setUserData(getCurrentUser())
-        const storedRecentProducts = localStorage.getItem("recentProducts")
-        if (storedRecentProducts) {
-          try {
-            setRecentProducts(JSON.parse(storedRecentProducts))
-          } catch (e) {
-            console.error("최근 본 상품 파싱 오류:", e)
-            setRecentProducts([])
-          }
-        }
+        const user = getCurrentUser()
+        setUserData(user)
       } else {
         setUserData(null)
-        setRecentProducts([])
+        setLikedProducts([])
       }
     }
 
@@ -96,7 +127,14 @@ const MainPage = () => {
     return () => {
       window.removeEventListener("storage", handleStorageChange)
     }
-  }, [])
+  }, [activeFilter])
+
+  // 상품이 로드된 후 좋아요한 상품 로드
+  useEffect(() => {
+    if (userLoggedIn && products.length > 0) {
+      loadLikedProducts()
+    }
+  }, [userLoggedIn, products])
 
   // 필터 변경 시 상품 다시 로드
   useEffect(() => {
@@ -105,14 +143,7 @@ const MainPage = () => {
 
   // 상품 클릭 핸들러
   const handleProductClick = (product) => {
-    if (!userLoggedIn) {
-      alert("로그인 후 이용 가능합니다.")
-      return
-    }
-
-    const updatedRecentProducts = [product, ...recentProducts.filter((item) => item.id !== product.id)].slice(0, 3)
-    setRecentProducts(updatedRecentProducts)
-    localStorage.setItem("recentProducts", JSON.stringify(updatedRecentProducts))
+    navigate(`/product/${product.id}`)
   }
 
   // 좋아요 토글 핸들러
@@ -122,8 +153,35 @@ const MainPage = () => {
       alert("로그인 후 이용 가능합니다.")
       return
     }
-    // 좋아요 API 호출 로직 추가 예정
-    console.log("좋아요 토글:", productId)
+
+    const likedIds = getLikedProductIds()
+    let updatedLikedIds
+
+    if (likedIds.includes(productId)) {
+      updatedLikedIds = likedIds.filter((id) => id !== productId)
+    } else {
+      updatedLikedIds = [...likedIds, productId]
+    }
+
+    saveLikedProductIds(updatedLikedIds)
+    loadLikedProducts()
+  }
+
+  // 검색 핸들러
+  const handleSearch = (e) => {
+    e.preventDefault()
+    if (!searchQuery.trim()) return
+    navigate(`/clothing-browse?search=${encodeURIComponent(searchQuery)}&page=1`)
+  }
+
+  // 카테고리 클릭 핸들러
+  const handleCategoryClick = (category) => {
+    navigate(`/clothing-browse?main_category=${encodeURIComponent(category)}&page=1`)
+  }
+
+  // 브랜드 클릭 핸들러
+  const handleBrandClick = (brand) => {
+    navigate(`/clothing-browse?brand=${encodeURIComponent(brand)}&page=1`)
   }
 
   return (
@@ -151,7 +209,7 @@ const MainPage = () => {
           <div className="hero-image">
             <div className="hero-placeholder">
               <div className="floating-card">
-                <img src="/placeholder.svg?height=200&width=150" alt="Fashion" />
+                <img src="/placeholder.svg?height=400&width=300" alt="Fashion" />
               </div>
             </div>
           </div>
@@ -195,14 +253,14 @@ const MainPage = () => {
                     className={activeFilter === "인기순" ? "active" : ""}
                     onClick={() => setActiveFilter("인기순")}
                   >
-                    <span className="filter-icon">🔥</span>
+                    <span className="filter-icon">★</span>
                     인기순
                   </button>
                   <button
                     className={activeFilter === "최신순" ? "active" : ""}
                     onClick={() => setActiveFilter("최신순")}
                   >
-                    <span className="filter-icon">✨</span>
+                    <span className="filter-icon">•</span>
                     최신순
                   </button>
                 </div>
@@ -242,12 +300,18 @@ const MainPage = () => {
                         </div>
 
                         <div className="product-overlay">
-                          <button className="try-on-button">
-                            <span className="button-icon">👗</span>
+                          <button
+                            className="try-on-button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigate(`/virtual-fitting/${product.id}`)
+                            }}
+                          >
+                            <span className="button-icon">▶</span>
                             가상 피팅
                           </button>
                           <button className="like-button" onClick={(e) => handleLikeToggle(e, product.id)}>
-                            <span className="heart-icon">🤍</span>
+                            <span className="heart-icon">{isProductLiked(product.id) ? "♥" : "♡"}</span>
                           </button>
                         </div>
 
@@ -259,7 +323,7 @@ const MainPage = () => {
                         <h3 className="product-name">{product.name}</h3>
                         <div className="product-meta">
                           <span className="likes-count">
-                            <span className="likes-icon">❤️</span>
+                            <span className="likes-icon">♥</span>
                             {product.likes.toLocaleString()}
                           </span>
                           <span className="gender-tag">{product.gender}</span>
@@ -269,6 +333,13 @@ const MainPage = () => {
                   ))}
                 </div>
               )}
+
+              <div className="view-all-container">
+                <button className="view-all-button" onClick={() => navigate("/clothing-browse")}>
+                  모든 상품 보기
+                  <span className="arrow-icon">→</span>
+                </button>
+              </div>
             </section>
 
             {/* Sidebar */}
@@ -276,7 +347,7 @@ const MainPage = () => {
               {/* Search Section */}
               <div className="search-section">
                 <h3>상품 검색</h3>
-                <div className="search-box">
+                <form className="search-box" onSubmit={handleSearch}>
                   <input
                     type="text"
                     placeholder="브랜드, 상품명으로 검색..."
@@ -284,68 +355,72 @@ const MainPage = () => {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="search-input"
                   />
-                  <button className="search-button">
-                    <span className="search-icon">🔍</span>
+                  <button type="submit" className="search-button">
+                    <span className="search-icon">⌕</span>
                   </button>
-                </div>
+                </form>
               </div>
 
               {/* Categories Section */}
               <div className="categories-section">
                 <h3>카테고리</h3>
                 <div className="category-list">
-                  <button className="category-item">
-                    <span className="category-icon">👔</span>
+                  <button className="category-item" onClick={() => handleCategoryClick("상의")}>
+                    <span className="category-icon">■</span>
                     상의
                   </button>
-                  <button className="category-item">
-                    <span className="category-icon">👖</span>
+                  <button className="category-item" onClick={() => handleCategoryClick("하의")}>
+                    <span className="category-icon">■</span>
                     하의
                   </button>
-                  <button className="category-item">
-                    <span className="category-icon">👗</span>
+                  <button className="category-item" onClick={() => handleCategoryClick("원피스")}>
+                    <span className="category-icon">■</span>
                     원피스
                   </button>
-                  <button className="category-item">
-                    <span className="category-icon">🧥</span>
+                  <button className="category-item" onClick={() => handleCategoryClick("아우터")}>
+                    <span className="category-icon">■</span>
                     아우터
                   </button>
-                  <button className="category-item">
-                    <span className="category-icon">👟</span>
+                  <button className="category-item" onClick={() => handleCategoryClick("신발")}>
+                    <span className="category-icon">■</span>
                     신발
                   </button>
-                  <button className="category-item">
-                    <span className="category-icon">👜</span>
+                  <button className="category-item" onClick={() => handleCategoryClick("가방")}>
+                    <span className="category-icon">■</span>
                     가방
                   </button>
                 </div>
               </div>
 
-              {/* Recent Products Section */}
+              {/* Liked Products Section */}
               {userLoggedIn && (
-                <div className="recent-products-section">
+                <div className="liked-products-section">
                   <h3>좋아요 한 상품</h3>
-                  {recentProducts.length > 0 ? (
-                    <div className="recent-products-list">
-                      {recentProducts.map((product) => (
-                        <div key={product.id} className="recent-product-item">
-                          <div className="recent-product-image">
+                  {likedProducts.length > 0 ? (
+                    <div className="liked-products-list">
+                      {likedProducts.map((product) => (
+                        <div
+                          key={product.id}
+                          className="liked-product-item"
+                          onClick={() => handleProductClick(product)}
+                        >
+                          <div className="liked-product-image">
                             {product.image ? (
                               <img src={product.image || "/placeholder.svg"} alt={product.name} />
                             ) : (
-                              <div className="recent-product-placeholder">{product.name.charAt(0)}</div>
+                              <div className="liked-product-placeholder">{product.name.charAt(0)}</div>
                             )}
                           </div>
-                          <div className="recent-product-info">
-                            <div className="recent-product-name">{product.name}</div>
-                            <div className="recent-product-brand">{product.brand}</div>
+                          <div className="liked-product-info">
+                            <div className="liked-product-name">{product.name}</div>
+                            <div className="liked-product-brand">{product.brand}</div>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <div className="empty-recent">
-                      <div className="empty-icon">💝</div>
+                    <div className="empty-liked">
+                      <div className="empty-icon">♡</div>
                       <p>좋아요한 상품이 없습니다</p>
                     </div>
                   )}
@@ -356,12 +431,24 @@ const MainPage = () => {
               <div className="trending-section">
                 <h3>인기 브랜드</h3>
                 <div className="trending-brands">
-                  <div className="brand-tag">나이키</div>
-                  <div className="brand-tag">아디다스</div>
-                  <div className="brand-tag">유니클로</div>
-                  <div className="brand-tag">자라</div>
-                  <div className="brand-tag">H&M</div>
-                  <div className="brand-tag">무신사</div>
+                  <div className="brand-tag" onClick={() => handleBrandClick("나이키")}>
+                    나이키
+                  </div>
+                  <div className="brand-tag" onClick={() => handleBrandClick("아디다스")}>
+                    아디다스
+                  </div>
+                  <div className="brand-tag" onClick={() => handleBrandClick("유니클로")}>
+                    유니클로
+                  </div>
+                  <div className="brand-tag" onClick={() => handleBrandClick("자라")}>
+                    자라
+                  </div>
+                  <div className="brand-tag" onClick={() => handleBrandClick("H&M")}>
+                    H&M
+                  </div>
+                  <div className="brand-tag" onClick={() => handleBrandClick("무신사")}>
+                    무신사
+                  </div>
                 </div>
               </div>
             </aside>

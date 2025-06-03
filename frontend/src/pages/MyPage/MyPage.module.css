@@ -1,0 +1,720 @@
+.mypage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  transition: background-color 0.3s;
+}
+
+.mypageMain {
+  flex: 1;
+  padding: 2rem 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 전체 컨테이너를 하나의 카드로 통합 */
+.pageContainer {
+  background-color: var(--card-bg);
+  border-radius: 24px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+/* 프로필 섹션 */
+.profileSection {
+  padding: 3rem 3rem 2rem 3rem;
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+  color: white;
+  position: relative;
+}
+
+.profileSection::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 0;
+}
+
+.profileHeader {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.profileImageContainer {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.profileImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profilePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.profileInfo {
+  flex: 1;
+}
+
+.profileName {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.profileEmail {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0 0 1.5rem 0;
+}
+
+.editProfileButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1rem;
+  backdrop-filter: blur(10px);
+}
+
+.editProfileButton:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.editIcon {
+  font-size: 1.1rem;
+}
+
+/* 통계 섹션 */
+.statsSection {
+  padding: 2rem 3rem;
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  text-align: center;
+}
+
+.statItem {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
+  transition: all 0.3s;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+}
+
+.statItem:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  border-color: var(--accent-color);
+}
+
+.statNumber {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--accent-color);
+  margin-bottom: 0.5rem;
+  transition: color 0.3s;
+}
+
+.statLabel {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+/* 탭 섹션 */
+.tabsSection {
+  padding: 1.5rem 3rem 0 3rem;
+  background-color: var(--card-bg);
+}
+
+.tabButtons {
+  display: flex;
+  gap: 0.5rem;
+  background-color: var(--bg-secondary);
+  padding: 0.5rem;
+  border-radius: 16px;
+  overflow-x: auto;
+}
+
+.tabButton {
+  flex: 1;
+  padding: 1rem 1.5rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 600;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.tabButton.active {
+  background-color: var(--accent-color);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.tabButton:hover:not(.active) {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+}
+
+/* 콘텐츠 섹션 */
+.contentSection {
+  padding: 2rem 3rem 3rem 3rem;
+  background-color: var(--card-bg);
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.contentItem {
+  background-color: var(--bg-primary);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border-color);
+}
+
+.contentItem:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  border-color: var(--accent-color);
+}
+
+.contentImage {
+  height: 280px;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-secondary);
+}
+
+.contentImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.contentItem:hover .contentImage img {
+  transform: scale(1.05);
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.contentOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.contentItem:hover .contentOverlay {
+  opacity: 1;
+}
+
+.overlayInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  width: 100%;
+}
+
+/* 오버레이 버튼 스타일 - 완전히 새로 작성 */
+.overlayButtons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.virtualFittingBtn {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.virtualFittingBtn:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.virtualFittingBtn:active {
+  transform: translateY(0);
+}
+
+.heartBtn {
+  width: 44px;
+  height: 44px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.heartBtn:hover {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
+  transform: translateY(-2px);
+}
+
+.heartBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.heartIcon {
+  transition: transform 0.2s;
+}
+
+.heartBtn.liked .heartIcon {
+  animation: heartBeat 0.6s ease-in-out;
+}
+
+@keyframes heartBeat {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.contentInfo {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 120px;
+}
+
+.contentTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.75rem 0;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.3s;
+  flex: 1;
+}
+
+.contentMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  transition: color 0.3s;
+  margin-top: auto;
+}
+
+/* 상태별 색상 */
+.status.completed {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.status.inProgress {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.status.designing {
+  color: #6366f1;
+  font-weight: 600;
+}
+
+.likes {
+  color: #ff6b6b;
+  font-weight: 500;
+}
+
+.likesCount {
+  color: #ff6b6b;
+  font-weight: 500;
+}
+
+.brand {
+  color: var(--accent-color);
+  font-weight: 500;
+}
+
+.price {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.likedDate {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.date {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+/* 빈 콘텐츠 */
+.emptyContent {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
+}
+
+.emptyIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.emptyContent h3 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  transition: color 0.3s;
+  flex: 1;
+}
+
+.emptyContent p {
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* 로딩 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  text-align: center;
+  min-height: 60vh;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--bg-secondary);
+  border-top: 4px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingContainer p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.loadingDot {
+  margin-left: 0.5rem;
+  color: var(--accent-color);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .contentGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .mypageMain {
+    padding: 1rem 0;
+  }
+
+  .profileSection,
+  .statsSection,
+  .contentSection {
+    padding: 1.5rem;
+  }
+
+  .tabsSection {
+    padding: 1rem 1.5rem 0 1.5rem;
+  }
+
+  .profileHeader {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .profileImageContainer {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profileName {
+    font-size: 2rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .tabButtons {
+    flex-wrap: wrap;
+  }
+
+  .tabButton {
+    flex: none;
+    min-width: 120px;
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .contentInfo {
+    min-height: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profileSection,
+  .statsSection,
+  .contentSection {
+    padding: 1rem;
+  }
+
+  .tabsSection {
+    padding: 1rem 1rem 0 1rem;
+  }
+
+  .profileImageContainer {
+    width: 80px;
+    height: 80px;
+  }
+
+  .profilePlaceholder {
+    font-size: 2rem;
+  }
+
+  .profileName {
+    font-size: 1.5rem;
+  }
+
+  .statNumber {
+    font-size: 2rem;
+  }
+
+  .contentImage {
+    height: 200px;
+  }
+
+  .tabButton {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .contentInfo {
+    min-height: 90px;
+  }
+
+  .virtualFittingBtn {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+}
+
+/* 다크모드 지원 */
+.dark-mode .pageContainer {
+  background-color: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.dark-mode .profileSection {
+  background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
+}
+
+.dark-mode .profileSection::after {
+  background: var(--card-bg);
+}
+
+.dark-mode .statItem {
+  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
+  border-color: var(--border-color);
+}
+
+.dark-mode .statItem:hover {
+  border-color: var(--accent-color);
+}
+
+.dark-mode .tabButtons {
+  background-color: var(--bg-secondary);
+}
+
+.dark-mode .contentItem {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .contentItem:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  border-color: var(--accent-color);
+}
+
+.dark-mode .contentOverlay {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
+}
+
+/* 다크모드 버튼 스타일 */
+.dark-mode .virtualFittingBtn {
+  background-color: var(--accent-color);
+}
+
+.dark-mode .virtualFittingBtn:hover {
+  background-color: var(--accent-hover);
+  box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
+}
+
+.dark-mode .heartBtn {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.dark-mode .heartBtn:hover {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+/* 접근성 개선 */
+.tabButton:focus,
+.editProfileButton:focus,
+.contentItem:focus,
+.virtualFittingBtn:focus,
+.heartBtn:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* 애니메이션 성능 최적화 */
+.contentItem,
+.statItem,
+.editProfileButton,
+.virtualFittingBtn,
+.heartBtn {
+  will-change: transform;
+}

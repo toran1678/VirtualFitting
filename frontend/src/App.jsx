@@ -11,6 +11,8 @@ import KakaoCallback from "./components/KakaoCallback/KakaoCallback"
 import LoginPage from "./pages/LoginPage"
 import VirtualFittingPage from "./pages/VirtualFittingPage"
 import ClothingBrowsePage from "./pages/ClothingBrowsePage"
+import MyPage from "./pages/MyPage/MyPage"
+
 import "./App.css"
 
 function App() {
@@ -26,7 +28,7 @@ function App() {
             <Route path="/clothing-browse" element={<ClothingBrowsePage />} />
             <Route path="/virtual-fitting" element={<VirtualFittingPage />} />
             <Route path="/feed" element={<div>Feed Page (Coming Soon)</div>} />
-            <Route path="/mypage" element={<div>My Page (Coming Soon)</div>} />
+            <Route path="/mypage" element={<MyPage />} />
           </Routes>
         </Router>
       </AuthProvider>

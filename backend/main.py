@@ -15,6 +15,7 @@ from app.api.routes import auth_router
 from app.api.routes import register_router
 from app.api import kakao_auth_router
 from app.api.routes import clothing_items_router
+from app.api.routes import liked_clothes_router
 
 # 환경 변수 로드
 load_dotenv()
@@ -68,6 +69,7 @@ app.include_router(auth_router)
 app.include_router(register_router)
 app.include_router(kakao_auth_router)
 app.include_router(clothing_items_router)
+app.include_router(liked_clothes_router)
 
 # 서버 상태 확인 엔드포인트
 @app.get("/health")

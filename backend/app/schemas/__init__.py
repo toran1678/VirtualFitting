@@ -30,5 +30,14 @@ from .kakao_auth import (
     KakaoUserInfo,
     KakaoSignupRequest,
     KakaoUserCheckResponse,
-    AuthorizationUrlResponse
+    AuthorizationUrlResponse,
+)
+
+from .liked_clothes import (
+    LikedClothesBase,
+    LikedClothesCreate,
+    LikedClothesResponse,
+    LikeToggleRequest,
+    LikeToggleResponse,
+    LikedClothesWithItemResponse,
 )

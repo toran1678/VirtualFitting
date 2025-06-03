@@ -6,6 +6,7 @@ import Header from "../components/Header"
 import Footer from "../components/Footer"
 import ImagePlaceholder from "../components/ImagePlaceholder"
 import { browseClothingItems, getCategories } from "../api/clothing_items"
+import { toggleClothingLike, getMyLikedClothingIds } from "../api/likedClothes"
 import { isLoggedIn } from "../api/auth"
 import "../styles/ClothingBrowsePage.css"
 
@@ -24,6 +25,8 @@ const ClothingBrowsePage = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [userLoggedIn, setUserLoggedIn] = useState(false)
+  const [likedClothingIds, setLikedClothingIds] = useState(new Set())
+  const [likingInProgress, setLikingInProgress] = useState(new Set())
 
   // 필터 상태
   const [filters, setFilters] = useState({
@@ -35,7 +38,7 @@ const ClothingBrowsePage = () => {
     sort_by: searchParams.get("sort_by") || "likes",
     order: searchParams.get("order") || "desc",
     page: Number.parseInt(searchParams.get("page")) || 1,
-    size: 20,
+    size: 21,
   })
 
   // 페이지네이션 정보
@@ -44,6 +47,21 @@ const ClothingBrowsePage = () => {
     total_pages: 0,
     current_page: 1,
   })
+
+  // 사용자가 좋아요한 의류 ID 목록 로드
+  const loadLikedClothingIds = useCallback(async () => {
+    if (!userLoggedIn) {
+      setLikedClothingIds(new Set())
+      return
+    }
+
+    try {
+      const likedIds = await getMyLikedClothingIds()
+      setLikedClothingIds(new Set(likedIds))
+    } catch (error) {
+      console.error("좋아요한 의류 목록 로드 실패:", error)
+    }
+  }, [userLoggedIn])
 
   // 카테고리 데이터 로드
   const loadCategories = useCallback(async () => {
@@ -69,7 +87,7 @@ const ClothingBrowsePage = () => {
         name: item.product_name,
         image: item.product_image_url,
         brand: item.brand_name,
-        likes: item.likes,
+        likes: item.likes, // 크롤링한 원래 좋아요 수
         gender: item.gender,
         category: item.main_category,
         subCategory: item.sub_category,
@@ -169,18 +187,85 @@ const ClothingBrowsePage = () => {
       sort_by: "likes",
       order: "desc",
       page: 1,
-      size: 20,
+      size: 21,
     }
 
     setFilters(resetFilters)
     setSearchParams(new URLSearchParams())
   }, [setSearchParams])
 
+  // 좋아요 토글 핸들러
+  const handleLikeToggle = async (e, productId) => {
+    e.stopPropagation()
+
+    if (!userLoggedIn) {
+      alert("로그인 후 이용 가능합니다.")
+      navigate("/login")
+      return
+    }
+
+    // 이미 처리 중인 경우 무시
+    if (likingInProgress.has(productId)) {
+      return
+    }
+
+    try {
+      // 처리 중 상태 추가
+      setLikingInProgress((prev) => new Set([...prev, productId]))
+
+      const result = await toggleClothingLike(productId)
+
+      // 사용자의 좋아요 상태만 업데이트 (좋아요 수는 변경하지 않음)
+      setLikedClothingIds((prev) => {
+        const newSet = new Set(prev)
+        if (result.is_liked) {
+          newSet.add(productId)
+        } else {
+          newSet.delete(productId)
+        }
+        return newSet
+      })
+
+      // 성공 메시지 표시 (선택사항)
+      // console.log(result.message)
+    } catch (error) {
+      console.error("좋아요 처리 실패:", error)
+      alert("좋아요 처리 중 오류가 발생했습니다.")
+    } finally {
+      // 처리 중 상태 제거
+      setLikingInProgress((prev) => {
+        const newSet = new Set(prev)
+        newSet.delete(productId)
+        return newSet
+      })
+    }
+  }
+
   // 컴포넌트 마운트 시 실행
   useEffect(() => {
-    setUserLoggedIn(isLoggedIn())
+    const loggedIn = isLoggedIn()
+    setUserLoggedIn(loggedIn)
     loadCategories()
-  }, [loadCategories])
+
+    // URL 파라미터가 변경될 때마다 필터 상태 업데이트
+    const newFilters = {
+      search: searchParams.get("search") || "",
+      main_category: searchParams.get("main_category") || "",
+      sub_category: searchParams.get("sub_category") || "",
+      gender: searchParams.get("gender") || "",
+      brand: searchParams.get("brand") || "",
+      sort_by: searchParams.get("sort_by") || "likes",
+      order: searchParams.get("order") || "desc",
+      page: Number.parseInt(searchParams.get("page")) || 1,
+      size: 21,
+    }
+    setFilters(newFilters)
+  }, [searchParams, loadCategories])
+
+  // 로그인 상태 변경 시 좋아요 목록 로드
+  useEffect(() => {
+    loadLikedClothingIds()
+  }, [loadLikedClothingIds])
 
   // 필터 변경 시 상품 로드
   useEffect(() => {
@@ -192,16 +277,6 @@ const ClothingBrowsePage = () => {
     // 상품 상세 페이지로 이동 또는 모달 열기
     console.log("상품 클릭:", product)
     // navigate(`/product/${product.id}`)
-  }
-
-  // 좋아요 토글 핸들러
-  const handleLikeToggle = (e, productId) => {
-    e.stopPropagation()
-    if (!userLoggedIn) {
-      alert("로그인 후 이용 가능합니다.")
-      return
-    }
-    console.log("좋아요 토글:", productId)
   }
 
   return (
@@ -234,7 +309,8 @@ const ClothingBrowsePage = () => {
                     type="text"
                     name="search"
                     placeholder="상품명, 브랜드 검색..."
-                    defaultValue={filters.search}
+                    value={filters.search}
+                    onChange={(e) => handleFilterChange("search", e.target.value)}
                     className="search-input"
                   />
                   <button type="submit" className="search-button">
@@ -423,8 +499,18 @@ const ClothingBrowsePage = () => {
 
                           <div className="product-overlay">
                             <button className="try-on-button">가상 피팅</button>
-                            <button className="like-button" onClick={(e) => handleLikeToggle(e, product.id)}>
-                              <span className="heart-icon">🤍</span>
+                            <button
+                              className={`like-button ${likedClothingIds.has(product.id) ? "liked" : ""}`}
+                              onClick={(e) => handleLikeToggle(e, product.id)}
+                              disabled={likingInProgress.has(product.id)}
+                            >
+                              <span className="heart-icon">
+                                {likingInProgress.has(product.id)
+                                  ? "⏳"
+                                  : likedClothingIds.has(product.id)
+                                    ? "❤️"
+                                    : "🤍"}
+                              </span>
                             </button>
                           </div>
 
@@ -437,7 +523,7 @@ const ClothingBrowsePage = () => {
                           <div className="product-meta">
                             <span className="likes-count">
                               <span className="likes-icon">❤️</span>
-                              {product.likes.toLocaleString()}
+                              {product.likes.toLocaleString()} {/* 크롤링한 원래 좋아요 수 유지 */}
                             </span>
                             <span className="gender-tag">{product.gender}</span>
                           </div>
