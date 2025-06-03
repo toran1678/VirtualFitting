@@ -562,14 +562,16 @@
   transition: all 0.3s;
 }
 
-/* 페이지네이션 */
+/* 페이지네이션 - 완전 중앙 정렬 */
 .pagination {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 4rem;
+  margin: 4rem auto 0 auto;
   padding: 2rem 0;
+  width: 100%;
+  max-width: 100%;
 }
 
 .pagination-button {
@@ -779,6 +781,7 @@
   .pagination {
     flex-wrap: wrap;
     gap: 0.25rem;
+    justify-content: center;
   }
 
   .pagination-numbers {
@@ -820,6 +823,22 @@
     width: 40px;
     height: 40px;
     padding: 0.5rem;
+  }
+
+  .pagination {
+    margin: 2rem auto 0 auto;
+    padding: 1rem 0;
+  }
+
+  .pagination-button {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .pagination-number {
+    padding: 0.5rem 0.75rem;
+    min-width: 36px;
+    font-size: 0.8rem;
   }
 }
 

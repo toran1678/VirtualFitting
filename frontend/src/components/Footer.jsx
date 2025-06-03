@@ -58,8 +58,8 @@ const Footer = () => {
         <div className="footer-section">
           <h4 className="footer-heading">고객센터</h4>
           <address className="footer-contact">
-            <p>이메일: info@fashionguys.com</p>
-            <p>전화: 02-123-4567</p>
+            <p>이메일: toran16784@gmail.com</p>
+            <p>전화: 010-1234-1234</p>
             <div className="social-links">
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
                 <svg

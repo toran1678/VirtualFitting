@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import { ThemeProvider } from "./context/ThemeContext"
 import { AuthProvider} from "./context/AuthContext"
 
+import ScrollToTop from "./components/ScrollToTop"
+
 // Importing pages
 import MainPage from "./pages/MainPage"
 import RegisterPage from "./pages/RegisterPage/RegisterPage"
@@ -20,6 +22,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Router>
+          <ScrollToTop /> {/* 페이지 이동 시 스크롤 맨위로 */}
           <Routes>
             <Route path="/" element={<MainPage />} />
             <Route path="/register" element={<RegisterPage />} />

@@ -23,17 +23,17 @@ const Sidebar = ({ isOpen, toggleSidebar, children }) => {
         <nav className="sidebar-nav">
           <ul>
             <li>
-              <Link to="/tops" onClick={toggleSidebar}>
+              <Link to="/clothing-browse?main_category=상의" onClick={toggleSidebar}>
                 상의
               </Link>
             </li>
             <li>
-              <Link to="/bottoms" onClick={toggleSidebar}>
+              <Link to="/clothing-browse?main_category=바지" onClick={toggleSidebar}>
                 하의
               </Link>
             </li>
             <li>
-              <Link to="/outer" onClick={toggleSidebar}>
+              <Link to="/clothing-browse?main_category=아우터" onClick={toggleSidebar}>
                 아우터
               </Link>
             </li>

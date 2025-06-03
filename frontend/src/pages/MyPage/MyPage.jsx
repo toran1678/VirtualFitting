@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import Header from "../../components/Header"
 import Footer from "../../components/Footer"
 import ImagePlaceholder from "../../components/ImagePlaceholder"
@@ -18,13 +18,31 @@ const MyPage = () => {
   const [likedClothesLoading, setLikedClothesLoading] = useState(false)
   const [likingInProgress, setLikingInProgress] = useState(new Set())
   const navigate = useNavigate()
+  // eslint-disable-next-line no-unused-vars
+  const location = useLocation()
+  const [searchParams] = useSearchParams()
+
+  // 탭과 URL 파라미터 매핑
+  const tabToParamMap = {
+    피드: "feed",
+    "가상 피팅": "virtual-fitting",
+    "커스텀 의류": "custom",
+    "좋아요 의류": "like",
+  }
+
+  const paramToTabMap = {
+    feed: "피드",
+    "virtual-fitting": "가상 피팅",
+    custom: "커스텀 의류",
+    like: "좋아요 의류",
+  }
 
   // 임시 데이터
   const [stats, setStats] = useState({
     feeds: 24,
     virtualFittings: 18,
     customClothes: 12,
-    likedClothes: 0, // 실제 데이터로 업데이트될 예정
+    likedClothes: 0,
   })
 
   const [tabData, setTabData] = useState({
@@ -160,8 +178,25 @@ const MyPage = () => {
         date: "2024-01-10",
       },
     ],
-    "좋아요 의류": [], // 실제 데이터로 채워질 예정
+    "좋아요 의류": [],
   })
+
+  // URL 파라미터 변경 감지 및 탭 동기화
+  useEffect(() => {
+    const tabParam = searchParams.get("tab")
+
+    if (tabParam && paramToTabMap[tabParam]) {
+      const tabFromParam = paramToTabMap[tabParam]
+      if (tabFromParam !== activeTab) {
+        setActiveTab(tabFromParam)
+      }
+    } else if (!tabParam) {
+      // 기본 탭 설정
+      const defaultParam = tabToParamMap["피드"]
+      navigate(`/mypage?tab=${defaultParam}`, { replace: true })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, activeTab, navigate])
 
   // 좋아요한 의류 데이터 로드
   const loadLikedClothes = async () => {
@@ -171,26 +206,23 @@ const MyPage = () => {
     try {
       const data = await getMyLikedClothes()
 
-      // API 응답을 컴포넌트에서 사용할 형태로 변환
       const formattedData = data.map((item) => ({
         id: item.clothing_id,
         image: item.product_image_url,
         title: item.product_name,
         brand: item.brand_name,
-        likedDate: new Date(item.liked_at).toLocaleDateString("ko-KR"), // 좋아요 누른 날짜
+        likedDate: new Date(item.liked_at).toLocaleDateString("ko-KR"),
         category: `${item.main_category} > ${item.sub_category}`,
         gender: item.gender,
       }))
 
       setLikedClothes(formattedData)
 
-      // 탭 데이터 업데이트
       setTabData((prev) => ({
         ...prev,
         "좋아요 의류": formattedData,
       }))
 
-      // 통계 업데이트
       setStats((prev) => ({
         ...prev,
         likedClothes: formattedData.length,
@@ -212,42 +244,35 @@ const MyPage = () => {
       return
     }
 
-    // 이미 처리 중인 경우 무시
     if (likingInProgress.has(productId)) {
       return
     }
 
     try {
-      // 처리 중 상태 추가
       setLikingInProgress((prev) => new Set([...prev, productId]))
 
       const result = await toggleClothingLike(productId)
 
       if (!result.is_liked) {
-        // 좋아요 취소된 경우 목록에서 제거
         const updatedLikedClothes = likedClothes.filter((item) => item.id !== productId)
         setLikedClothes(updatedLikedClothes)
 
-        // 탭 데이터 업데이트
         setTabData((prev) => ({
           ...prev,
           "좋아요 의류": updatedLikedClothes,
         }))
 
-        // 통계 업데이트
         setStats((prev) => ({
           ...prev,
           likedClothes: updatedLikedClothes.length,
         }))
       }
 
-      // 성공 메시지 표시
       console.log(result.message)
     } catch (error) {
       console.error("좋아요 처리 실패:", error)
       alert("좋아요 처리 중 오류가 발생했습니다.")
     } finally {
-      // 처리 중 상태 제거
       setLikingInProgress((prev) => {
         const newSet = new Set(prev)
         newSet.delete(productId)
@@ -266,7 +291,6 @@ const MyPage = () => {
       return
     }
 
-    // 가상 피팅 페이지로 이동
     navigate(`/virtual-fitting/try/${productId}`)
     console.log(`가상 피팅 시작: ${productId}`)
   }
@@ -288,7 +312,6 @@ const MyPage = () => {
   }, [navigate])
 
   useEffect(() => {
-    // 컴포넌트 마운트 시 좋아요한 의류 데이터 로드
     loadLikedClothes()
   }, [])
 
@@ -297,6 +320,10 @@ const MyPage = () => {
   }
 
   const handleTabChange = (tab) => {
+    const tabParam = tabToParamMap[tab]
+    if (tabParam) {
+      navigate(`/mypage?tab=${tabParam}`)
+    }
     setActiveTab(tab)
   }
 
@@ -312,7 +339,7 @@ const MyPage = () => {
         navigate(`/custom/${item.id}`)
         break
       case "좋아요 의류":
-        navigate(`/product/${item.id}`)
+        // navigate(`/product/${item.id}`)
         break
       default:
         break
