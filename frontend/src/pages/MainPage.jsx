@@ -5,37 +5,30 @@ import { useNavigate } from "react-router-dom"
 import Header from "../components/Header"
 import Footer from "../components/Footer"
 import ImagePlaceholder from "../components/ImagePlaceholder"
-import { loginUser, isLoggedIn, getCurrentUser, logoutUser } from "../api/auth"
+import { isLoggedIn, getCurrentUser } from "../api/auth"
 import { getPopularItems, getLatestItems } from "../api/clothing_items"
-import { useKakaoAuth } from "../hooks/useKakaoAuth"
 import "../styles/MainPage.css"
-import { getProfileImageUrl, handleImageError } from "../utils/imageUtils"
 
 const MainPage = () => {
-  const [activeCategory, setActiveCategory] = useState("인기순")
-  const [loginForm, setLoginForm] = useState({ id: "", password: "" })
-  const [loginError, setLoginError] = useState("")
-  const [loading, setLoading] = useState(false)
+  const [activeFilter, setActiveFilter] = useState("인기순")
   const [userLoggedIn, setUserLoggedIn] = useState(false)
   const [userData, setUserData] = useState(null)
   const [recentProducts, setRecentProducts] = useState([])
   const [products, setProducts] = useState([])
   const [productsLoading, setProductsLoading] = useState(true)
   const [productsError, setProductsError] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
   const navigate = useNavigate()
 
-  // 카카오 인증 관련 훅
-  const { startKakaoLogin, isLoading: kakaoLoading, error: kakaoError } = useKakaoAuth()
-
   // 상품 데이터 로드 함수
-  const loadProducts = async (category) => {
+  const loadProducts = async (filter) => {
     setProductsLoading(true)
     setProductsError("")
 
     try {
       let data = []
 
-      switch (category) {
+      switch (filter) {
         case "인기순":
           data = await getPopularItems(6)
           break
@@ -46,11 +39,10 @@ const MainPage = () => {
           data = await getPopularItems(6)
       }
 
-      // 데이터 형식을 기존 products 형식에 맞게 변환
+      // 데이터 형식 변환
       const formattedProducts = data.map((item) => ({
         id: item.product_id,
         name: item.product_name,
-        price: Math.floor(Math.random() * 200000) + 50000, // 임시 가격 (실제로는 가격 필드 추가 필요)
         image: item.product_image_url,
         brand: item.brand_name,
         likes: item.likes,
@@ -64,14 +56,13 @@ const MainPage = () => {
     } catch (error) {
       console.error("상품 로드 실패:", error)
       setProductsError("상품을 불러오는데 실패했습니다.")
-      // 에러 시 빈 배열로 설정
       setProducts([])
     } finally {
       setProductsLoading(false)
     }
   }
 
-  // 컴포넌트 마운트 시 로그인 상태 확인 및 상품 로드
+  // 컴포넌트 마운트 시 실행
   useEffect(() => {
     const checkLoginStatus = () => {
       const loginStatus = isLoggedIn()
@@ -79,7 +70,6 @@ const MainPage = () => {
 
       if (loginStatus) {
         setUserData(getCurrentUser())
-        // 최근 본 상품 가져오기 (로컬 스토리지에서)
         const storedRecentProducts = localStorage.getItem("recentProducts")
         if (storedRecentProducts) {
           try {
@@ -95,152 +85,141 @@ const MainPage = () => {
       }
     }
 
-    // 초기 로그인 상태 확인
     checkLoginStatus()
+    loadProducts(activeFilter)
 
-    // 초기 상품 로드
-    loadProducts(activeCategory)
-
-    // 로컬 스토리지 변경 이벤트 리스너 추가
     const handleStorageChange = () => {
       checkLoginStatus()
     }
 
     window.addEventListener("storage", handleStorageChange)
-
-    // 컴포넌트 언마운트 시 이벤트 리스너 제거
     return () => {
       window.removeEventListener("storage", handleStorageChange)
     }
   }, [])
 
-  // 카테고리 변경 시 상품 다시 로드
+  // 필터 변경 시 상품 다시 로드
   useEffect(() => {
-    loadProducts(activeCategory)
-  }, [activeCategory])
+    loadProducts(activeFilter)
+  }, [activeFilter])
 
-  // 카카오 에러 처리
-  useEffect(() => {
-    if (kakaoError) {
-      setLoginError(kakaoError)
-    }
-  }, [kakaoError])
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target
-    setLoginForm({ ...loginForm, [name]: value })
-    // 입력 시 에러 메시지 초기화
-    if (loginError) setLoginError("")
-  }
-
-  const handleLogin = async (e) => {
-    e.preventDefault()
-
-    // 입력 검증
-    if (!loginForm.id.trim() || !loginForm.password.trim()) {
-      setLoginError("아이디와 비밀번호를 모두 입력해주세요.")
+  // 상품 클릭 핸들러
+  const handleProductClick = (product) => {
+    if (!userLoggedIn) {
+      alert("로그인 후 이용 가능합니다.")
       return
     }
 
-    setLoading(true)
-    setLoginError("")
-
-    try {
-      // 로그인 API 호출
-      await loginUser(loginForm)
-
-      // 로그인 성공 시 상태 업데이트
-      setUserLoggedIn(true)
-      setUserData(getCurrentUser())
-
-      // 폼 초기화
-      setLoginForm({ id: "", password: "" })
-
-      // 페이지 새로고침
-      window.location.reload()
-    } catch (error) {
-      console.error("로그인 오류:", error)
-
-      // 서버 응답에 따른 에러 메시지 설정
-      if (error.response) {
-        if (error.response.status === 401) {
-          setLoginError("아이디 또는 비밀번호가 일치하지 않습니다.")
-        } else if (error.response.status === 404) {
-          setLoginError("존재하지 않는 사용자입니다.")
-        } else {
-          setLoginError("로그인 중 오류가 발생했습니다. 다시 시도해주세요.")
-        }
-      } else {
-        setLoginError("서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.")
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // 카카오 로그인 핸들러
-  const handleKakaoLogin = async () => {
-    try {
-      setLoginError("")
-      console.log("메인페이지에서 카카오 로그인 시작...")
-      await startKakaoLogin()
-    } catch (error) {
-      console.error("카카오 로그인 오류:", error)
-      setLoginError("카카오 로그인 중 오류가 발생했습니다. 다시 시도해주세요.")
-    }
-  }
-
-  const handleLogout = async () => {
-    try {
-      await logoutUser()
-      setUserLoggedIn(false)
-      setUserData(null)
-      setRecentProducts([])
-      window.location.reload()
-    } catch (error) {
-      console.error("로그아웃 오류:", error)
-      alert("로그아웃 중 오류가 발생했습니다.")
-    }
-  }
-
-  // 상품 클릭 시 최근 본 상품에 추가
-  const handleProductClick = (product) => {
-    if (!userLoggedIn) return
-
-    // 최근 본 상품 목록 업데이트
     const updatedRecentProducts = [product, ...recentProducts.filter((item) => item.id !== product.id)].slice(0, 3)
-
     setRecentProducts(updatedRecentProducts)
-
-    // 로컬 스토리지에 저장
     localStorage.setItem("recentProducts", JSON.stringify(updatedRecentProducts))
+  }
+
+  // 좋아요 토글 핸들러
+  const handleLikeToggle = (e, productId) => {
+    e.stopPropagation()
+    if (!userLoggedIn) {
+      alert("로그인 후 이용 가능합니다.")
+      return
+    }
+    // 좋아요 API 호출 로직 추가 예정
+    console.log("좋아요 토글:", productId)
   }
 
   return (
     <div className="main-page">
       <Header />
 
-      <div className="main-content">
-        <div className="content-container">
-          <div className="category-tabs animated-scrollbar">
-            <button className={activeCategory === "인기순" ? "active" : ""} onClick={() => setActiveCategory("인기순")}>
-              인기순
-            </button>
-            <button className={activeCategory === "최신순" ? "active" : ""} onClick={() => setActiveCategory("최신순")}>
-              최신순
-            </button>
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <div className="hero-text">
+            <h1>
+              AI 가상 피팅으로 <br />
+              완벽한 스타일을 찾아보세요
+            </h1>
+            <p>최신 AI 기술로 옷을 입어보고, 나만의 스타일을 발견하세요</p>
+            <div className="hero-buttons">
+              <button className="cta-button primary" onClick={() => navigate("/virtual-fitting")}>
+                가상 피팅 시작하기
+              </button>
+              <button className="cta-button secondary" onClick={() => navigate("/about")}>
+                서비스 소개
+              </button>
+            </div>
           </div>
+          <div className="hero-image">
+            <div className="hero-placeholder">
+              <div className="floating-card">
+                <img src="/placeholder.svg?height=200&width=150" alt="Fashion" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          <div className="main-layout">
-            <div className="products-section">
+      {/* Stats Section */}
+      <section className="stats-section">
+        <div className="container">
+          <div className="stats-grid">
+            <div className="stat-item">
+              <div className="stat-number">10,000+</div>
+              <div className="stat-label">의류 상품</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">5,000+</div>
+              <div className="stat-label">만족한 고객</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">98%</div>
+              <div className="stat-label">정확도</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-number">24/7</div>
+              <div className="stat-label">서비스 지원</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <main className="main-content">
+        <div className="container">
+          <div className="content-layout">
+            {/* Products Section */}
+            <section className="products-section">
+              <div className="section-header">
+                <h2>추천 상품</h2>
+                <div className="filter-tabs">
+                  <button
+                    className={activeFilter === "인기순" ? "active" : ""}
+                    onClick={() => setActiveFilter("인기순")}
+                  >
+                    <span className="filter-icon">🔥</span>
+                    인기순
+                  </button>
+                  <button
+                    className={activeFilter === "최신순" ? "active" : ""}
+                    onClick={() => setActiveFilter("최신순")}
+                  >
+                    <span className="filter-icon">✨</span>
+                    최신순
+                  </button>
+                </div>
+              </div>
+
               {productsLoading ? (
                 <div className="loading-container">
+                  <div className="loading-spinner"></div>
                   <p>상품을 불러오는 중...</p>
                 </div>
               ) : productsError ? (
                 <div className="error-container">
+                  <div className="error-icon">⚠️</div>
                   <p>{productsError}</p>
-                  <button onClick={() => loadProducts(activeCategory)}>다시 시도</button>
+                  <button className="retry-button" onClick={() => loadProducts(activeFilter)}>
+                    다시 시도
+                  </button>
                 </div>
               ) : (
                 <div className="product-grid">
@@ -258,154 +237,137 @@ const MainPage = () => {
                             }}
                           />
                         ) : null}
-                        <div style={{ display: product.image ? "none" : "flex" }}>
+                        <div style={{ display: product.image ? "none" : "flex" }} className="image-placeholder">
                           <ImagePlaceholder productName={product.name} />
                         </div>
-                        <button className="try-on-button">가상 피팅</button>
+
+                        <div className="product-overlay">
+                          <button className="try-on-button">
+                            <span className="button-icon">👗</span>
+                            가상 피팅
+                          </button>
+                          <button className="like-button" onClick={(e) => handleLikeToggle(e, product.id)}>
+                            <span className="heart-icon">🤍</span>
+                          </button>
+                        </div>
+
+                        <div className="product-badge">{product.category}</div>
                       </div>
-                      <h3>{product.name}</h3>
-                      <p>{product.price.toLocaleString()}원</p>
-                      <div className="product-meta">
-                        <span className="brand">{product.brand}</span>
-                        <span className="likes">❤️ {product.likes}</span>
+
+                      <div className="product-info">
+                        <div className="product-brand">{product.brand}</div>
+                        <h3 className="product-name">{product.name}</h3>
+                        <div className="product-meta">
+                          <span className="likes-count">
+                            <span className="likes-icon">❤️</span>
+                            {product.likes.toLocaleString()}
+                          </span>
+                          <span className="gender-tag">{product.gender}</span>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
               )}
-            </div>
+            </section>
 
-            <div className="login-section">
-              {!userLoggedIn ? (
-                <div className="login-card">
-                  <h3>로그인</h3>
-                  <form className="login-form" onSubmit={handleLogin}>
-                    <input
-                      type="text"
-                      name="id"
-                      placeholder="아이디"
-                      className="login-input"
-                      value={loginForm.id}
-                      onChange={handleInputChange}
-                    />
-                    <input
-                      type="password"
-                      name="password"
-                      placeholder="비밀번호"
-                      className="login-input"
-                      value={loginForm.password}
-                      onChange={handleInputChange}
-                    />
-                    {loginError && <p className="login-error">{loginError}</p>}
-                    <button type="submit" className="login-submit-btn" disabled={loading}>
-                      {loading ? "로그인 중..." : "로그인"}
-                    </button>
-                    <button
-                      type="button"
-                      className="kakao-login-btn"
-                      onClick={handleKakaoLogin}
-                      disabled={kakaoLoading || loading}
-                    >
-                      {kakaoLoading ? "카카오 로그인 중..." : "카카오 로그인"}
-                    </button>
-                  </form>
-                  <div className="login-links">
-                    <a href="/">아이디 찾기</a>
-                    <span className="divider">|</span>
-                    <a href="/">비밀번호 찾기</a>
-                    <span className="divider">|</span>
-                    <a href="/register">회원가입</a>
-                  </div>
+            {/* Sidebar */}
+            <aside className="sidebar">
+              {/* Search Section */}
+              <div className="search-section">
+                <h3>상품 검색</h3>
+                <div className="search-box">
+                  <input
+                    type="text"
+                    placeholder="브랜드, 상품명으로 검색..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="search-input"
+                  />
+                  <button className="search-button">
+                    <span className="search-icon">🔍</span>
+                  </button>
                 </div>
-              ) : (
-                <div className="user-profile-card">
-                  <div className="user-profile-header">
-                    <div className="profile-image-large">
-                      {userData?.profile_picture ? (
-                        <img
-                          src={getProfileImageUrl(userData.profile_picture) || "/placeholder.svg"}
-                          alt="프로필"
-                          onError={(e) => handleImageError(e, "/placeholder.svg?height=60&width=60")}
-                        />
-                      ) : (
-                        <div className="profile-initial-large">{userData?.nickname?.charAt(0) || "U"}</div>
-                      )}
+              </div>
+
+              {/* Categories Section */}
+              <div className="categories-section">
+                <h3>카테고리</h3>
+                <div className="category-list">
+                  <button className="category-item">
+                    <span className="category-icon">👔</span>
+                    상의
+                  </button>
+                  <button className="category-item">
+                    <span className="category-icon">👖</span>
+                    하의
+                  </button>
+                  <button className="category-item">
+                    <span className="category-icon">👗</span>
+                    원피스
+                  </button>
+                  <button className="category-item">
+                    <span className="category-icon">🧥</span>
+                    아우터
+                  </button>
+                  <button className="category-item">
+                    <span className="category-icon">👟</span>
+                    신발
+                  </button>
+                  <button className="category-item">
+                    <span className="category-icon">👜</span>
+                    가방
+                  </button>
+                </div>
+              </div>
+
+              {/* Recent Products Section */}
+              {userLoggedIn && (
+                <div className="recent-products-section">
+                  <h3>좋아요 한 상품</h3>
+                  {recentProducts.length > 0 ? (
+                    <div className="recent-products-list">
+                      {recentProducts.map((product) => (
+                        <div key={product.id} className="recent-product-item">
+                          <div className="recent-product-image">
+                            {product.image ? (
+                              <img src={product.image || "/placeholder.svg"} alt={product.name} />
+                            ) : (
+                              <div className="recent-product-placeholder">{product.name.charAt(0)}</div>
+                            )}
+                          </div>
+                          <div className="recent-product-info">
+                            <div className="recent-product-name">{product.name}</div>
+                            <div className="recent-product-brand">{product.brand}</div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="user-info">
-                      <h3>{userData?.nickname || "사용자"}</h3>
-                      <p>{userData?.email || ""}</p>
+                  ) : (
+                    <div className="empty-recent">
+                      <div className="empty-icon">💝</div>
+                      <p>좋아요한 상품이 없습니다</p>
                     </div>
-                  </div>
-                  <div className="user-profile-actions">
-                    <button className="mypage-button" onClick={() => navigate("/mypage")}>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="12" cy="7" r="4"></circle>
-                      </svg>
-                      마이페이지
-                    </button>
-                    <button className="logout-button-main" onClick={handleLogout}>
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                        <polyline points="16 17 21 12 16 7"></polyline>
-                        <line x1="21" y1="12" x2="9" y2="12"></line>
-                      </svg>
-                      로그아웃
-                    </button>
-                  </div>
+                  )}
                 </div>
               )}
 
-              <div className="recent-products">
-                <h3>좋아요 한 상품</h3>
-                {userLoggedIn && recentProducts.length > 0 ? (
-                  <div className="recent-products-grid">
-                    {recentProducts.map((product) => (
-                      <div key={product.id} className="recent-product-item">
-                        <div className="recent-product-image">
-                          {product.image ? (
-                            <img src={product.image || "/placeholder.svg"} alt={product.name} />
-                          ) : (
-                            <div className="recent-product-placeholder">{product.name.charAt(0)}</div>
-                          )}
-                        </div>
-                        <div className="recent-product-info">
-                          <p className="recent-product-name">{product.name}</p>
-                          <p className="recent-product-price">{product.price.toLocaleString()}원</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="empty-recent">
-                    {userLoggedIn ? "좋아요한 상품이 없습니다." : "로그인 후 이용 가능합니다"}
-                  </p>
-                )}
+              {/* Trending Brands */}
+              <div className="trending-section">
+                <h3>인기 브랜드</h3>
+                <div className="trending-brands">
+                  <div className="brand-tag">나이키</div>
+                  <div className="brand-tag">아디다스</div>
+                  <div className="brand-tag">유니클로</div>
+                  <div className="brand-tag">자라</div>
+                  <div className="brand-tag">H&M</div>
+                  <div className="brand-tag">무신사</div>
+                </div>
               </div>
-            </div>
+            </aside>
           </div>
         </div>
-      </div>
+      </main>
 
       <Footer />
     </div>

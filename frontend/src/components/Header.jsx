@@ -124,6 +124,9 @@ const Header = () => {
             <nav className="navigation">
               <ul>
                 <li className="nav-item">
+                  <Link to="/clothing-browse">의류</Link>
+                </li>
+                <li className="nav-item">
                   <Link to="/virtual-fitting">가상피팅</Link>
                 </li>
                 <li className="nav-item">

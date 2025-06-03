@@ -96,6 +96,19 @@ export const searchClothingItems = async (query, page = 1, size = 20) => {
 }
 
 /**
+ * 카테고리 정보 조회
+ */
+export const getCategories = async () => {
+  try {
+    const response = await clothingAPI.get("/categories")
+    return response.data
+  } catch (error) {
+    console.error("카테고리 조회 실패:", error)
+    throw error
+  }
+}
+
+/**
  * 특정 상품 조회
  */
 export const getClothingItem = async (productId) => {
@@ -120,4 +133,42 @@ export const getClothingItemsByCategory = async (category, params = {}) => {
  */
 export const getClothingItemsByGender = async (gender, params = {}) => {
   return getClothingItems({ ...params, gender })
+}
+
+/**
+ * 필터링과 검색이 가능한 의류 아이템 브라우징
+ */
+export const browseClothingItems = async (params = {}) => {
+  try {
+    const {
+      page = 1,
+      size = 20,
+      sort_by = "likes",
+      order = "desc",
+      main_category = null,
+      sub_category = null,
+      gender = null,
+      brand = null,
+      search = null,
+    } = params
+
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+      sort_by,
+      order,
+    })
+
+    if (main_category) queryParams.append("main_category", main_category)
+    if (sub_category) queryParams.append("sub_category", sub_category)
+    if (gender) queryParams.append("gender", gender)
+    if (brand) queryParams.append("brand", brand)
+    if (search) queryParams.append("search", search)
+
+    const response = await clothingAPI.get(`/browse?${queryParams}`)
+    return response.data
+  } catch (error) {
+    console.error("상품 브라우징 실패:", error)
+    throw error
+  }
 }
