@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import ImageCarousel from "../ImageCarousel/ImageCarousel"
 import { getProfileImageUrl, handleProfileImageError } from "../../utils/imageUtils"
 import { getRelativeTime } from "../../utils/dateUtils"
@@ -8,6 +9,7 @@ import { toggleFeedLike } from "../../api/feeds"
 import styles from "./FeedItem.module.css"
 
 const FeedItem = ({ feed, onUpdate }) => {
+  const navigate = useNavigate()
   const [isLiked, setIsLiked] = useState(feed.is_liked ?? feed.isLiked ?? false)
   const [likeCount, setLikeCount] = useState(feed.like_count ?? feed.likeCount ?? 0)
   const [isFollowing, setIsFollowing] = useState(feed.user?.isFollowing || false)
@@ -29,7 +31,16 @@ const FeedItem = ({ feed, onUpdate }) => {
     }
   }, [feed])
 
-  const handleLike = async () => {
+  // 피드 상세 페이지로 이동
+  const goToFeedDetail = () => {
+    const feedId = feed.feed_id || feed.id
+    navigate(`/feed/${feedId}`)
+  }
+
+  const handleLike = async (e) => {
+    // 이벤트 버블링 방지
+    e.stopPropagation()
+
     if (isLikeLoading) return
 
     try {
@@ -43,7 +54,8 @@ const FeedItem = ({ feed, onUpdate }) => {
       setLikeCount(newLikeCount)
 
       // API 호출
-      const response = await toggleFeedLike(feed.feed_id)
+      const feedId = feed.feed_id || feed.id
+      const response = await toggleFeedLike(feedId)
 
       // API 응답으로 정확한 값 업데이트
       if (response) {
@@ -73,7 +85,10 @@ const FeedItem = ({ feed, onUpdate }) => {
     }
   }
 
-  const handleFollow = async () => {
+  const handleFollow = async (e) => {
+    // 이벤트 버블링 방지
+    e.stopPropagation()
+
     try {
       const newIsFollowing = !isFollowing
       setIsFollowing(newIsFollowing)
@@ -88,28 +103,49 @@ const FeedItem = ({ feed, onUpdate }) => {
     }
   }
 
-  const handleComment = () => {
-    // 댓글 기능 구현 예정
+  const handleComment = (e) => {
+    // 이벤트 버블링 방지
+    e.stopPropagation()
+
+    // 댓글 페이지로 이동
+    const feedId = feed.feed_id || feed.id
+    navigate(`/feed/${feedId}`, { state: { scrollToComments: true } })
   }
 
-  const handleShare = async () => {
+  const handleShare = async (e) => {
+    // 이벤트 버블링 방지
+    e.stopPropagation()
+
     try {
-      if (navigator.share) {
-        await navigator.share({
-          title: feed.title,
-          text: feed.content,
-          url: `${window.location.origin}/feed/${feed.feed_id}`,
-        })
-      } else {
-        await navigator.clipboard.writeText(`${window.location.origin}/feed/${feed.feed_id}`)
-        alert("링크가 클립보드에 복사되었습니다!")
-      }
+      const feedId = feed.feed_id || feed.id
+      const shareUrl = `${window.location.origin}/feed/${feedId}`
+
+      await navigator.clipboard.writeText(shareUrl)
+      alert("링크가 클립보드에 복사되었습니다!")
     } catch (error) {
       console.error("공유 오류:", error)
+      // 클립보드 API가 지원되지 않는 경우 대안
+      const feedId = feed.feed_id || feed.id
+      const shareUrl = `${window.location.origin}/feed/${feedId}`
+
+      const textArea = document.createElement("textarea")
+      textArea.value = shareUrl
+      document.body.appendChild(textArea)
+      textArea.select()
+      try {
+        document.execCommand("copy")
+        alert("링크가 클립보드에 복사되었습니다!")
+      } catch (fallbackError) {
+        console.error("클립보드 복사 실패:", fallbackError)
+        alert("링크 복사에 실패했습니다. 수동으로 복사해주세요: " + shareUrl)
+      }
+      document.body.removeChild(textArea)
     }
   }
 
-  const toggleText = () => {
+  const toggleText = (e) => {
+    // 이벤트 버블링 방지
+    e.stopPropagation()
     setShowFullText(!showFullText)
   }
 
@@ -121,9 +157,9 @@ const FeedItem = ({ feed, onUpdate }) => {
   const formattedDate = getRelativeTime(feed.created_at || feed.createdAt)
 
   return (
-    <article className={styles.feedItem}>
+    <article className={styles.feedItem} onClick={goToFeedDetail}>
       {/* 사용자 정보 헤더 */}
-      <header className={styles.feedHeader}>
+      <header className={styles.feedHeader} onClick={(e) => e.stopPropagation()}>
         <div className={styles.userInfo}>
           <div className={styles.userAvatar}>
             {profileImageUrl ? (
@@ -149,10 +185,12 @@ const FeedItem = ({ feed, onUpdate }) => {
       </header>
 
       {/* 이미지 갤러리 */}
-      <ImageCarousel images={feed.images} alt={feed.title} />
+      <div className={styles.imageGalleryWrapper}>
+        <ImageCarousel images={feed.images} alt={feed.title} />
+      </div>
 
       {/* 상호작용 버튼 */}
-      <div className={styles.feedActions}>
+      <div className={styles.feedActions} onClick={(e) => e.stopPropagation()}>
         <button
           className={`${styles.actionButton} ${isLiked ? styles.liked : ""} ${isLikeLoading ? styles.loading : ""}`}
           onClick={handleLike}

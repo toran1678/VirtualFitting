@@ -5,11 +5,18 @@
   border: 1px solid var(--border-color);
   overflow: hidden;
   transition: all 0.3s ease;
+  cursor: pointer; /* 커서를 포인터로 변경하여 클릭 가능함을 표시 */
 }
 
 .feedItem:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
+}
+
+/* 이미지 갤러리 래퍼 - 클릭 이벤트 전파를 위해 추가 */
+.imageGalleryWrapper {
+  position: relative;
+  width: 100%;
 }
 
 /* 사용자 정보 헤더 */

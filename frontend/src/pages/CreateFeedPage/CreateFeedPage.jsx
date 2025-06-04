@@ -159,7 +159,7 @@ const CreateFeedPage = () => {
       const uploadableImages = images.filter((img) => img.file)
 
       // 백엔드 API 호출
-      const response = await createFeed(formData, uploadableImages)
+      await createFeed(formData, uploadableImages)
 
       // 임시저장 데이터 삭제
       localStorage.removeItem(`draft_feed_${user.user_id}`)

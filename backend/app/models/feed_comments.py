@@ -12,7 +12,7 @@ class FeedComments(Base):
     feed_id = Column(Integer, ForeignKey("feeds.feed_id"), nullable=False)
     parent_id = Column(Integer, ForeignKey("feed_comments.comment_id"), nullable=True) # 부모 댓글 ID값
     
-    content = Column(String(100), nullable=False)
+    content = Column(String(500), nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
     feed = relationship("Feeds", back_populates="feed_comment")

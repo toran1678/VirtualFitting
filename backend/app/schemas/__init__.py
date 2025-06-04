@@ -52,3 +52,12 @@ from .feeds import (
     FeedResponse,
     FeedListResponse,
 )
+
+from .comments import (
+    CommentBase,
+    CommentCreate,
+    CommentUpdate,
+    CommentUserBrief,
+    CommentResponse,
+    CommentListResponse,
+)

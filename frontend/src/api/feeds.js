@@ -13,9 +13,11 @@ const feedAPI = axios.create({
 // 요청 인터셉터
 feedAPI.interceptors.request.use(
   (config) => {
+    console.log(`📤 API 요청: ${config.method?.toUpperCase()} ${config.url}`, config.data)
     return config
   },
   (error) => {
+    console.error("📤 요청 오류:", error)
     return Promise.reject(error)
   },
 )
@@ -23,10 +25,22 @@ feedAPI.interceptors.request.use(
 // 응답 인터셉터
 feedAPI.interceptors.response.use(
   (response) => {
+    console.log(`📥 API 응답: ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data)
     return response
   },
   (error) => {
-    console.error("피드 API 오류:", error)
+    console.error("📥 응답 오류:", error)
+
+    // 상세한 오류 정보 로깅
+    if (error.response) {
+      console.error("응답 상태:", error.response.status)
+      console.error("응답 데이터:", error.response.data)
+      console.error("응답 헤더:", error.response.headers)
+    } else if (error.request) {
+      console.error("요청 오류:", error.request)
+    } else {
+      console.error("설정 오류:", error.message)
+    }
 
     // 인증 오류 처리
     if (error.response?.status === 401) {
@@ -182,13 +196,15 @@ export const toggleFeedLike = async (feedId) => {
  */
 export const getFeedComments = async (feedId, params = {}) => {
   try {
-    const { page = 1, size = 20 } = params
+    const { page = 1, size = 20, tree_structure = true } = params
     const queryParams = new URLSearchParams({
       page: page.toString(),
       size: size.toString(),
+      tree_structure: tree_structure.toString(),
     })
 
-    const response = await feedAPI.get(`/${feedId}/comments?${queryParams}`)
+    // 경로 끝에 슬래시 추가
+    const response = await feedAPI.get(`/${feedId}/comments/?${queryParams}`)
     return response.data
   } catch (error) {
     console.error("피드 댓글 조회 실패:", error)
@@ -200,16 +216,69 @@ export const getFeedComments = async (feedId, params = {}) => {
  * 피드 댓글 작성
  * @param {number} feedId - 피드 ID
  * @param {string} content - 댓글 내용
+ * @param {number|null} parentId - 부모 댓글 ID (대댓글인 경우)
  * @returns {Promise<Object>} - 생성된 댓글 정보
  */
-export const createFeedComment = async (feedId, content) => {
+export const createFeedComment = async (feedId, content, parentId = null) => {
   try {
-    const response = await feedAPI.post(`/${feedId}/comments`, {
-      content,
+    console.log(`💬 댓글 작성 API 호출: feedId=${feedId}, content="${content}", parentId=${parentId}`)
+
+    const requestData = {
+      content: content.trim(),
+    }
+
+    // parentId가 유효한 값인 경우에만 추가
+    if (parentId && parentId > 0) {
+      requestData.parent_id = parentId
+    }
+
+    console.log(`📤 요청 데이터:`, requestData)
+
+    // 경로 끝에 슬래시 추가
+    const response = await feedAPI.post(`/${feedId}/comments/`, requestData, {
+      headers: {
+        "Content-Type": "application/json",
+      },
     })
+
+    console.log(`✅ 댓글 작성 성공:`, response.data)
     return response.data
   } catch (error) {
     console.error("피드 댓글 작성 실패:", error)
+
+    // 더 상세한 오류 정보 로깅
+    if (error.response?.data) {
+      console.error("서버 오류 응답:", error.response.data)
+    }
+
+    throw error
+  }
+}
+
+/**
+ * 피드 댓글 수정
+ * @param {number} feedId - 피드 ID
+ * @param {number} commentId - 댓글 ID
+ * @param {string} content - 수정할 댓글 내용
+ * @returns {Promise<Object>} - 수정된 댓글 정보
+ */
+export const updateFeedComment = async (feedId, commentId, content) => {
+  try {
+    // 경로 끝에 슬래시 추가
+    const response = await feedAPI.put(
+      `/${feedId}/comments/${commentId}/`,
+      {
+        content: content.trim(),
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    )
+    return response.data
+  } catch (error) {
+    console.error("피드 댓글 수정 실패:", error)
     throw error
   }
 }
@@ -222,10 +291,52 @@ export const createFeedComment = async (feedId, content) => {
  */
 export const deleteFeedComment = async (feedId, commentId) => {
   try {
-    const response = await feedAPI.delete(`/${feedId}/comments/${commentId}`)
+    // 경로 끝에 슬래시 추가
+    const response = await feedAPI.delete(`/${feedId}/comments/${commentId}/`)
     return response.data
   } catch (error) {
     console.error("피드 댓글 삭제 실패:", error)
+    throw error
+  }
+}
+
+/**
+ * 특정 댓글 조회
+ * @param {number} feedId - 피드 ID
+ * @param {number} commentId - 댓글 ID
+ * @returns {Promise<Object>} - 댓글 정보
+ */
+export const getFeedComment = async (feedId, commentId) => {
+  try {
+    // 경로 끝에 슬래시 추가
+    const response = await feedAPI.get(`/${feedId}/comments/${commentId}/`)
+    return response.data
+  } catch (error) {
+    console.error("피드 댓글 조회 실패:", error)
+    throw error
+  }
+}
+
+/**
+ * 댓글의 대댓글 목록 조회
+ * @param {number} feedId - 피드 ID
+ * @param {number} commentId - 부모 댓글 ID
+ * @param {Object} params - 조회 파라미터
+ * @returns {Promise<Object>} - 대댓글 목록
+ */
+export const getCommentReplies = async (feedId, commentId, params = {}) => {
+  try {
+    const { page = 1, size = 50 } = params
+    const queryParams = new URLSearchParams({
+      page: page.toString(),
+      size: size.toString(),
+    })
+
+    // 경로 끝에 슬래시 추가
+    const response = await feedAPI.get(`/${feedId}/comments/${commentId}/replies/?${queryParams}`)
+    return response.data
+  } catch (error) {
+    console.error("대댓글 목록 조회 실패:", error)
     throw error
   }
 }

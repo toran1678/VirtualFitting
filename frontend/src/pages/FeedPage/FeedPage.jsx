@@ -9,7 +9,7 @@ import { getFeeds } from "../../api/feeds"
 import styles from "./FeedPage.module.css"
 
 const FeedPage = () => {
-  const { user, isAuthenticated } = useAuth()
+  const { isAuthenticated } = useAuth()
   const [feeds, setFeeds] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)

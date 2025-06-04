@@ -5,6 +5,9 @@ sqlalchemy
 mysql
 PyMySQL
 cryptography
+pytz
+
+pandas
 
 python-dotenv
 email-validator

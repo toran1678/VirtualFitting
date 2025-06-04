@@ -16,6 +16,7 @@ import ClothingBrowsePage from "./pages/ClothingBrowsePage/ClothingBrowsePage"
 import MyPage from "./pages/MyPage/MyPage"
 import FeedPage from "./pages/FeedPage/FeedPage"
 import CreateFeedPage from "./pages/CreateFeedPage/CreateFeedPage"
+import FeedDetailPage from "./pages/FeedDetailPage/FeedDetailPage"
 
 import "./App.css"
 
@@ -34,6 +35,7 @@ function App() {
             <Route path="/virtual-fitting" element={<VirtualFittingPage />} />
             <Route path="/feed" element={<FeedPage />} />
             <Route path="/create-feed" element={<CreateFeedPage />} />
+            <Route path="/feed/:feedId" element={<FeedDetailPage />} />
             <Route path="/mypage" element={<MyPage />} />
           </Routes>
         </Router>
