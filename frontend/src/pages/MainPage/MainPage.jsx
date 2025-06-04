@@ -122,6 +122,7 @@ const MainPage = () => {
       const formattedData = data.map((item) => ({
         id: item.clothing_id,
         name: item.product_name,
+        productUrl: item.product_url,
         image: item.product_image_url,
         brand: item.brand_name,
         category: item.main_category,
@@ -256,7 +257,11 @@ const MainPage = () => {
   // 상품 클릭 핸들러
   const handleProductClick = (product) => {
     console.log("상품 클릭:", product)
-    // navigate(`/product/${product.id}`)
+    if (product.productUrl) {
+      window.open(product.productUrl, "_blank", "noopener,noreferrer")
+    } else {
+      console.log("상품 URL이 없습니다:", product)
+    }
   }
 
   // 가상 피팅 핸들러

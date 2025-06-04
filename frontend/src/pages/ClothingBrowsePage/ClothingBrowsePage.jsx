@@ -275,7 +275,11 @@ const ClothingBrowsePage = () => {
   // 상품 클릭 핸들러
   const handleProductClick = (product) => {
     // 상품 상세 페이지로 이동 또는 모달 열기
-    console.log("상품 클릭:", product)
+    if (product.productUrl) {
+      window.open(product.productUrl, "_blank", "noopener,noreferrer")
+    } else {
+      console.log("상품 URL이 없습니다:", product)
+    }
     // navigate(`/product/${product.id}`)
   }
 

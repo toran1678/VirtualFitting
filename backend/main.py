@@ -16,6 +16,7 @@ from app.api.routes import register_router
 from app.api import kakao_auth_router
 from app.api.routes import clothing_items_router
 from app.api.routes import liked_clothes_router
+from app.api.routes import feeds_router
 
 # 환경 변수 로드
 load_dotenv()
@@ -60,8 +61,11 @@ app.add_middleware(
     allow_headers=["*"],  # 모든 헤더 허용
 )
 
-# 정적 파일 제공 (프로필 이미지 등)
+# 정적 파일 제공을 위한 디렉토리 생성성
 os.makedirs("uploads/profile_pictures", exist_ok=True)
+os.makedirs("uploads/feeds", exist_ok=True)
+
+# 정적 파일 제공
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # 라우터 등록
@@ -70,6 +74,7 @@ app.include_router(register_router)
 app.include_router(kakao_auth_router)
 app.include_router(clothing_items_router)
 app.include_router(liked_clothes_router)
+app.include_router(feeds_router)
 
 # 서버 상태 확인 엔드포인트
 @app.get("/health")

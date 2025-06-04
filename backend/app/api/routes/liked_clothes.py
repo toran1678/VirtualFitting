@@ -68,6 +68,7 @@ async def get_my_liked_clothes(
                 clothing_id=item.clothing_id,
                 liked_at=item.liked_at,
                 product_name=item.product_name,
+                product_url=item.product_url,
                 product_image_url=item.product_image_url,
                 brand_name=item.brand_name,
                 main_category=item.main_category,

@@ -1,0 +1,220 @@
+/* 이미지 업로드 영역 */
+.imageUploadSection {
+  padding: 1.5rem;
+}
+
+.formLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.uploadArea {
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  text-align: center;
+  background-color: var(--bg-primary);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.uploadArea:hover {
+  border-color: var(--accent-color);
+  background-color: rgba(var(--accent-color-rgb), 0.05);
+}
+
+.uploadArea.dragOver {
+  border-color: var(--accent-color);
+  background-color: rgba(var(--accent-color-rgb), 0.1);
+  transform: scale(1.02);
+}
+
+.uploadIcon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 1rem;
+  color: var(--text-secondary);
+}
+
+.uploadText {
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.uploadSubtext {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+.hiddenFileInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 이미지 미리보기 그리드 */
+.imagePreviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.imagePreviewItem {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  cursor: grab;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.imagePreviewItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.imagePreviewItem:active {
+  cursor: grabbing;
+}
+
+.imagePreviewItem.dragging {
+  opacity: 0.5;
+  transform: rotate(5deg);
+}
+
+/* 복원된 이미지 스타일 */
+.imagePreviewItem.restored {
+  border: 2px solid #f59e0b;
+  position: relative;
+}
+
+.imagePreviewItem.restored::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(245, 158, 11, 0.1);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.restoredBadge {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  background-color: #f59e0b;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imageActions {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  display: flex;
+  gap: 0.3rem;
+  z-index: 2;
+}
+
+.imageActionButton {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.7rem;
+}
+
+.deleteButton {
+  background-color: rgba(239, 68, 68, 0.9);
+  color: white;
+}
+
+.deleteButton:hover {
+  background-color: rgba(239, 68, 68, 1);
+  transform: scale(1.1);
+}
+
+.orderBadge {
+  position: absolute;
+  bottom: 0.5rem;
+  left: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: bold;
+  z-index: 2;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .imagePreviewGrid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .imagePreviewGrid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .imageUploadSection {
+    padding: 1rem;
+  }
+
+  .uploadArea {
+    padding: 1.5rem 1rem;
+  }
+
+  .uploadIcon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 0.8rem;
+  }
+
+  .uploadText {
+    font-size: 0.9rem;
+  }
+
+  .uploadSubtext {
+    font-size: 0.8rem;
+  }
+}

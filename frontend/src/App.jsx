@@ -14,6 +14,8 @@ import LoginPage from "./pages/LoginPage/LoginPage"
 import VirtualFittingPage from "./pages/VirtualFittingPage/VirtualFittingPage"
 import ClothingBrowsePage from "./pages/ClothingBrowsePage/ClothingBrowsePage"
 import MyPage from "./pages/MyPage/MyPage"
+import FeedPage from "./pages/FeedPage/FeedPage"
+import CreateFeedPage from "./pages/CreateFeedPage/CreateFeedPage"
 
 import "./App.css"
 
@@ -30,7 +32,8 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/clothing-browse" element={<ClothingBrowsePage />} />
             <Route path="/virtual-fitting" element={<VirtualFittingPage />} />
-            <Route path="/feed" element={<div>Feed Page (Coming Soon)</div>} />
+            <Route path="/feed" element={<FeedPage />} />
+            <Route path="/create-feed" element={<CreateFeedPage />} />
             <Route path="/mypage" element={<MyPage />} />
           </Routes>
         </Router>

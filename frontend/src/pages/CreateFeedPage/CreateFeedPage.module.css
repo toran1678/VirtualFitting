@@ -1,0 +1,421 @@
+.createFeedContainer {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  padding-top: var(--header-height);
+}
+
+/* 3단 레이아웃 컨테이너 - 기존과 동일 */
+.layoutContainer {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  gap: 2rem;
+  position: relative;
+}
+
+/* 왼쪽 빈 공간 */
+.leftSpacer {
+  /* 빈 공간으로 자리만 차지 */
+}
+
+/* 메인 작성 영역 */
+.createFeedContent {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* 오른쪽 사이드바 */
+.rightSidebar {
+  position: sticky;
+  top: calc(var(--header-height) + 2rem);
+  height: fit-content;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* 사용자 정보 */
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem;
+  background-color: var(--bg-primary);
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.userAvatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--accent-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.userAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.userDetails h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.userDetails span {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+/* 페이지 헤더 */
+.pageHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.pageTitle {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.backButton:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* 작성 폼 - 디자인 개선 */
+.createForm {
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.formSection {
+  padding: 1.5rem;
+  border-bottom: 1px solid var(--border-color);
+  /* 폼 섹션 내부 패딩 조정 */
+}
+
+.formSection:last-child {
+  border-bottom: none;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%; /* 너비 100%로 설정 */
+}
+
+.formLabel {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+/* 폼 입력 필드 디자인 개선 */
+.formInput {
+  width: 100%; /* 너비 100%로 설정 */
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  box-sizing: border-box; /* 중요: 패딩을 너비에 포함 */
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.1);
+}
+
+.formTextarea {
+  min-height: 120px;
+  resize: vertical;
+  font-family: inherit;
+  line-height: 1.5;
+}
+
+.characterCount {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-align: right;
+  margin-top: 0.3rem;
+}
+
+.characterCount.warning {
+  color: #f59e0b;
+}
+
+.characterCount.error {
+  color: #ef4444;
+}
+
+/* 폼 액션 버튼들 */
+.formActions {
+  display: flex;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: var(--bg-primary);
+}
+
+.actionButton {
+  flex: 1;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.primaryButton {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.primaryButton:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.primaryButton:disabled {
+  background-color: var(--text-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.secondaryButton {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.secondaryButton:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* 에러 메시지 스타일 */
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 1rem;
+  margin-bottom: 1rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  color: #dc2626;
+  font-size: 0.9rem;
+}
+
+.errorMessage svg {
+  flex-shrink: 0;
+  color: #dc2626;
+}
+
+/* 사이드바 내용 */
+.sidebarSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sidebarTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tipsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.tipItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.tipIcon {
+  width: 16px;
+  height: 16px;
+  color: var(--accent-color);
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+/* 임시저장 상태 - 사이드바와 조화로운 디자인으로 개선 */
+.autoSaveStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: transparent; /* 사이드바와 동일한 배경 */
+  transition: all 0.2s ease;
+}
+
+/* 상태별 색상 - 더 부드럽고 조화로운 색상으로 변경 */
+.autoSaveStatus.saved {
+  color: #059669; /* 더 부드러운 녹색 */
+  border-color: rgba(5, 150, 105, 0.2);
+  background-color: rgba(5, 150, 105, 0.05);
+}
+
+.autoSaveStatus.saving {
+  color: #d97706; /* 더 부드러운 주황색 */
+  border-color: rgba(217, 119, 6, 0.2);
+  background-color: rgba(217, 119, 6, 0.05);
+}
+
+.autoSaveStatus.error {
+  color: #dc2626; /* 더 부드러운 빨간색 */
+  border-color: rgba(220, 38, 38, 0.2);
+  background-color: rgba(220, 38, 38, 0.05);
+}
+
+/* 아이콘 애니메이션 추가 */
+.autoSaveStatus svg {
+  transition: transform 0.2s ease;
+}
+
+.autoSaveStatus.saving svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* 로딩 컨테이너 */
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 50vh;
+  width: 100%;
+  color: var(--text-secondary);
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1200px) {
+  .layoutContainer {
+    grid-template-columns: 280px 1fr 280px;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 1024px) {
+  .layoutContainer {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .leftSpacer {
+    display: none;
+  }
+
+  .rightSidebar {
+    position: static;
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .layoutContainer {
+    padding: 1rem 0.5rem;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .formActions {
+    flex-direction: column;
+  }
+
+  .userInfo {
+    padding: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .layoutContainer {
+    padding: 0.5rem 0;
+  }
+
+  .createForm {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .formSection {
+    padding: 1rem;
+  }
+}

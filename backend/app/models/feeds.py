@@ -17,4 +17,5 @@ class Feeds(Base):
     # 댓글 관계 설정 (1:N)
     liked_feed = relationship("LikedFeeds", back_populates="feed", cascade="all, delete")
     feed_comment = relationship("FeedComments", back_populates="feed", cascade="all, delete")
+    feed_images = relationship("FeedImages", back_populates="feed", cascade="all, delete")
     user = relationship("Users", back_populates="feed")

@@ -41,3 +41,14 @@ from .liked_clothes import (
     LikeToggleResponse,
     LikedClothesWithItemResponse,
 )
+
+from .feeds import (
+    FeedImageBase,
+    FeedImageCreate,
+    FeedImageResponse,
+    FeedCreate,
+    FeedUpdate,
+    UserBrief,
+    FeedResponse,
+    FeedListResponse,
+)

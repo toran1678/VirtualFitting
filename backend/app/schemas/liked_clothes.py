@@ -20,6 +20,7 @@ class LikedClothesWithItemResponse(BaseModel):
     clothing_id: int
     liked_at: datetime
     product_name: str
+    product_url: str
     product_image_url: str
     brand_name: str
     main_category: str

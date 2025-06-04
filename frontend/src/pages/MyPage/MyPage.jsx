@@ -208,6 +208,7 @@ const MyPage = () => {
 
       const formattedData = data.map((item) => ({
         id: item.clothing_id,
+        productUrl: item.product_url,
         image: item.product_image_url,
         title: item.product_name,
         brand: item.brand_name,
@@ -339,7 +340,11 @@ const MyPage = () => {
         navigate(`/custom/${item.id}`)
         break
       case "좋아요 의류":
-        // navigate(`/product/${item.id}`)
+        if (item.productUrl) {
+          window.open(item.productUrl, "_blank", "noopener,noreferrer")
+        } else {
+          console.log("상품 URL이 없습니다:", item)
+        }
         break
       default:
         break
