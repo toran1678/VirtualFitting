@@ -34,7 +34,9 @@ class FeedUpdate(BaseModel):
 class UserBrief(BaseModel):
     user_id: int
     nickname: str
+    email: str
     profile_picture: Optional[str] = None
+    isFollowing: Optional[bool] = False
 
     class Config:
         from_attributes = True

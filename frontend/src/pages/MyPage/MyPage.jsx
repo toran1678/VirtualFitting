@@ -4,11 +4,12 @@ import { useState, useEffect } from "react"
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom"
 import Header from "../../components/Header/Header"
 import Footer from "../../components/Footer/Footer"
-import ImagePlaceholder from "../../components/ImagePlaceholder/ImagePlaceholder"
 import { isLoggedIn, getCurrentUser } from "../../api/auth"
 import { getMyLikedClothes, toggleClothingLike } from "../../api/likedClothes"
 import styles from "./MyPage.module.css"
-import { getProfileImageUrl, handleImageError } from "../../utils/imageUtils"
+import { getProfileImageUrl, getFeedImageUrl } from "../../utils/imageUtils"
+import { getMyFeeds } from "../../api/feeds"
+import { getUserProfileByEmail } from "../../api/userProfiles"
 
 const MyPage = () => {
   const [activeTab, setActiveTab] = useState("피드")
@@ -18,7 +19,7 @@ const MyPage = () => {
   const [likedClothesLoading, setLikedClothesLoading] = useState(false)
   const [likingInProgress, setLikingInProgress] = useState(new Set())
   const navigate = useNavigate()
-  // eslint-disable-next-line no-unused-vars
+  const [feedsLoading, setFeedsLoading] = useState(false)
   const location = useLocation()
   const [searchParams] = useSearchParams()
 
@@ -37,59 +38,22 @@ const MyPage = () => {
     like: "좋아요 의류",
   }
 
-  // 임시 데이터
+  // 통계 데이터
   const [stats, setStats] = useState({
-    feeds: 24,
+    feeds: 0,
     virtualFittings: 18,
     customClothes: 12,
     likedClothes: 0,
   })
 
+  // 팔로우 데이터
+  const [followData, setFollowData] = useState({
+    following: 0,
+    followers: 0,
+  })
+
   const [tabData, setTabData] = useState({
-    피드: [
-      {
-        id: 1,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "오늘의 OOTD",
-        date: "2024-01-15",
-        likes: 45,
-      },
-      {
-        id: 2,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "겨울 코디 추천",
-        date: "2024-01-14",
-        likes: 32,
-      },
-      {
-        id: 3,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "캐주얼 룩",
-        date: "2024-01-13",
-        likes: 28,
-      },
-      {
-        id: 4,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "데이트 코디",
-        date: "2024-01-12",
-        likes: 67,
-      },
-      {
-        id: 5,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "직장인 룩",
-        date: "2024-01-11",
-        likes: 23,
-      },
-      {
-        id: 6,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "주말 나들이",
-        date: "2024-01-10",
-        likes: 41,
-      },
-    ],
+    피드: [],
     "가상 피팅": [
       {
         id: 1,
@@ -195,8 +159,64 @@ const MyPage = () => {
       const defaultParam = tabToParamMap["피드"]
       navigate(`/mypage?tab=${defaultParam}`, { replace: true })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, activeTab, navigate])
+  }, [searchParams, activeTab, navigate, paramToTabMap])
+
+  // 콘텐츠 요약 함수
+  const truncateContent = (content, maxLength = 80) => {
+    if (!content) return ""
+    if (content.length <= maxLength) return content
+    return content.substring(0, maxLength) + "..."
+  }
+
+  // 피드 데이터 로드
+  const loadMyFeeds = async () => {
+    if (!isLoggedIn()) {
+      return
+    }
+
+    setFeedsLoading(true)
+    try {
+      const data = await getMyFeeds({ page: 1, size: 20 })
+
+      if (!data || !data.feeds) {
+        console.warn("⚠️ 피드 데이터가 비어있음:", data)
+        setTabData((prev) => ({ ...prev, 피드: [] }))
+        setStats((prev) => ({ ...prev, feeds: 0 }))
+        return
+      }
+
+      // 피드 데이터 포맷팅
+      const formattedData = data.feeds.map((feed) => ({
+        id: feed.feed_id,
+        image:
+          feed.images && feed.images.length > 0
+            ? getFeedImageUrl(feed.images[0].image_url)
+            : "/placeholder.svg?height=300&width=300",
+        title: feed.title,
+        content: feed.content,
+        date: new Date(feed.created_at).toLocaleDateString("ko-KR"),
+        likes: feed.like_count || 0,
+        comments: feed.comment_count || 0,
+      }))
+
+      // 탭 데이터 업데이트
+      setTabData((prev) => ({
+        ...prev,
+        피드: formattedData,
+      }))
+
+      // 통계 업데이트
+      setStats((prev) => ({
+        ...prev,
+        feeds: data.total || formattedData.length,
+      }))
+    } catch (error) {
+      console.error("피드 로드 실패:", error)
+      alert(`피드를 불러오는 중 오류가 발생했습니다: ${error.message}`)
+    } finally {
+      setFeedsLoading(false)
+    }
+  }
 
   // 좋아요한 의류 데이터 로드
   const loadLikedClothes = async () => {
@@ -235,6 +255,39 @@ const MyPage = () => {
     }
   }
 
+  // 사용자 프로필 정보 로드 (팔로워/팔로잉 수)
+  const loadUserProfile = async (userEmail) => {
+    if (!userEmail) {
+      console.warn("사용자 이메일이 없어서 프로필 정보를 로드할 수 없습니다.")
+      return
+    }
+
+    try {
+      console.log("프로필 정보 로드 시작:", userEmail)
+      const profileData = await getUserProfileByEmail(userEmail)
+
+      if (profileData) {
+        setFollowData({
+          following: profileData.following_count || 0,
+          followers: profileData.followers_count || 0,
+        })
+
+        console.log("프로필 정보 로드 완료:", {
+          email: userEmail,
+          following: profileData.following_count,
+          followers: profileData.followers_count,
+        })
+      }
+    } catch (error) {
+      console.error("프로필 정보 로드 실패:", error)
+      // 에러가 발생해도 기본값 유지
+      setFollowData({
+        following: 0,
+        followers: 0,
+      })
+    }
+  }
+
   // 좋아요 취소 핸들러
   const handleLikeToggle = async (e, productId) => {
     e.stopPropagation()
@@ -268,8 +321,6 @@ const MyPage = () => {
           likedClothes: updatedLikedClothes.length,
         }))
       }
-
-      console.log(result.message)
     } catch (error) {
       console.error("좋아요 처리 실패:", error)
       alert("좋아요 처리 중 오류가 발생했습니다.")
@@ -293,11 +344,25 @@ const MyPage = () => {
     }
 
     navigate(`/virtual-fitting/try/${productId}`)
-    console.log(`가상 피팅 시작: ${productId}`)
   }
 
+  // 팔로잉 페이지로 이동
+  const handleFollowingClick = () => {
+    if (userData?.email) {
+      navigate(`/follow/${userData.email}?tab=following`)
+    }
+  }
+
+  // 팔로워 페이지로 이동
+  const handleFollowersClick = () => {
+    if (userData?.email) {
+      navigate(`/follow/${userData.email}?tab=followers`)
+    }
+  }
+
+  // 초기 인증 및 데이터 로드
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       if (!isLoggedIn()) {
         alert("로그인이 필요합니다.")
         navigate("/login")
@@ -305,16 +370,20 @@ const MyPage = () => {
       }
 
       const user = getCurrentUser()
+      console.log("현재 사용자 정보:", user)
+
       setUserData(user)
       setLoading(false)
+
+      // 사용자 정보가 설정된 후 데이터 로드
+      if (user?.email) {
+        // 병렬로 데이터 로드
+        await Promise.all([loadMyFeeds(), loadLikedClothes(), loadUserProfile(user.email)])
+      }
     }
 
     checkAuth()
   }, [navigate])
-
-  useEffect(() => {
-    loadLikedClothes()
-  }, [])
 
   const handleProfileEdit = () => {
     navigate("/profile/edit")
@@ -323,9 +392,29 @@ const MyPage = () => {
   const handleTabChange = (tab) => {
     const tabParam = tabToParamMap[tab]
     if (tabParam) {
-      navigate(`/mypage?tab=${tabParam}`)
+      const newUrl = `/mypage?tab=${tabParam}`
+      window.location.href = newUrl
     }
     setActiveTab(tab)
+  }
+
+  // 이미지 에러 처리 함수
+  const handleImageError = (e, title) => {
+    e.target.style.display = "none"
+    const placeholder = e.target.nextElementSibling
+    if (placeholder) {
+      placeholder.style.display = "flex"
+      placeholder.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style="color: var(--text-secondary); opacity: 0.6;">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21,15 16,10 5,21"/>
+          </svg>
+          <span style="font-size: 0.85rem; color: var(--text-secondary); text-align: center;">이미지가 없습니다</span>
+        </div>
+      `
+    }
   }
 
   const handleItemClick = (item, type) => {
@@ -402,10 +491,35 @@ const MyPage = () => {
                 <div className={styles.profileInfo}>
                   <h1 className={styles.profileName}>{userData?.nickname || "사용자"}</h1>
                   <p className={styles.profileEmail}>{userData?.email || "user@example.com"}</p>
-                  <button className={styles.editProfileButton} onClick={handleProfileEdit}>
-                    <span className={styles.editIcon}>✎</span>
-                    프로필 수정
-                  </button>
+
+                  {/* 팔로우 정보 */}
+                  <div className={styles.followInfo}>
+                    <button className={styles.followItem} onClick={handleFollowingClick} title="팔로잉 목록 보기">
+                      <span className={styles.followCount}>{followData.following}</span>
+                      <span className={styles.followLabel}>팔로잉</span>
+                    </button>
+                    <button className={styles.followItem} onClick={handleFollowersClick} title="팔로워 목록 보기">
+                      <span className={styles.followCount}>{followData.followers}</span>
+                      <span className={styles.followLabel}>팔로워</span>
+                    </button>
+                  </div>
+
+                  {/* 액션 버튼들 */}
+                  <div className={styles.actionButtons}>
+                    <button
+                      className={styles.actionButton}
+                      onClick={() => navigate("/my-avatar")}
+                      title="내 인물 이미지 관리"
+                    >
+                      인물 이미지
+                    </button>
+                    <button className={styles.actionButton} onClick={() => navigate("/my-closet")} title="내 옷장 관리">
+                      내 옷장
+                    </button>
+                    <button className={styles.actionButton} onClick={handleProfileEdit} title="프로필 수정">
+                      프로필 수정
+                    </button>
+                  </div>
                 </div>
               </div>
             </section>
@@ -443,6 +557,7 @@ const MyPage = () => {
                   >
                     {tab}
                     {tab === "좋아요 의류" && likedClothesLoading && <span className={styles.loadingDot}>...</span>}
+                    {tab === "피드" && feedsLoading && <span className={styles.loadingDot}>...</span>}
                   </button>
                 ))}
               </div>
@@ -457,13 +572,11 @@ const MyPage = () => {
                       <img
                         src={item.image || "/placeholder.svg"}
                         alt={item.title}
-                        onError={(e) => {
-                          e.target.style.display = "none"
-                          e.target.nextSibling.style.display = "flex"
-                        }}
+                        onError={(e) => handleImageError(e, item.title)}
+                        style={{ display: "block" }}
                       />
-                      <div style={{ display: "none" }} className={styles.imagePlaceholder}>
-                        <ImagePlaceholder productName={item.title} />
+                      <div className={styles.imagePlaceholder} style={{ display: "none" }}>
+                        {item.title}
                       </div>
 
                       {/* 오버레이 정보 */}
@@ -506,9 +619,16 @@ const MyPage = () => {
 
                     <div className={styles.contentInfo}>
                       <h3 className={styles.contentTitle}>{item.title}</h3>
+
+                      {/* 피드의 경우 콘텐츠 요약 추가 */}
+                      {activeTab === "피드" && item.content && (
+                        <p className={styles.contentSummary}>{truncateContent(item.content)}</p>
+                      )}
+
+                      {/* 메타 정보 */}
                       {activeTab === "피드" && (
                         <div className={styles.contentMeta}>
-                          <span className={styles.likes}>♥ {item.likes}</span>
+                          <span className={styles.comments}>💬 {item.comments}</span>
                           <span className={styles.date}>{item.date}</span>
                         </div>
                       )}

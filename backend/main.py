@@ -18,6 +18,8 @@ from app.api.routes import clothing_items_router
 from app.api.routes import liked_clothes_router
 from app.api.routes import feeds_router
 from app.api.routes import comments_router
+from app.api import user_profiles_router
+from app.api import follow_system_router
 
 # 환경 변수 로드
 load_dotenv()
@@ -78,6 +80,9 @@ app.include_router(liked_clothes_router)
 
 app.include_router(feeds_router)
 app.include_router(comments_router)
+
+app.include_router(user_profiles_router)
+app.include_router(follow_system_router)
 
 # 서버 상태 확인 엔드포인트
 @app.get("/health")

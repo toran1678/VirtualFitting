@@ -1,0 +1,174 @@
+.followButton {
+  position: relative;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+/* 크기 변형 */
+.small {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  min-width: 70px;
+}
+
+.medium {
+  padding: 0.5rem 1.2rem;
+  font-size: 0.9rem;
+  min-width: 90px;
+}
+
+.large {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  min-width: 120px;
+}
+
+/* 호버 효과 */
+.followButton:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 팔로잉 상태 */
+.followButton.following {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.followButton.following:hover {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+/* 요청 대기 상태 */
+.followButton.pending {
+  background-color: #f59e0b;
+  color: white;
+  border: 1px solid #f59e0b;
+}
+
+.followButton.pending:hover {
+  background-color: #d97706;
+  border-color: #d97706;
+}
+
+/* 로딩 상태 */
+.followButton.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.followButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.followButton:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* 버튼 텍스트 */
+.buttonText {
+  transition: opacity 0.2s ease;
+}
+
+.hoverText {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: inherit;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.followButton.following:hover .buttonText {
+  opacity: 0;
+}
+
+.followButton.following:hover .hoverText {
+  opacity: 1;
+}
+
+/* 다크모드 지원 */
+.dark-mode .followButton {
+  background-color: var(--accent-color);
+}
+
+.dark-mode .followButton:hover {
+  background-color: var(--accent-hover);
+  box-shadow: 0 4px 8px rgba(58, 134, 255, 0.3);
+}
+
+.dark-mode .followButton.following {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.dark-mode .followButton.following:hover {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.dark-mode .followButton.pending {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.dark-mode .followButton.pending:hover {
+  background-color: #d97706;
+}
+
+/* 접근성 개선 */
+.followButton:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* 애니메이션 성능 최적화 */
+.followButton {
+  will-change: transform;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .large {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+    min-width: 100px;
+  }
+
+  .medium {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    min-width: 80px;
+  }
+
+  .small {
+    padding: 0.4rem 0.7rem;
+    font-size: 0.75rem;
+    min-width: 60px;
+  }
+}

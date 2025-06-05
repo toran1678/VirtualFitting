@@ -8,6 +8,7 @@ import Footer from "../../components/Footer/Footer"
 import ImageCarousel from "../../components/ImageCarousel/ImageCarousel"
 import CommentSection from "../../components/CommentSection/CommentSection"
 import { getFeedById, toggleFeedLike } from "../../api/feeds"
+import { toggleUserFollowEnhanced } from "../../api/followSystem"
 import { getProfileImageUrl, handleProfileImageError } from "../../utils/imageUtils"
 import { getRelativeTime, formatDate } from "../../utils/dateUtils"
 import styles from "./FeedDetailPage.module.css"
@@ -15,7 +16,7 @@ import styles from "./FeedDetailPage.module.css"
 const FeedDetailPage = () => {
   const { feedId } = useParams()
   const navigate = useNavigate()
-  const { user, isAuthenticated } = useAuth()
+  const { user: currentUser, isAuthenticated } = useAuth()
 
   const [feed, setFeed] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -24,6 +25,7 @@ const FeedDetailPage = () => {
   const [likeCount, setLikeCount] = useState(0)
   const [isLikeLoading, setIsLikeLoading] = useState(false)
   const [isFollowing, setIsFollowing] = useState(false)
+  const [isFollowLoading, setIsFollowLoading] = useState(false)
 
   // 피드 데이터 로드
   useEffect(() => {
@@ -33,6 +35,8 @@ const FeedDetailPage = () => {
         setError(null)
 
         const feedData = await getFeedById(feedId)
+        console.log("피드 데이터:", feedData)
+
         setFeed(feedData)
         setIsLiked(feedData.is_liked || false)
         setLikeCount(feedData.like_count || 0)
@@ -52,7 +56,7 @@ const FeedDetailPage = () => {
 
   // 좋아요 처리
   const handleLike = async () => {
-    if (isLikeLoading || !isAuthenticated) return
+    if (isLikeLoading) return
 
     if (!isAuthenticated) {
       if (window.confirm("로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니까?")) {
@@ -94,6 +98,8 @@ const FeedDetailPage = () => {
 
   // 팔로우 처리
   const handleFollow = async () => {
+    if (isFollowLoading) return
+
     if (!isAuthenticated) {
       if (window.confirm("로그인이 필요한 기능입니다. 로그인 페이지로 이동하시겠습니까?")) {
         navigate("/login", { state: { from: `/feed/${feedId}` } })
@@ -101,18 +107,76 @@ const FeedDetailPage = () => {
       return
     }
 
+    // 자기 자신을 팔로우하려는 경우
+    if (currentUser && feed?.user && currentUser.user_id === feed.user.user_id) {
+      return // 아무것도 하지 않음
+    }
+
+    // 사용자 이메일 정보 확인
+    const userEmail = feed?.user?.email
+    if (!userEmail) {
+      console.error("사용자 이메일 정보가 없습니다:", feed?.user)
+      alert("사용자 정보를 불러올 수 없습니다. 페이지를 새로고침해주세요.")
+      return
+    }
+
     try {
+      setIsFollowLoading(true)
+
+      console.log("팔로우 API 호출:", userEmail, "현재 상태:", isFollowing)
+
+      // 낙관적 업데이트
       const newIsFollowing = !isFollowing
       setIsFollowing(newIsFollowing)
 
-      // 실제 API 호출 (추후 구현)
-      // await fetch(`/api/users/${feed.user.user_id}/follow`, {
-      //   method: newIsFollowing ? 'POST' : 'DELETE'
-      // })
+      // API 호출
+      const response = await toggleUserFollowEnhanced(userEmail)
+      console.log("팔로우 API 응답:", response)
+
+      // API 응답으로 정확한 값 업데이트
+      if (response) {
+        setIsFollowing(response.is_following)
+
+        // 피드 데이터의 사용자 정보도 업데이트
+        setFeed((prevFeed) => ({
+          ...prevFeed,
+          user: {
+            ...prevFeed.user,
+            isFollowing: response.is_following,
+            has_pending_request: response.has_pending_request || false,
+          },
+        }))
+
+        // 팔로우 요청을 보낸 경우 메시지 표시
+        if (response.message && response.message.includes("요청")) {
+          alert(response.message)
+        }
+      }
     } catch (error) {
       console.error("팔로우 처리 오류:", error)
+
+      // 오류 시 원래 상태로 복원
       setIsFollowing(!isFollowing)
-      alert("팔로우 처리 중 오류가 발생했습니다.")
+
+      if (error.response?.status === 404) {
+        alert("사용자를 찾을 수 없습니다.")
+      } else if (error.response?.status === 400) {
+        const errorMessage = error.response?.data?.detail || ""
+        if (errorMessage.includes("자기 자신")) {
+          alert("자기 자신을 팔로우할 수 없습니다.")
+        } else if (errorMessage.includes("이미 팔로우 요청")) {
+          alert("이미 팔로우 요청을 보냈습니다.")
+        } else {
+          alert("팔로우 처리 중 오류가 발생했습니다.")
+        }
+      } else if (error.response?.status === 401) {
+        alert("로그인이 필요합니다.")
+        navigate("/login")
+      } else {
+        alert("팔로우 처리 중 오류가 발생했습니다. 다시 시도해주세요.")
+      }
+    } finally {
+      setIsFollowLoading(false)
     }
   }
 
@@ -166,6 +230,19 @@ const FeedDetailPage = () => {
     }
   }
 
+  // 사용자 프로필로 이동
+  const handleUserProfile = () => {
+    const userEmail = feedUser.email
+    if (userEmail) {
+      // 자기 자신인 경우 MyPage로, 다른 사용자인 경우 UserProfile로 이동
+      if (currentUser && currentUser.email === userEmail) {
+        navigate("/mypage")
+      } else {
+        navigate(`/profile/${userEmail}`)
+      }
+    }
+  }
+
   // 로딩 중 표시
   if (loading) {
     return (
@@ -200,7 +277,7 @@ const FeedDetailPage = () => {
   // 사용자 정보 안전하게 처리
   const feedUser = feed.user || {}
   const profileImageUrl = getProfileImageUrl(feedUser.profile_picture)
-  const isOwner = isAuthenticated && user?.user_id === feed.user_id
+  const isOwner = isAuthenticated && currentUser?.user_id === feed.user_id
 
   return (
     <div className={styles.feedDetailContainer}>
@@ -228,7 +305,7 @@ const FeedDetailPage = () => {
               </button>
               <button className={styles.deleteButton} onClick={handleDelete}>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                  <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2 2h4a2 2 0 0 1 2 2v2"></path>
                   <line x1="10" y1="11" x2="10" y2="17"></line>
                   <line x1="14" y1="11" x2="14" y2="17"></line>
                 </svg>
@@ -241,7 +318,7 @@ const FeedDetailPage = () => {
         <article className={styles.feedDetail}>
           {/* 사용자 정보 헤더 */}
           <header className={styles.feedHeader}>
-            <div className={styles.userInfo}>
+            <div className={styles.userInfo} onClick={handleUserProfile}>
               <div className={styles.userAvatar}>
                 {profileImageUrl ? (
                   <img
@@ -260,12 +337,16 @@ const FeedDetailPage = () => {
                 </span>
               </div>
             </div>
+            {/* 자기 자신의 피드가 아닌 경우에만 팔로우 버튼 표시 */}
             {!isOwner && (
               <button
-                className={`${styles.followButton} ${isFollowing ? styles.following : ""}`}
+                className={`${styles.followButton} ${isFollowing ? styles.following : ""} ${
+                  isFollowLoading ? styles.loading : ""
+                }`}
                 onClick={handleFollow}
+                disabled={isFollowLoading}
               >
-                {isFollowing ? "팔로잉" : "팔로우"}
+                <span>{isFollowLoading ? "처리중..." : isFollowing ? "팔로잉" : "팔로우"}</span>
               </button>
             )}
           </header>

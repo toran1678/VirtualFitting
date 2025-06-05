@@ -14,6 +14,8 @@ import LoginPage from "./pages/LoginPage/LoginPage"
 import VirtualFittingPage from "./pages/VirtualFittingPage/VirtualFittingPage"
 import ClothingBrowsePage from "./pages/ClothingBrowsePage/ClothingBrowsePage"
 import MyPage from "./pages/MyPage/MyPage"
+import UserProfilePage from "./pages/UserProfilePage/UserProfilePage"
+import FollowPage from "./pages/FollowPage/FollowPage"
 import FeedPage from "./pages/FeedPage/FeedPage"
 import CreateFeedPage from "./pages/CreateFeedPage/CreateFeedPage"
 import FeedDetailPage from "./pages/FeedDetailPage/FeedDetailPage"
@@ -37,6 +39,8 @@ function App() {
             <Route path="/create-feed" element={<CreateFeedPage />} />
             <Route path="/feed/:feedId" element={<FeedDetailPage />} />
             <Route path="/mypage" element={<MyPage />} />
+            <Route path="/profile/:email" element={<UserProfilePage />} />
+            <Route path="/follow/:email" element={<FollowPage />} />
           </Routes>
         </Router>
       </AuthProvider>

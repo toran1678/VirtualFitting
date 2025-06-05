@@ -1,13 +1,121 @@
-.mypage {
+/* 기존 스타일들... */
+
+/* 에러 상태 스타일 추가 */
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  text-align: center;
+  min-height: 60vh;
+}
+
+.errorContainer h2 {
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  transition: color 0.3s;
+}
+
+.errorContainer p {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  margin-bottom: 2rem;
+  max-width: 500px;
+  line-height: 1.5;
+}
+
+.errorActions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.retryButton,
+.homeButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.retryButton {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.retryButton:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+.homeButton {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.homeButton:hover {
+  background-color: var(--card-bg);
+  transform: translateY(-2px);
+}
+
+/* 로딩 점 스타일 개선 */
+.loadingDot {
+  margin-left: 0.5rem;
+  color: var(--accent-color);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* 탭 로딩 컨테이너 스타일 추가 */
+.tabLoadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  text-align: center;
+  min-height: 200px;
+}
+
+.tabLoadingContainer .loadingSpinner {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 1rem;
+}
+
+.tabLoadingContainer p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+/* 기존 스타일들은 그대로 유지... */
+.userProfile {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   background-color: var(--bg-primary);
   transition: background-color 0.3s;
-  padding-top: 90px; /* 헤더 높이만큼 */
+  padding-top: 90px;
 }
 
-.mypageMain {
+.userProfileMain {
   flex: 1;
   padding: 2rem 0;
 }
@@ -20,7 +128,6 @@
   box-sizing: border-box;
 }
 
-/* 전체 컨테이너를 하나의 카드로 통합 */
 .pageContainer {
   background-color: var(--card-bg);
   border-radius: 24px;
@@ -29,7 +136,6 @@
   transition: background-color 0.3s, box-shadow 0.3s;
 }
 
-/* 프로필 섹션 */
 .profileSection {
   padding: 3rem 3rem 2rem 3rem;
   background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
@@ -103,7 +209,6 @@
   margin: 0 0 1.5rem 0;
 }
 
-/* 팔로우 정보 스타일 */
 .followInfo {
   display: flex;
   gap: 2rem;
@@ -142,19 +247,18 @@
   font-weight: 500;
 }
 
-/* 액션 버튼들 스타일 */
 .actionButtons {
   display: flex;
   gap: 1rem;
-  justify-content: flex-end; /* 우측 정렬로 변경 */
+  justify-content: flex-end;
   flex-wrap: wrap;
 }
 
-.actionButton {
+.followButton {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem 1.25rem;
+  padding: 0.75rem 1.5rem;
   background-color: rgba(255, 255, 255, 0.2);
   color: white;
   border: 2px solid rgba(255, 255, 255, 0.3);
@@ -167,20 +271,30 @@
   white-space: nowrap;
 }
 
-.actionButton:hover {
+.followButton:hover {
   background-color: rgba(255, 255, 255, 0.3);
   border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
-.actionIcon {
-  font-size: 1rem;
-  color: white;
-  font-weight: bold;
+.followButton.following {
+  background-color: rgba(255, 255, 255, 0.9);
+  color: var(--accent-color);
+  border-color: rgba(255, 255, 255, 0.9);
 }
 
-/* 통계 섹션 */
+.followButton.following:hover {
+  background-color: rgba(255, 255, 255, 1);
+  color: #dc2626;
+}
+
+.followButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 .statsSection {
   padding: 2rem 3rem;
   background-color: var(--card-bg);
@@ -224,7 +338,6 @@
   transition: color 0.3s;
 }
 
-/* 탭 섹션 */
 .tabsSection {
   padding: 1.5rem 3rem 0 3rem;
   background-color: var(--card-bg);
@@ -264,7 +377,6 @@
   color: var(--text-primary);
 }
 
-/* 콘텐츠 섹션 */
 .contentSection {
   padding: 2rem 3rem 3rem 3rem;
   background-color: var(--card-bg);
@@ -348,7 +460,6 @@
   width: 100%;
 }
 
-/* 오버레이 버튼 스타일 - 완전히 새로 작성 */
 .overlayButtons {
   display: flex;
   align-items: center;
@@ -375,10 +486,6 @@
   background-color: var(--accent-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.virtualFittingBtn:active {
-  transform: translateY(0);
 }
 
 .heartBtn {
@@ -434,7 +541,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 140px; /* 콘텐츠 요약을 위해 높이 증가 */
+  min-height: 140px;
 }
 
 .contentTitle {
@@ -451,7 +558,6 @@
   transition: color 0.3s;
 }
 
-/* 콘텐츠 요약 스타일 추가 */
 .contentSummary {
   font-size: 0.9rem;
   color: var(--text-secondary);
@@ -476,33 +582,11 @@
   margin-top: auto;
 }
 
-/* 상태별 색상 */
-.status.completed {
-  color: #10b981;
-  font-weight: 600;
-}
-
-.status.inProgress {
-  color: #f59e0b;
-  font-weight: 600;
-}
-
-.status.designing {
-  color: #6366f1;
-  font-weight: 600;
-}
-
-.likes {
-  color: #ff6b6b;
-  font-weight: 500;
-}
-
 .likesCount {
   color: #ff6b6b;
   font-weight: 500;
 }
 
-/* 댓글 수 스타일 추가 */
 .comments {
   color: #3b82f6;
   font-weight: 500;
@@ -516,11 +600,6 @@
   font-weight: 500;
 }
 
-.price {
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
 .likedDate {
   color: var(--text-secondary);
   font-size: 0.85rem;
@@ -531,7 +610,6 @@
   font-size: 0.85rem;
 }
 
-/* 빈 콘텐츠 */
 .emptyContent {
   text-align: center;
   padding: 4rem 2rem;
@@ -549,7 +627,6 @@
   color: var(--text-primary);
   margin-bottom: 0.5rem;
   transition: color 0.3s;
-  flex: 1;
 }
 
 .emptyContent p {
@@ -557,7 +634,47 @@
   margin: 0;
 }
 
-/* 로딩 */
+.privateAccount {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  background-color: var(--card-bg);
+}
+
+.privateIcon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+.privateAccount h3 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+  transition: color 0.3s;
+}
+
+.privateAccount p {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0 0 2rem 0;
+  transition: color 0.3s;
+}
+
+.privateAccount .followButton {
+  background-color: var(--accent-color);
+  color: white;
+  border: 2px solid var(--accent-color);
+}
+
+.privateAccount .followButton:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
 .loadingContainer {
   display: flex;
   flex-direction: column;
@@ -578,6 +695,13 @@
   margin-bottom: 1.5rem;
 }
 
+.loadingSubtext {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  opacity: 0.8;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -591,11 +715,6 @@
   color: var(--text-secondary);
   font-size: 1.1rem;
   margin: 0;
-}
-
-.loadingDot {
-  margin-left: 0.5rem;
-  color: var(--accent-color);
 }
 
 /* 반응형 디자인 */
@@ -612,7 +731,7 @@
 }
 
 @media (max-width: 768px) {
-  .mypageMain {
+  .userProfileMain {
     padding: 1rem 0;
   }
 
@@ -669,13 +788,23 @@
   }
 
   .actionButtons {
-    justify-content: center; /* 모바일에서는 중앙 정렬 */
+    justify-content: center;
     gap: 0.75rem;
   }
 
-  .actionButton {
+  .followButton {
     padding: 0.6rem 1rem;
     font-size: 0.85rem;
+  }
+
+  .errorActions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .retryButton,
+  .homeButton {
+    width: 200px;
   }
 }
 
@@ -734,131 +863,7 @@
     gap: 0.5rem;
   }
 
-  .actionButton {
-    padding: 0.5rem 0.8rem;
-    font-size: 0.8rem;
-  }
-}
-
-/* 다크모드 지원 */
-.dark-mode .pageContainer {
-  background-color: var(--card-bg);
-  box-shadow: var(--card-shadow);
-}
-
-.dark-mode .profileSection {
-  background: linear-gradient(135deg, var(--accent-color), var(--accent-hover));
-}
-
-.dark-mode .profileSection::after {
-  background: var(--card-bg);
-}
-
-.dark-mode .statItem {
-  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
-  border-color: var(--border-color);
-}
-
-.dark-mode .statItem:hover {
-  border-color: var(--accent-color);
-}
-
-.dark-mode .tabButtons {
-  background-color: var(--bg-secondary);
-}
-
-.dark-mode .contentItem {
-  background-color: var(--bg-primary);
-  border-color: var(--border-color);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.dark-mode .contentItem:hover {
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  border-color: var(--accent-color);
-}
-
-.dark-mode .contentOverlay {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.9), transparent);
-}
-
-/* 다크모드 버튼 스타일 */
-.dark-mode .virtualFittingBtn {
-  background-color: var(--accent-color);
-}
-
-.dark-mode .virtualFittingBtn:hover {
-  background-color: var(--accent-hover);
-  box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
-}
-
-.dark-mode .heartBtn {
-  background-color: rgba(0, 0, 0, 0.8);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.dark-mode .heartBtn:hover {
-  background-color: #ef4444;
-  color: white;
-  border-color: #ef4444;
-}
-
-/* 접근성 개선 */
-.tabButton:focus,
-.contentItem:focus,
-.virtualFittingBtn:focus,
-.heartBtn:focus {
-  outline: 2px solid var(--accent-color);
-  outline-offset: 2px;
-}
-
-/* 애니메이션 성능 최적화 */
-.contentItem,
-.statItem,
-.virtualFittingBtn,
-.heartBtn {
-  will-change: transform;
-}
-
-/* 반응형 디자인 개선 */
-@media (max-width: 768px) {
-  .profileHeader {
-    flex-direction: column;
-    text-align: center;
-    gap: 1.5rem;
-  }
-
-  .followInfo {
-    justify-content: center;
-    gap: 3rem;
-  }
-
-  .actionButtons {
-    justify-content: center; /* 모바일에서는 중앙 정렬 */
-    gap: 0.75rem;
-  }
-
-  .actionButton {
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .followInfo {
-    gap: 2rem;
-  }
-
-  .actionButtons {
-    justify-content: center;
-    gap: 0.5rem;
-  }
-
-  .actionButton {
-    width: 100%;
-    max-width: 200px;
-    justify-content: center;
+  .followButton {
     padding: 0.5rem 0.8rem;
     font-size: 0.8rem;
   }

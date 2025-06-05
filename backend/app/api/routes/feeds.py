@@ -27,6 +27,7 @@ def get_feed_with_user_status(feed, current_user_id, db):
     like_count = 0
     comment_count = 0
     is_liked = False
+    is_following = False
     
     # 좋아요 수와 현재 사용자의 좋아요 상태 확인
     try:
@@ -57,6 +58,25 @@ def get_feed_with_user_status(feed, current_user_id, db):
     except Exception:
         pass
     
+    # 팔로우 상태 확인
+    if current_user_id and user and current_user_id != user.user_id:
+        try:
+            from app.models.users import Followers
+            follow_record = db.query(Followers).filter(
+                Followers.follower_id == current_user_id,
+                Followers.following_id == user.user_id
+            ).first()
+            is_following = follow_record is not None
+        except ImportError:
+            # Followers 모델이 없는 경우
+            try:
+                from app.crud.followers import is_following as check_following
+                is_following = check_following(db, current_user_id, user.user_id)
+            except ImportError:
+                pass
+        except Exception:
+            pass
+    
     result = {
         "feed_id": feed.feed_id,
         "user_id": feed.user_id,
@@ -67,7 +87,9 @@ def get_feed_with_user_status(feed, current_user_id, db):
         "user": {
             "user_id": user.user_id,
             "nickname": user.nickname,
-            "profile_picture": user.profile_picture
+            "email": user.email,  # 이메일 정보 추가
+            "profile_picture": user.profile_picture,
+            "isFollowing": is_following  # 팔로우 상태 추가
         } if user else None,
         "images": [
             {
@@ -196,6 +218,92 @@ async def get_feeds(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"피드 목록 조회 중 오류가 발생했습니다: {str(e)}"
+        )
+        
+# 내가 작성한 피드 목록 조회
+@router.get("/my-feeds", response_model=FeedListResponse)
+async def get_my_feeds(
+    page: int = 1,
+    size: int = 10,
+    current_user: Users = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """내가 작성한 피드 목록 조회 API"""
+    try:
+        skip = (page - 1) * size
+        
+        feeds = db.query(Feeds).filter(
+            Feeds.user_id == current_user.user_id
+        ).order_by(Feeds.created_at.desc()).offset(skip).limit(size).all()
+        
+        total = db.query(Feeds).filter(Feeds.user_id == current_user.user_id).count()
+        
+        feed_list = []
+        for feed in feeds:
+            feed_data = get_feed_with_user_status(feed, current_user.user_id, db)
+            feed_list.append(feed_data)
+        
+        return {
+            "feeds": feed_list,
+            "total": total,
+            "page": page,
+            "size": size,
+            "total_pages": (total + size - 1) // size
+        }
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"내 피드 목록 조회 중 오류가 발생했습니다: {str(e)}"
+        )
+        
+# 피드 검색
+@router.get("/search", response_model=FeedListResponse)
+async def search_feeds(
+    q: str,
+    page: int = 1,
+    size: int = 10,
+    db: Session = Depends(get_db),
+    request: Request = None
+):
+    """피드 검색 API"""
+    try:
+        skip = (page - 1) * size
+        
+        # 제목이나 내용에서 검색
+        feeds = db.query(Feeds).filter(
+            (Feeds.title.contains(q)) | (Feeds.content.contains(q))
+        ).order_by(Feeds.created_at.desc()).offset(skip).limit(size).all()
+        
+        total = db.query(Feeds).filter(
+            (Feeds.title.contains(q)) | (Feeds.content.contains(q))
+        ).count()
+        
+        # 현재 사용자 확인
+        current_user_id = None
+        try:
+            if request and hasattr(request, 'session') and 'user_id' in request.session:
+                current_user_id = request.session['user_id']
+        except Exception:
+            pass
+        
+        feed_list = []
+        for feed in feeds:
+            feed_data = get_feed_with_user_status(feed, current_user_id, db)
+            feed_list.append(feed_data)
+        
+        return {
+            "feeds": feed_list,
+            "total": total,
+            "page": page,
+            "size": size,
+            "total_pages": (total + size - 1) // size
+        }
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"피드 검색 중 오류가 발생했습니다: {str(e)}"
         )
 
 # 특정 피드 조회
@@ -473,90 +581,4 @@ async def create_feed_comment(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"댓글 작성 중 오류가 발생했습니다: {str(e)}"
-        )
-
-# 내가 작성한 피드 목록 조회
-@router.get("/my-feeds", response_model=FeedListResponse)
-async def get_my_feeds(
-    page: int = 1,
-    size: int = 10,
-    current_user: Users = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """내가 작성한 피드 목록 조회 API"""
-    try:
-        skip = (page - 1) * size
-        
-        feeds = db.query(Feeds).filter(
-            Feeds.user_id == current_user.user_id
-        ).order_by(Feeds.created_at.desc()).offset(skip).limit(size).all()
-        
-        total = db.query(Feeds).filter(Feeds.user_id == current_user.user_id).count()
-        
-        feed_list = []
-        for feed in feeds:
-            feed_data = get_feed_with_user_status(feed, current_user.user_id, db)
-            feed_list.append(feed_data)
-        
-        return {
-            "feeds": feed_list,
-            "total": total,
-            "page": page,
-            "size": size,
-            "total_pages": (total + size - 1) // size
-        }
-    
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"내 피드 목록 조회 중 오류가 발생했습니다: {str(e)}"
-        )
-
-# 피드 검색
-@router.get("/search", response_model=FeedListResponse)
-async def search_feeds(
-    q: str,
-    page: int = 1,
-    size: int = 10,
-    db: Session = Depends(get_db),
-    request: Request = None
-):
-    """피드 검색 API"""
-    try:
-        skip = (page - 1) * size
-        
-        # 제목이나 내용에서 검색
-        feeds = db.query(Feeds).filter(
-            (Feeds.title.contains(q)) | (Feeds.content.contains(q))
-        ).order_by(Feeds.created_at.desc()).offset(skip).limit(size).all()
-        
-        total = db.query(Feeds).filter(
-            (Feeds.title.contains(q)) | (Feeds.content.contains(q))
-        ).count()
-        
-        # 현재 사용자 확인
-        current_user_id = None
-        try:
-            if request and hasattr(request, 'session') and 'user_id' in request.session:
-                current_user_id = request.session['user_id']
-        except Exception:
-            pass
-        
-        feed_list = []
-        for feed in feeds:
-            feed_data = get_feed_with_user_status(feed, current_user_id, db)
-            feed_list.append(feed_data)
-        
-        return {
-            "feeds": feed_list,
-            "total": total,
-            "page": page,
-            "size": size,
-            "total_pages": (total + size - 1) // size
-        }
-    
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"피드 검색 중 오류가 발생했습니다: {str(e)}"
         )

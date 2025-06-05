@@ -18,6 +18,7 @@
 /* 왼쪽 빈 공간 - 자리만 차지 */
 .leftSpacer {
   /* 빈 공간으로 자리만 차지 */
+  border-bottom: none;
 }
 
 /* 메인 피드 영역 - 정확히 가운데 */
@@ -227,4 +228,189 @@
     border-right: none;
     margin: 0 0 1rem;
   }
+}
+
+/* 더보기 버튼 컨테이너 */
+.loadMoreContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 0;
+  margin-top: 1rem;
+}
+
+/* 더보기 버튼 - 심플 버전 */
+.loadMoreButton {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.loadMoreButton:hover {
+  background-color: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
+.loadMoreButton:active {
+  transform: translateY(1px);
+}
+
+.loadMoreButton:disabled {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  border-color: var(--border-color);
+}
+
+.loadMoreButton:disabled:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+/* 로딩 인디케이터 */
+.loadingIndicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+  gap: 1rem;
+  color: var(--text-secondary);
+}
+
+.loadingIndicator span {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* 스피너 애니메이션 */
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--bg-secondary);
+  border-top: 3px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 첫 피드 작성 버튼 - 심플 버전 */
+.createFirstFeedButton {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.createFirstFeedButton:hover {
+  background-color: var(--accent-hover);
+}
+
+/* 재시도 버튼 - 심플 버전 */
+.retryButton {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+}
+
+.retryButton:hover {
+  background-color: var(--accent-hover);
+}
+
+/* 다크모드는 기본 스타일 사용 */
+@media (prefers-color-scheme: dark) {
+  .loadMoreButton {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+  }
+
+  .loadMoreButton:hover {
+    background-color: var(--accent-color);
+    color: white;
+  }
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .loadMoreButton {
+    padding: 0.9rem 2rem;
+    font-size: 0.95rem;
+    min-width: 120px;
+  }
+
+  .loadMoreContainer {
+    padding: 1.5rem 0;
+  }
+
+  .loadingIndicator {
+    padding: 1.5rem 0;
+  }
+
+  .spinner {
+    width: 35px;
+    height: 35px;
+    border-width: 2.5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .loadMoreButton {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+    border-radius: 25px;
+  }
+
+  .createFirstFeedButton {
+    padding: 0.9rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .retryButton {
+    padding: 0.7rem 1.2rem;
+    font-size: 0.85rem;
+  }
+}
+
+/* 접근성 개선 */
+.loadMoreButton:focus,
+.createFirstFeedButton:focus,
+.retryButton:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* 복잡한 효과들 제거 */
+.loadMoreButton::before {
+  display: none;
 }

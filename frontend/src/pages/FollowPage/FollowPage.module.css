@@ -1,0 +1,685 @@
+.followPageContainer {
+  min-height: 100vh;
+  background-color: var(--bg-primary);
+  padding-top: var(--header-height);
+  transition: background-color 0.3s;
+}
+
+.followPageContent {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  box-sizing: border-box;
+}
+
+/* 네비게이션 바 */
+.navigationBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.backButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.backButton:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* 사용자 헤더 */
+.userHeader {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.userAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--accent-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.userInfo {
+  flex: 1;
+}
+
+.userName {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.userEmail {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* 탭 버튼 */
+.tabButtons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: var(--bg-secondary);
+  padding: 0.5rem;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.tabButton {
+  flex: 1;
+  padding: 1rem;
+  border: none;
+  background: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.tabButton.active {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.tabButton:hover:not(.active) {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.count {
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.tabButton.active .count {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* 비공개 계정 메시지 */
+.privateAccountMessage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.privateIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.privateAccountMessage h2 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.privateAccountMessage p {
+  color: var(--text-secondary);
+  margin: 0 0 1.5rem 0;
+  max-width: 400px;
+}
+
+.followButton {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 120px;
+}
+
+.followButton:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.followButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 사용자 목록 */
+.userListContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.userListItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.userListItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--accent-color);
+}
+
+.userListInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  cursor: pointer;
+}
+
+.userListAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--accent-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.userListAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.userListDetails {
+  flex: 1;
+}
+
+.userListName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.userListEmail {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.25rem 0;
+}
+
+.userListBio {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin: 0.25rem 0 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.followListButton {
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 90px;
+  white-space: nowrap;
+}
+
+.followListButton:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.followListButton.following {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.followListButton.following:hover {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.followListButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 팔로우 요청 목록 */
+.requestsContainer {
+  margin-bottom: 2rem;
+}
+
+.requestsTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--accent-color);
+}
+
+.requestCount {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+
+.requestsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.requestItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.requestItem:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: var(--accent-color);
+}
+
+.requestUserInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.requestUserAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: var(--accent-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.requestUserAvatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.requestUserDetails {
+  flex: 1;
+}
+
+.requestUserName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+}
+
+.requestUserEmail {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0 0 0.25rem 0;
+}
+
+.requestTime {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.requestActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.acceptButton,
+.rejectButton,
+.cancelButton {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 70px;
+  border: none;
+}
+
+.acceptButton {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.acceptButton:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.rejectButton,
+.cancelButton {
+  background-color: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+}
+
+.rejectButton:hover,
+.cancelButton:hover {
+  background-color: #ef4444;
+  color: white;
+  border-color: #ef4444;
+}
+
+.acceptButton:disabled,
+.rejectButton:disabled,
+.cancelButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 로딩 및 빈 상태 */
+.loadingContainer,
+.listLoadingContainer,
+.requestsLoadingContainer,
+.errorContainer,
+.emptyListContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(var(--accent-color-rgb), 0.3);
+  border-radius: 50%;
+  border-top-color: var(--accent-color);
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.listLoadingContainer .spinner,
+.requestsLoadingContainer .spinner {
+  width: 30px;
+  height: 30px;
+  margin-bottom: 0.5rem;
+}
+
+.listLoadingContainer p,
+.requestsLoadingContainer p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.emptyListContainer {
+  padding: 2rem 1rem;
+}
+
+.emptyIcon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+  color: var(--text-secondary);
+}
+
+.emptyIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.emptyListContainer p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.errorContainer h2 {
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.errorContainer p {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+  .followPageContent {
+    padding: 1.5rem 1rem;
+  }
+
+  .userHeader {
+    padding: 1.2rem;
+    margin-bottom: 1.5rem;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .userName {
+    font-size: 1.5rem;
+  }
+
+  .tabButton {
+    padding: 0.8rem;
+    font-size: 0.95rem;
+  }
+
+  .userListItem,
+  .requestItem {
+    padding: 0.8rem;
+  }
+
+  .userListAvatar,
+  .requestUserAvatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .userListName,
+  .requestUserName {
+    font-size: 1rem;
+  }
+
+  .followListButton,
+  .acceptButton,
+  .rejectButton,
+  .cancelButton {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    min-width: 70px;
+  }
+
+  .requestActions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .followPageContent {
+    padding: 1rem 0.5rem;
+  }
+
+  .navigationBar {
+    padding: 0 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .userHeader {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+  }
+
+  .userAvatar {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+
+  .userName {
+    font-size: 1.3rem;
+  }
+
+  .tabButtons {
+    padding: 0.3rem;
+    border-radius: 8px;
+  }
+
+  .tabButton {
+    padding: 0.6rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+  }
+
+  .count {
+    padding: 0.1rem 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .userListItem,
+  .requestItem {
+    padding: 0.8rem;
+    border-radius: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+  }
+
+  .userListInfo,
+  .requestUserInfo {
+    width: 100%;
+  }
+
+  .followListButton {
+    width: 100%;
+  }
+
+  .requestActions {
+    width: 100%;
+    flex-direction: row;
+  }
+
+  .acceptButton,
+  .rejectButton,
+  .cancelButton {
+    flex: 1;
+  }
+
+  .privateAccountMessage {
+    padding: 2rem 1rem;
+  }
+
+  .privateAccountMessage h2 {
+    font-size: 1.3rem;
+  }
+
+  .privateIcon {
+    font-size: 2.5rem;
+  }
+
+  .emptyIcon {
+    width: 40px;
+    height: 40px;
+  }
+}

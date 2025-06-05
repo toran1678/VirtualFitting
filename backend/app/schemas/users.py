@@ -107,6 +107,30 @@ class UserResponse(BaseModel):
         "from_attributes": True
     }
 
+# 사용자 프로필 조회 응답 스키마 추가
+class UserProfileResponse(BaseModel):
+    user_id: int
+    email: str
+    nickname: str
+    profile_picture: Optional[str] = None
+    is_private: bool = False
+    followers_count: int = 0
+    following_count: int = 0
+    is_following: Optional[bool] = False  # 현재 로그인한 사용자가 이 사용자를 팔로우하고 있는지
+    
+    model_config = {
+        "from_attributes": True
+    }
+
+# 팔로우 관련 스키마
+class FollowRequest(BaseModel):
+    user_id: int
+
+class FollowResponse(BaseModel):
+    is_following: bool
+    followers_count: int
+    message: str
+
 class UserLogin(BaseModel):
     id: str
     password: str

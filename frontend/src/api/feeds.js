@@ -354,10 +354,25 @@ export const getMyFeeds = async (params = {}) => {
       size: size.toString(),
     })
 
+    console.log("📤 getMyFeeds 요청:", {
+      url: `/my-feeds?${queryParams}`,
+      params,
+    })
+
     const response = await feedAPI.get(`/my-feeds?${queryParams}`)
+
+    console.log("📥 getMyFeeds 응답:", response.data)
     return response.data
   } catch (error) {
-    console.error("내 피드 목록 조회 실패:", error)
+    console.error("❌ 내 피드 목록 조회 실패:", error)
+
+    // 더 상세한 에러 정보
+    if (error.response) {
+      console.error("에러 상태:", error.response.status)
+      console.error("에러 데이터:", error.response.data)
+      console.error("에러 헤더:", error.response.headers)
+    }
+
     throw error
   }
 }
