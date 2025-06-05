@@ -566,19 +566,19 @@ const UserProfilePage = () => {
                   <div className={styles.followInfo}>
                     <button
                       className={styles.followItem}
-                      onClick={() => navigate(`/following/${email}`)}
+                      onClick={() => navigate(`/follow/${email}`)}
                       title="팔로잉 목록 보기"
-                    >
-                      <span className={styles.followCount}>{userData?.following_count || 0}</span>
-                      <span className={styles.followLabel}>팔로잉</span>
-                    </button>
-                    <button
-                      className={styles.followItem}
-                      onClick={() => navigate(`/followers/${email}`)}
-                      title="팔로워 목록 보기"
                     >
                       <span className={styles.followCount}>{userData?.followers_count || 0}</span>
                       <span className={styles.followLabel}>팔로워</span>
+                    </button>
+                    <button
+                      className={styles.followItem}
+                      onClick={() => navigate(`/follow/${email}`)}
+                      title="팔로워 목록 보기"
+                    >
+                      <span className={styles.followCount}>{userData?.following_count || 0}</span>
+                      <span className={styles.followLabel}>팔로잉</span>
                     </button>
                   </div>
 
@@ -710,7 +710,20 @@ const UserProfilePage = () => {
 
                   {tabData[activeTab]?.length === 0 && !tabLoadingStates[activeTab] && (
                     <div className={styles.emptyContent}>
-                      <div className={styles.emptyIcon}>📭</div>
+                      <div className={styles.emptyIcon}>
+                        <svg
+                          width="64"
+                          height="64"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                        >
+                          <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                          <line x1="8" y1="21" x2="16" y2="21" />
+                          <line x1="12" y1="17" x2="12" y2="21" />
+                        </svg>
+                      </div>
                       <h3>아직 {activeTab}가 없습니다</h3>
                       <p>이 사용자의 {activeTab}를 기다려보세요!</p>
                     </div>
@@ -726,7 +739,12 @@ const UserProfilePage = () => {
               </>
             ) : (
               <div className={styles.privateAccount}>
-                <div className={styles.privateIcon}>🔒</div>
+                <div className={styles.privateIcon}>
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
                 <h3>비공개 계정입니다</h3>
                 <p>이 사용자의 콘텐츠를 보려면 팔로우 요청을 보내세요.</p>
                 <button

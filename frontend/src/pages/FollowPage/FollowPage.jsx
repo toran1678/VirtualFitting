@@ -64,7 +64,7 @@ const FollowPage = () => {
     }
   }, [searchParams, setSearchParams])
 
-  // 초기 데이터 로드
+  // 초기 사용자 정보 로드
   useEffect(() => {
     const loadUserData = async () => {
       if (!email) {
@@ -85,24 +85,6 @@ const FollowPage = () => {
         const isSameUser = currentUser && currentUser.email === email
         setIsCurrentUser(isSameUser)
 
-        // 현재 사용자가 조회 대상 사용자를 팔로우하고 있거나, 본인 계정이거나, 비공개 계정이 아닌 경우
-        const canViewData = !profileData.is_private || profileData.is_following || isSameUser
-
-        if (canViewData) {
-          // 탭에 따라 데이터 로드
-          if (activeTab === "followers") {
-            loadFollowers()
-          } else {
-            loadFollowing()
-          }
-
-          // 본인 계정인 경우 팔로우 요청 목록도 로드
-          if (isSameUser) {
-            loadFollowRequests()
-            loadSentRequests()
-          }
-        }
-
         setLoading(false)
       } catch (error) {
         console.error("사용자 정보 로드 실패:", error)
@@ -112,7 +94,29 @@ const FollowPage = () => {
     }
 
     loadUserData()
-  }, [email, currentUser, navigate, activeTab])
+  }, [email, currentUser, navigate])
+
+  // 사용자 정보 로드 완료 후 데이터 로드
+  useEffect(() => {
+    if (!userData || loading) return
+
+    const canViewData = !userData.is_private || userData.is_following || isCurrentUser
+
+    if (canViewData) {
+      // 현재 활성 탭에 따라 데이터 로드
+      if (activeTab === "followers") {
+        loadFollowers()
+      } else {
+        loadFollowing()
+      }
+
+      // 본인 계정인 경우 항상 팔로우 요청 목록 로드 (탭과 관계없이)
+      if (isCurrentUser) {
+        loadFollowRequests()
+        loadSentRequests()
+      }
+    }
+  }, [userData, isCurrentUser, activeTab])
 
   // 팔로워 목록 로드
   const loadFollowers = async () => {

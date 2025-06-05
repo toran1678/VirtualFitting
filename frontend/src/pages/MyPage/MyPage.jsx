@@ -494,13 +494,13 @@ const MyPage = () => {
 
                   {/* 팔로우 정보 */}
                   <div className={styles.followInfo}>
-                    <button className={styles.followItem} onClick={handleFollowingClick} title="팔로잉 목록 보기">
-                      <span className={styles.followCount}>{followData.following}</span>
-                      <span className={styles.followLabel}>팔로잉</span>
-                    </button>
                     <button className={styles.followItem} onClick={handleFollowersClick} title="팔로워 목록 보기">
                       <span className={styles.followCount}>{followData.followers}</span>
                       <span className={styles.followLabel}>팔로워</span>
+                    </button>
+                    <button className={styles.followItem} onClick={handleFollowingClick} title="팔로잉 목록 보기">
+                      <span className={styles.followCount}>{followData.following}</span>
+                      <span className={styles.followLabel}>팔로잉</span>
                     </button>
                   </div>
 

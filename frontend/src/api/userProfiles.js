@@ -135,13 +135,8 @@ export { getFollowRequests, acceptFollowRequest, rejectFollowRequest, cancelFoll
  * @returns {Promise<Array>} - 가상 피팅 목록
  */
 export const getUserVirtualFittings = async (email, params = {}) => {
-  try {
-    // 임시로 빈 배열 반환 (백엔드 구현 후 수정)
-    return []
-  } catch (error) {
-    console.error("사용자 가상 피팅 조회 실패:", error)
-    return []
-  }
+  // 임시로 빈 배열 반환 (백엔드 구현 후 수정)
+  return []
 }
 
 /**
@@ -151,11 +146,6 @@ export const getUserVirtualFittings = async (email, params = {}) => {
  * @returns {Promise<Array>} - 커스텀 의류 목록
  */
 export const getUserCustomClothes = async (email, params = {}) => {
-  try {
-    // 임시로 빈 배열 반환 (백엔드 구현 후 수정)
-    return []
-  } catch (error) {
-    console.error("사용자 커스텀 의류 조회 실패:", error)
-    return []
-  }
+  // 임시로 빈 배열 반환 (백엔드 구현 후 수정)
+  return []
 }

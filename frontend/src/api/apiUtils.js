@@ -6,7 +6,6 @@
  * @returns {Promise} - API 응답
  */
 export const retryApiCall = async (apiCall, maxRetries = 2, delay = 1000) => {
-  let lastError
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -17,8 +16,6 @@ export const retryApiCall = async (apiCall, maxRetries = 2, delay = 1000) => {
 
       return await apiCall()
     } catch (error) {
-      lastError = error
-
       // 마지막 시도였으면 에러 던지기
       if (attempt === maxRetries) {
         throw error
@@ -27,7 +24,8 @@ export const retryApiCall = async (apiCall, maxRetries = 2, delay = 1000) => {
       // 네트워크 오류나 타임아웃인 경우만 재시도
       if (!error.response || error.code === "ECONNABORTED" || error.message.includes("timeout")) {
         console.log(`API 요청 실패, ${delay}ms 후 재시도...`, error)
-        await new Promise((resolve) => setTimeout(resolve, delay))
+        const currentDelay = delay;
+        await new Promise((resolve) => setTimeout(resolve, currentDelay));
         // 다음 재시도에서 지연 시간 증가 (지수 백오프)
         delay = delay * 1.5
       } else {
