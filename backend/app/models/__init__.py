@@ -12,11 +12,13 @@ from .custom_clothing_items import CustomClothingItems
 from .liked_clothes import LikedClothes
 from .liked_feeds import LikedFeeds
 from .verification import EmailVerification
+from .person_images import PersonImages
 
 __all__ = ["Base",
            "Users",
            "Followers",
            "FollowRequests",
+           "PersonImages",
            "UserClothes",
            "ClothingItems",
            "Feeds",

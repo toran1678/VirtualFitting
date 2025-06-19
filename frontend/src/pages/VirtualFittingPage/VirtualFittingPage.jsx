@@ -8,6 +8,12 @@ import { User, Shirt, Heart, ImageIcon, Camera, Upload, Palette } from "lucide-r
 import { isLoggedIn } from "../../api/auth"
 import { getMyLikedClothes } from "../../api/likedClothes"
 import styles from "./VirtualFittingPage.module.css"
+import {
+  getPersonImages,
+  getPersonImageUrl,
+  handlePersonImageError,
+  filterValidPersonImages,
+} from "../../api/personImages"
 
 const VirtualFittingPage = () => {
   const { darkMode } = useContext(ThemeContext)
@@ -18,6 +24,8 @@ const VirtualFittingPage = () => {
   const [likedClothingLoading, setLikedClothingLoading] = useState(false)
   const [personImageFit, setPersonImageFit] = useState("contain")
   const [clothingImageFit, setClothingImageFit] = useState("contain")
+  const [personImages, setPersonImages] = useState([])
+  const [personImagesLoading, setPersonImagesLoading] = useState(false)
 
   const userImages = [
     {
@@ -88,9 +96,43 @@ const VirtualFittingPage = () => {
     }
   }
 
+  // 인물 이미지 데이터 로드
+  const loadPersonImages = async () => {
+    if (!isLoggedIn()) {
+      console.log("로그인이 필요합니다.")
+      setPersonImages([])
+      return
+    }
+
+    setPersonImagesLoading(true)
+    try {
+      const data = await getPersonImages(1, 50) // 첫 페이지, 최대 50개
+      console.log("인물 이미지 API 응답:", data)
+
+      const validImages = filterValidPersonImages(data.images || [])
+
+      // API 응답을 컴포넌트에서 사용할 형태로 변환
+      const formattedData = validImages.map((item) => ({
+        id: item.id,
+        name: item.description || `인물 이미지 ${item.id}`,
+        image: getPersonImageUrl(item.image_url),
+        created_at: item.created_at,
+        description: item.description,
+      }))
+
+      setPersonImages(formattedData)
+    } catch (error) {
+      console.error("인물 이미지 로드 실패:", error)
+      setPersonImages([])
+    } finally {
+      setPersonImagesLoading(false)
+    }
+  }
+
   useEffect(() => {
-    // 컴포넌트 마운트 시 좋아요한 의류 데이터 로드
+    // 컴포넌트 마운트 시 데이터 로드
     loadLikedClothes()
+    loadPersonImages()
   }, [])
 
   const handlePersonImageUpload = (event) => {
@@ -215,21 +257,55 @@ const VirtualFittingPage = () => {
           </div>
         )
       case "images":
+        if (personImagesLoading) {
+          return (
+            <div className={styles.loadingContainer}>
+              <div className={styles.loadingSpinner}></div>
+              <p>내 이미지를 불러오는 중...</p>
+            </div>
+          )
+        }
+
+        if (!isLoggedIn()) {
+          return (
+            <div className={styles.emptyState}>
+              <ImageIcon className={styles.emptyIcon} />
+              <h3>로그인이 필요합니다</h3>
+              <p>내 이미지를 보려면 로그인해주세요.</p>
+            </div>
+          )
+        }
+
+        if (personImages.length === 0) {
+          return (
+            <div className={styles.emptyState}>
+              <ImageIcon className={styles.emptyIcon} />
+              <h3>업로드된 이미지가 없습니다</h3>
+              <p>인물 이미지 관리 페이지에서 이미지를 추가해보세요!</p>
+            </div>
+          )
+        }
+
         return (
           <div className={styles.itemsGrid}>
-            {userImages.map((item) => (
-              <div key={item.id} className={styles.gridItem} onClick={() => handleUserImageSelect(item)}>
+            {personImages.map((item) => (
+              <div key={item.id} className={styles.personImageGridItem} onClick={() => handleUserImageSelect(item)}>
                 <img
-                  src={item.image || "/placeholder.svg"}
+                  src={item.image || "/placeholder.svg?height=300&width=200&text=No+Image"}
                   alt={item.name}
-                  onError={(e) => handleImageError(e, item.name)}
+                  onError={(e) => handlePersonImageError(e, item.name)}
                   style={{ display: "block" }}
                 />
-                <div className={styles.imagePlaceholder} style={{ display: "none" }}>
+                <div className={styles.personImagePlaceholder} style={{ display: "none" }}>
                   {item.name}
                 </div>
-                <div className={styles.itemInfo}>
+                <div className={styles.personImageItemInfo}>
                   <h4>{item.name}</h4>
+                  <div className={styles.personImageItemMeta}>
+                    <span className={styles.personImageCategory}>
+                      {new Date(item.created_at).toLocaleDateString("ko-KR")}
+                    </span>
+                  </div>
                 </div>
               </div>
             ))}
@@ -394,6 +470,7 @@ const VirtualFittingPage = () => {
               onClick={() => setActiveTab("images")}
             >
               <ImageIcon className={styles.inlineIcon} /> 내 이미지
+              {personImagesLoading && <span style={{ marginLeft: "0.5rem", color: "var(--accent-color)" }}>...</span>}
             </button>
             <button
               className={`${styles.tabBtn} ${activeTab === "custom" ? styles.active : ""}`}

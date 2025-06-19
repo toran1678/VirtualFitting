@@ -1,0 +1,245 @@
+"use client"
+
+import { useState, useRef, useCallback, useEffect } from "react"
+import ReactCrop, { centerCrop, makeAspectCrop } from "react-image-crop"
+import "react-image-crop/dist/ReactCrop.css"
+import styles from "../PersonImageManagePage.module.css"
+import { X, Crop, Upload } from "lucide-react"
+import { uploadPersonImage } from "../../../api/personImages"
+
+const ImageUploadModal = ({ image, onClose, onUploadComplete }) => {
+  const [description, setDescription] = useState("")
+  const [crop, setCrop] = useState()
+  const [completedCrop, setCompletedCrop] = useState()
+  const [imageSrc, setImageSrc] = useState("")
+  const [uploading, setUploading] = useState(false)
+  const [showCrop, setShowCrop] = useState(false)
+  const imgRef = useRef(null)
+  const canvasRef = useRef(null)
+  const [croppedImageSrc, setCroppedImageSrc] = useState("")
+
+  // 이미지 로드 시 초기 설정
+  useEffect(() => {
+    if (image?.file) {
+      const reader = new FileReader()
+      reader.onload = (e) => {
+        setImageSrc(e.target.result)
+      }
+      reader.readAsDataURL(image.file)
+    }
+  }, [image])
+
+  // 이미지 로드 완료 시 기본 크롭 설정
+  const onImageLoad = useCallback((e) => {
+    const { width, height } = e.currentTarget
+    const crop = centerCrop(
+      makeAspectCrop(
+        {
+          unit: "%",
+          width: 80,
+        },
+        3 / 4, // 3:4 비율 (인물 사진에 적합)
+        width,
+        height,
+      ),
+      width,
+      height,
+    )
+    setCrop(crop)
+  }, [])
+
+  // 크롭된 이미지를 캔버스에 그리기
+  const getCroppedImg = useCallback(() => {
+    if (!completedCrop || !imgRef.current || !canvasRef.current) {
+      return null
+    }
+
+    const image = imgRef.current
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext("2d")
+
+    const scaleX = image.naturalWidth / image.width
+    const scaleY = image.naturalHeight / image.height
+
+    canvas.width = completedCrop.width * scaleX
+    canvas.height = completedCrop.height * scaleY
+
+    ctx.drawImage(
+      image,
+      completedCrop.x * scaleX,
+      completedCrop.y * scaleY,
+      completedCrop.width * scaleX,
+      completedCrop.height * scaleY,
+      0,
+      0,
+      canvas.width,
+      canvas.height,
+    )
+
+    return new Promise((resolve) => {
+      canvas.toBlob(resolve, "image/jpeg", 0.9)
+    })
+  }, [completedCrop])
+
+  // 크롭 완료 처리
+  const handleCropComplete = useCallback(async () => {
+    if (!completedCrop || !imgRef.current || !canvasRef.current) {
+      setShowCrop(false)
+      return
+    }
+
+    const croppedBlob = await getCroppedImg()
+    if (croppedBlob) {
+      const croppedUrl = URL.createObjectURL(croppedBlob)
+      setCroppedImageSrc(croppedUrl)
+    }
+    setShowCrop(false)
+  }, [completedCrop, getCroppedImg])
+
+  // 업로드 처리
+  const handleUpload = async () => {
+    if (!description.trim()) {
+      alert("이미지 설명을 입력해주세요.")
+      return
+    }
+
+    setUploading(true)
+    try {
+      let fileToUpload = image.file
+
+      // 크롭이 적용된 경우 크롭된 이미지 사용
+      if (croppedImageSrc && completedCrop) {
+        const croppedBlob = await getCroppedImg()
+        if (croppedBlob) {
+          fileToUpload = new File([croppedBlob], image.file.name, {
+            type: "image/jpeg",
+          })
+        }
+      }
+
+      const result = await uploadPersonImage(fileToUpload, description.trim())
+
+      if (result.success) {
+        onUploadComplete(result.image)
+        alert("이미지가 성공적으로 업로드되었습니다!")
+      } else {
+        throw new Error(result.message || "업로드 실패")
+      }
+    } catch (error) {
+      console.error("업로드 실패:", error)
+      let errorMessage = "이미지 업로드 중 오류가 발생했습니다."
+
+      if (error.response?.data?.detail) {
+        errorMessage = error.response.data.detail
+      } else if (error.message) {
+        errorMessage = error.message
+      }
+
+      alert(errorMessage)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  return (
+    <div className={styles.modalOverlay} onClick={onClose}>
+      <div className={styles.uploadModal} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <h2>이미지 업로드</h2>
+          <button className={styles.closeButton} onClick={onClose}>
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className={styles.modalContent}>
+          {/* 이미지 미리보기 및 크롭 */}
+          <div className={styles.imagePreviewSection}>
+            {imageSrc && (
+              <div className={styles.cropContainer}>
+                {showCrop ? (
+                  <ReactCrop
+                    crop={crop}
+                    onChange={(_, percentCrop) => setCrop(percentCrop)}
+                    onComplete={(c) => setCompletedCrop(c)}
+                    aspect={3 / 4}
+                    minWidth={100}
+                    minHeight={133}
+                  >
+                    <img
+                      ref={imgRef}
+                      src={imageSrc || "/placeholder.svg"}
+                      alt="업로드할 이미지"
+                      onLoad={onImageLoad}
+                      className={styles.cropImage}
+                    />
+                  </ReactCrop>
+                ) : (
+                  <img
+                    src={croppedImageSrc || imageSrc || "/placeholder.svg"}
+                    alt="업로드할 이미지"
+                    className={styles.previewImage}
+                  />
+                )}
+              </div>
+            )}
+
+            {/* 크롭 토글 버튼 */}
+            <div className={styles.cropControls}>
+              <button
+                className={`${styles.cropToggleButton} ${showCrop ? styles.active : ""}`}
+                onClick={showCrop ? handleCropComplete : () => setShowCrop(true)}
+              >
+                <Crop size={18} />
+                {showCrop ? "크롭 완료" : "이미지 자르기"}
+              </button>
+            </div>
+          </div>
+
+          {/* 설명 입력 */}
+          <div className={styles.descriptionSection}>
+            <label className={styles.label}>
+              이미지 설명 <span className={styles.required}>*</span>
+            </label>
+            <textarea
+              className={styles.descriptionInput}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="예: 정면 전신 사진, 캐주얼 스타일 등"
+              maxLength={200}
+              rows={3}
+            />
+            <div className={styles.characterCount}>{description.length}/200</div>
+          </div>
+        </div>
+
+        <div className={styles.modalFooter}>
+          <button className={styles.cancelButton} onClick={onClose}>
+            취소
+          </button>
+          <button
+            className={styles.uploadSubmitButton}
+            onClick={handleUpload}
+            disabled={uploading || !description.trim()}
+          >
+            {uploading ? (
+              <>
+                <div className={styles.buttonSpinner}></div>
+                업로드 중...
+              </>
+            ) : (
+              <>
+                <Upload size={18} />
+                업로드
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* 숨겨진 캔버스 (크롭 처리용) */}
+        <canvas ref={canvasRef} style={{ display: "none" }} />
+      </div>
+    </div>
+  )
+}
+
+export default ImageUploadModal

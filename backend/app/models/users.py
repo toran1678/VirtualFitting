@@ -44,6 +44,9 @@ class Users(Base):
     # 팔로우 관계 설정
     following = relationship("Followers", foreign_keys="Followers.follower_id", back_populates="follower", cascade="all, delete")
     followers = relationship("Followers", foreign_keys="Followers.following_id", back_populates="following", cascade="all, delete")
+    
+    # 인물 이미지 관계 설정
+    person_images = relationship("PersonImages", back_populates="user", cascade="all, delete")
 
 # 팔로우 테이블 추가
 class Followers(Base):

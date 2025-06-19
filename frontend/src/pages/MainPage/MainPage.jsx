@@ -9,7 +9,7 @@ import { toggleClothingLike, getMyLikedClothingIds } from "../../api/likedClothe
 import styles from "./MainPage.module.css"
 import { getPopularItems, getLatestItems, getCategories, browseClothingItems } from "../../api/clothing_items"
 import { getMyLikedClothes } from "../../api/likedClothes"
-import ImagePlaceholder from "../../components/ImagePlaceholder/ImagePlaceholder"
+// 이 줄을 제거
 import { Heart, Clock, AlertTriangle, Gift } from "lucide-react"
 
 const MainPage = () => {
@@ -255,6 +255,25 @@ const MainPage = () => {
     }
   }
 
+  // 이미지 에러 처리 함수
+  const handleImageError = (e, title) => {
+    e.target.style.display = "none"
+    const placeholder = e.target.nextElementSibling
+    if (placeholder) {
+      placeholder.style.display = "flex"
+      placeholder.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style="color: var(--text-secondary); opacity: 0.6;">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21,15 16,10 5,21"/>
+          </svg>
+          <span style="font-size: 0.85rem; color: var(--text-secondary); text-align: center;">이미지가 없습니다</span>
+        </div>
+      `
+    }
+  }
+
   // 상품 클릭 핸들러
   const handleProductClick = (product) => {
     console.log("상품 클릭:", product)
@@ -399,14 +418,29 @@ const MainPage = () => {
                         <img
                           src={product.image || "/placeholder.svg"}
                           alt={product.name}
-                          onError={(e) => {
-                            e.target.style.display = "none"
-                            e.target.nextSibling.style.display = "flex"
-                          }}
+                          onError={(e) => handleImageError(e, product.name)}
+                          style={{ display: "block" }}
                         />
                       ) : null}
                       <div style={{ display: product.image ? "none" : "flex" }} className={styles.imagePlaceholder}>
-                        <ImagePlaceholder productName={product.name} />
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}>
+                          <svg
+                            width="48"
+                            height="48"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            style={{ color: "var(--text-secondary)", opacity: 0.6 }}
+                          >
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <polyline points="21,15 16,10 5,21" />
+                          </svg>
+                          <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", textAlign: "center" }}>
+                            이미지가 없습니다
+                          </span>
+                        </div>
                       </div>
 
                       <div className={styles.productOverlay}>
@@ -496,14 +530,33 @@ const MainPage = () => {
                             <img
                               src={product.image || "/placeholder.svg"}
                               alt={product.name}
-                              onError={(e) => {
-                                e.target.style.display = "none"
-                                e.target.nextSibling.style.display = "flex"
-                              }}
+                              onError={(e) => handleImageError(e, product.name)}
+                              style={{ display: "block" }}
                             />
                           ) : null}
                           <div style={{ display: product.image ? "none" : "flex" }} className={styles.imagePlaceholder}>
-                            <ImagePlaceholder productName={product.name} />
+                            <div
+                              style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}
+                            >
+                              <svg
+                                width="48"
+                                height="48"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                style={{ color: "var(--text-secondary)", opacity: 0.6 }}
+                              >
+                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                                <circle cx="8.5" cy="8.5" r="1.5" />
+                                <polyline points="21,15 16,10 5,21" />
+                              </svg>
+                              <span
+                                style={{ fontSize: "0.85rem", color: "var(--text-secondary)", textAlign: "center" }}
+                              >
+                                이미지가 없습니다
+                              </span>
+                            </div>
                           </div>
 
                           <div className={styles.productOverlay}>
@@ -577,25 +630,33 @@ const MainPage = () => {
                   likedProducts.map((product) => (
                     <div key={product.id} className={styles.productCard} onClick={() => handleProductClick(product)}>
                       <div className={styles.productImage}>
-                        <img src={product.image || "/placeholder.svg"} alt={product.name} />
-
-                        <div className={styles.productOverlay}>
-                          <button className={styles.tryOnButton} onClick={(e) => handleTryOn(e, product)}>
-                            가상 피팅
-                          </button>
-                          <button
-                            className={`${styles.likeButton} ${styles.liked}`}
-                            onClick={(e) => handleLikeToggle(e, product.id)}
-                            disabled={likingInProgress.has(product.id)}
+                        <img
+                          src={product.image || "/placeholder.svg"}
+                          alt={product.name}
+                          onError={(e) => handleImageError(e, product.name)}
+                          style={{ display: "block" }}
+                        />
+                        <div style={{ display: "none" }} className={styles.imagePlaceholder}>
+                          <div
+                            style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem" }}
                           >
-                            <span className={styles.heartIcon}>
-                              {likingInProgress.has(product.id) ? (
-                                <Clock size={16} />
-                              ) : (
-                                <Heart size={16} fill="currentColor" />
-                              )}
+                            <svg
+                              width="48"
+                              height="48"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.5"
+                              style={{ color: "var(--text-secondary)", opacity: 0.6 }}
+                            >
+                              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                              <circle cx="8.5" cy="8.5" r="1.5" />
+                              <polyline points="21,15 16,10 5,21" />
+                            </svg>
+                            <span style={{ fontSize: "0.85rem", color: "var(--text-secondary)", textAlign: "center" }}>
+                              이미지가 없습니다
                             </span>
-                          </button>
+                          </div>
                         </div>
                       </div>
 

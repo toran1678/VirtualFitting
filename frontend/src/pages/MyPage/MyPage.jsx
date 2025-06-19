@@ -10,6 +10,7 @@ import styles from "./MyPage.module.css"
 import { getProfileImageUrl, getFeedImageUrl } from "../../utils/imageUtils"
 import { getMyFeeds } from "../../api/feeds"
 import { getUserProfileByEmail } from "../../api/userProfiles"
+import { Heart, Clock } from "lucide-react"
 
 const MyPage = () => {
   const [activeTab, setActiveTab] = useState("피드")
@@ -664,28 +665,9 @@ const MyPage = () => {
                             >
                               <span className={styles.heartIcon}>
                                 {likingInProgress.has(item.id) ? (
-                                  <svg
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                  >
-                                    <circle cx="12" cy="12" r="10" />
-                                    <polyline points="12,6 12,12 16,14" />
-                                  </svg>
+                                  <Clock size={16} />
                                 ) : (
-                                  <svg
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                  >
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                  </svg>
+                                  <Heart size={16} fill="currentColor" />
                                 )}
                               </span>
                             </button>

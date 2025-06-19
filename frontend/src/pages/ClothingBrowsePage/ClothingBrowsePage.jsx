@@ -9,6 +9,7 @@ import { browseClothingItems, getCategories } from "../../api/clothing_items"
 import { toggleClothingLike, getMyLikedClothingIds } from "../../api/likedClothes"
 import { isLoggedIn } from "../../api/auth"
 import styles from "./ClothingBrowsePage.module.css"
+import { Heart, AlertTriangle, Search, Clock } from "lucide-react"
 
 const ClothingBrowsePage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -318,7 +319,7 @@ const ClothingBrowsePage = () => {
                     className={styles.searchInput}
                   />
                   <button type="submit" className={styles.searchButton}>
-                    🔍
+                    <Search size={16} />
                   </button>
                 </form>
               </div>
@@ -465,7 +466,9 @@ const ClothingBrowsePage = () => {
                 </div>
               ) : error ? (
                 <div className={styles.errorContainer}>
-                  <div className={styles.errorIcon}>⚠️</div>
+                  <div className={styles.errorIcon}>
+                    <AlertTriangle size={48} />
+                  </div>
                   <p>{error}</p>
                   <button className={styles.retryButton} onClick={() => loadProducts(filters)}>
                     다시 시도
@@ -509,11 +512,13 @@ const ClothingBrowsePage = () => {
                               disabled={likingInProgress.has(product.id)}
                             >
                               <span className={styles.heartIcon}>
-                                {likingInProgress.has(product.id)
-                                  ? "⏳"
-                                  : likedClothingIds.has(product.id)
-                                    ? "❤️"
-                                    : "🤍"}
+                                {likingInProgress.has(product.id) ? (
+                                  <Clock size={16} />
+                                ) : likedClothingIds.has(product.id) ? (
+                                  <Heart size={16} fill="currentColor" />
+                                ) : (
+                                  <Heart size={16} />
+                                )}
                               </span>
                             </button>
                           </div>
@@ -526,7 +531,7 @@ const ClothingBrowsePage = () => {
                           <h3 className={styles.productName}>{product.name}</h3>
                           <div className={styles.productMeta}>
                             <span className={styles.likesCount}>
-                              <span className={styles.likesIcon}>❤️</span>
+                              <Heart size={14} className={styles.likesIcon} />
                               {product.likes.toLocaleString()} {/* 크롤링한 원래 좋아요 수 유지 */}
                             </span>
                             <span className={styles.genderTag}>{product.gender}</span>

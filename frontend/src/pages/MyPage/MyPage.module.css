@@ -386,22 +386,34 @@
   width: 44px;
   height: 44px;
   background-color: rgba(255, 255, 255, 0.9);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #6b7280; /* 회색으로 변경 */
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
 }
 
 .heartBtn:hover {
-  background-color: #ef4444;
+  background-color: #ff6b6b;
   color: white;
-  border-color: #ef4444;
-  transform: translateY(-2px);
+  border-color: #ff6b6b;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+}
+
+.heartBtn.liked {
+  background-color: #ff6b6b;
+  color: white;
+  border-color: #ff6b6b;
+}
+
+.heartBtn.liked:hover {
+  background-color: #ff5252;
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 20px rgba(255, 82, 82, 0.4);
 }
 
 .heartBtn:disabled {
@@ -817,15 +829,25 @@
 }
 
 .dark-mode .heartBtn {
-  background-color: rgba(0, 0, 0, 0.8);
-  color: #ef4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #9ca3af; /* 다크모드에서 회색 */
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.dark-mode .heartBtn.liked {
+  background-color: #ff6b6b;
+  color: white;
+  border-color: #ff6b6b;
 }
 
 .dark-mode .heartBtn:hover {
-  background-color: #ef4444;
+  background-color: #ff6b6b;
   color: white;
-  border-color: #ef4444;
+}
+
+.dark-mode .heartBtn.liked:hover {
+  background-color: #ff5252;
+  color: white;
 }
 
 /* 접근성 개선 */
