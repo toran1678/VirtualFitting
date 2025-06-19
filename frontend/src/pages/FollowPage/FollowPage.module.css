@@ -161,8 +161,21 @@
 }
 
 .privateIcon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  background-color: var(--bg-primary);
+  border-radius: 50%;
+  margin-bottom: 1.5rem;
+  color: var(--text-secondary);
+  border: 2px solid var(--border-color);
+}
+
+.privateIcon svg {
+  width: 48px;
+  height: 48px;
 }
 
 .privateAccountMessage h2 {

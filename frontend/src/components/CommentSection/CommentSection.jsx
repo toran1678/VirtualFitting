@@ -155,21 +155,14 @@ const CommentSection = ({ feedId }) => {
     }
 
     try {
-      console.log("💬 대댓글 작성 요청:", { feedId, parentId, content })
-
       const response = await createFeedComment(feedId, content.trim(), parentId)
-
-      console.log("✅ 대댓글 작성 완료:", response)
 
       // 대댓글을 해당 부모 댓글에 추가
       setComments((prev) => addReplyToTree(prev, parentId, response))
       setTotalComments((prev) => prev + 1)
 
-      console.log("대댓글이 성공적으로 작성되었습니다.")
       return response
     } catch (err) {
-      console.error("대댓글 작성 실패:", err)
-
       let errorMessage = "대댓글 작성 중 오류가 발생했습니다."
       if (err.response?.data?.detail) {
         errorMessage = err.response.data.detail

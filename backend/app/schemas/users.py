@@ -60,6 +60,16 @@ class RegisterResponse(BaseModel):
                     "birth_date": "1990-01-01",
                     "phone_number": "010-1234-5678",
                     "address": "서울시 강남구"
+                },
+                {
+                    "id": "test2",
+                    "name": "김철수",
+                    "password": "password1!",
+                    "nickname": "철동이",
+                    "email": "test2@example.com",
+                    "birth_date": "1990-01-01",
+                    "phone_number": "010-1234-5674",
+                    "address": "서울시 강남구"
                 }
             ]
         }

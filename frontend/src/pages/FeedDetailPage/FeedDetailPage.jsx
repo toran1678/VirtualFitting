@@ -7,7 +7,7 @@ import Header from "../../components/Header/Header"
 import Footer from "../../components/Footer/Footer"
 import ImageCarousel from "../../components/ImageCarousel/ImageCarousel"
 import CommentSection from "../../components/CommentSection/CommentSection"
-import { getFeedById, toggleFeedLike } from "../../api/feeds"
+import { getFeedById, toggleFeedLike, deleteFeed } from "../../api/feeds"
 import { toggleUserFollowEnhanced } from "../../api/followSystem"
 import { getProfileImageUrl, handleProfileImageError } from "../../utils/imageUtils"
 import { getRelativeTime, formatDate } from "../../utils/dateUtils"
@@ -220,8 +220,7 @@ const FeedDetailPage = () => {
     }
 
     try {
-      // 실제 API 호출 (추후 구현)
-      // await deleteFeed(feedId)
+      await deleteFeed(feedId)
       alert("피드가 삭제되었습니다.")
       navigate("/feed")
     } catch (error) {

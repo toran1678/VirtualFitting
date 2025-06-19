@@ -8,7 +8,7 @@ class CustomClothingItems(Base):
     __tablename__ = "custom_clothing_items"
 
     custom_clothing_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
     custom_name = Column(String(100), nullable=False)
     custom_image_url = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

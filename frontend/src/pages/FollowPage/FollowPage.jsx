@@ -420,7 +420,13 @@ const FollowPage = () => {
         {/* 비공개 계정 메시지 */}
         {isPrivateAndNotFollowing ? (
           <div className={styles.privateAccountMessage}>
-            <div className={styles.privateIcon}>🔒</div>
+            <div className={styles.privateIcon}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+                <circle cx="12" cy="16" r="1" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+              </svg>
+            </div>
             <h2>비공개 계정입니다</h2>
             <p>이 사용자의 팔로잉/팔로워 목록을 보려면 팔로우 요청을 보내세요.</p>
             <button

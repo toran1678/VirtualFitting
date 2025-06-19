@@ -123,6 +123,25 @@ const VirtualFittingPage = () => {
     setSelectedClothingImage(clothing.image)
   }
 
+  // 이미지 에러 처리 함수 추가 (handleClothingSelect 함수 다음에)
+  const handleImageError = (e, title) => {
+    e.target.style.display = "none"
+    const placeholder = e.target.nextElementSibling
+    if (placeholder) {
+      placeholder.style.display = "flex"
+      placeholder.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style="color: var(--text-secondary); opacity: 0.6;">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21,15 16,10 5,21"/>
+          </svg>
+          <span style="font-size: 0.85rem; color: var(--text-secondary); text-align: center;">이미지가 없습니다</span>
+        </div>
+      `
+    }
+  }
+
   const handleVirtualFitting = () => {
     if (!selectedPersonImage || !selectedClothingImage) {
       alert("사람 이미지와 의류 이미지를 모두 선택해주세요!")
@@ -178,10 +197,12 @@ const VirtualFittingPage = () => {
                 <img
                   src={item.image || "/placeholder.svg"}
                   alt={item.name}
-                  onError={(e) => {
-                    e.target.src = "/placeholder.svg?height=200&width=200&text=" + encodeURIComponent(item.name)
-                  }}
+                  onError={(e) => handleImageError(e, item.name)}
+                  style={{ display: "block" }}
                 />
+                <div className={styles.imagePlaceholder} style={{ display: "none" }}>
+                  {item.name}
+                </div>
                 <div className={styles.itemInfo}>
                   <h4>{item.name}</h4>
                   <div className={styles.itemMeta}>
@@ -198,7 +219,15 @@ const VirtualFittingPage = () => {
           <div className={styles.itemsGrid}>
             {userImages.map((item) => (
               <div key={item.id} className={styles.gridItem} onClick={() => handleUserImageSelect(item)}>
-                <img src={item.image || "/placeholder.svg"} alt={item.name} />
+                <img
+                  src={item.image || "/placeholder.svg"}
+                  alt={item.name}
+                  onError={(e) => handleImageError(e, item.name)}
+                  style={{ display: "block" }}
+                />
+                <div className={styles.imagePlaceholder} style={{ display: "none" }}>
+                  {item.name}
+                </div>
                 <div className={styles.itemInfo}>
                   <h4>{item.name}</h4>
                 </div>
@@ -211,7 +240,15 @@ const VirtualFittingPage = () => {
           <div className={styles.itemsGrid}>
             {customClothing.map((item) => (
               <div key={item.id} className={styles.gridItem} onClick={() => handleClothingSelect(item)}>
-                <img src={item.image || "/placeholder.svg"} alt={item.name} />
+                <img
+                  src={item.image || "/placeholder.svg"}
+                  alt={item.name}
+                  onError={(e) => handleImageError(e, item.name)}
+                  style={{ display: "block" }}
+                />
+                <div className={styles.imagePlaceholder} style={{ display: "none" }}>
+                  {item.name}
+                </div>
                 <div className={styles.itemInfo}>
                   <h4>{item.name}</h4>
                   <div className={styles.itemMeta}>

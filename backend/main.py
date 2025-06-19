@@ -20,6 +20,7 @@ from app.api.routes import feeds_router
 from app.api.routes import comments_router
 from app.api import user_profiles_router
 from app.api import follow_system_router
+from app.api.routes import user_profile_router # 사용자 프로필 수정정
 
 # 환경 변수 로드
 load_dotenv()
@@ -77,6 +78,7 @@ app.include_router(register_router)
 app.include_router(kakao_auth_router)
 app.include_router(clothing_items_router)
 app.include_router(liked_clothes_router)
+app.include_router(user_profile_router)
 
 app.include_router(feeds_router)
 app.include_router(comments_router)

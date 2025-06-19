@@ -19,6 +19,8 @@ import FollowPage from "./pages/FollowPage/FollowPage"
 import FeedPage from "./pages/FeedPage/FeedPage"
 import CreateFeedPage from "./pages/CreateFeedPage/CreateFeedPage"
 import FeedDetailPage from "./pages/FeedDetailPage/FeedDetailPage"
+import EditFeedPage from "./pages/EditFeedPage/EditFeedPage"
+import ProfileEditPage from "./pages/ProfileEditPage/ProfileEditPage"
 
 import "./App.css"
 
@@ -38,7 +40,9 @@ function App() {
             <Route path="/feed" element={<FeedPage />} />
             <Route path="/create-feed" element={<CreateFeedPage />} />
             <Route path="/feed/:feedId" element={<FeedDetailPage />} />
+            <Route path="/feed/:feedId/edit" element={<EditFeedPage />} />
             <Route path="/mypage" element={<MyPage />} />
+            <Route path="/profile/edit" element={<ProfileEditPage />}/>
             <Route path="/profile/:email" element={<UserProfilePage />} />
             <Route path="/follow/:email" element={<FollowPage />} />
           </Routes>

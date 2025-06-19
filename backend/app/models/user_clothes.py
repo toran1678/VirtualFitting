@@ -7,7 +7,7 @@ class UserClothes(Base):
     __tablename__ = "user_clothes"
     
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
     image_url = Column(String(255), nullable=False)
     color = Column(String(50))
     season = Column(String(20))

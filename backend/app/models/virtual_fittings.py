@@ -7,7 +7,7 @@ class VirtualFittings(Base):
     __tablename__ = "virtual_fittings"
 
     fitting_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
     # product_id = Column(Integer, ForeignKey("clothing_items.product_id"), nullable=False)
     fitting_image_url = Column(String(255), nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))

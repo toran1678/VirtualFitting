@@ -10,6 +10,7 @@ import styles from "./MainPage.module.css"
 import { getPopularItems, getLatestItems, getCategories, browseClothingItems } from "../../api/clothing_items"
 import { getMyLikedClothes } from "../../api/likedClothes"
 import ImagePlaceholder from "../../components/ImagePlaceholder/ImagePlaceholder"
+import { Heart, Clock, AlertTriangle, Gift } from "lucide-react"
 
 const MainPage = () => {
   const navigate = useNavigate()
@@ -382,7 +383,9 @@ const MainPage = () => {
                 </div>
               ) : productsError ? (
                 <div className={styles.errorContainer}>
-                  <div className={styles.errorIcon}>⚠️</div>
+                  <div className={styles.errorIcon}>
+                    <AlertTriangle size={48} />
+                  </div>
                   <p>{productsError}</p>
                   <button className={styles.retryButton} onClick={() => loadRecommendedProducts(recommendFilter)}>
                     다시 시도
@@ -416,7 +419,13 @@ const MainPage = () => {
                           disabled={likingInProgress.has(product.id)}
                         >
                           <span className={styles.heartIcon}>
-                            {likingInProgress.has(product.id) ? "⏳" : likedClothingIds.has(product.id) ? "❤️" : "🤍"}
+                            {likingInProgress.has(product.id) ? (
+                              <Clock size={16} />
+                            ) : likedClothingIds.has(product.id) ? (
+                              <Heart size={16} fill="currentColor" />
+                            ) : (
+                              <Heart size={16} />
+                            )}
                           </span>
                         </button>
                       </div>
@@ -428,7 +437,7 @@ const MainPage = () => {
                       <div className={styles.productMeta}>
                         <span className={styles.productCategory}>{product.category}</span>
                         <span className={styles.likesCount}>
-                          <span className={styles.likesIcon}>❤️</span>
+                          <Heart size={14} className={styles.likesIcon} />
                           {product.likes.toLocaleString()}
                         </span>
                       </div>
@@ -458,7 +467,9 @@ const MainPage = () => {
               </div>
             ) : categoryError ? (
               <div className={styles.errorContainer}>
-                <div className={styles.errorIcon}>⚠️</div>
+                <div className={styles.errorIcon}>
+                  <AlertTriangle size={48} />
+                </div>
                 <p>{categoryError}</p>
                 <button className={styles.retryButton} onClick={loadCategoryProducts}>
                   다시 시도
@@ -505,11 +516,13 @@ const MainPage = () => {
                               disabled={likingInProgress.has(product.id)}
                             >
                               <span className={styles.heartIcon}>
-                                {likingInProgress.has(product.id)
-                                  ? "⏳"
-                                  : likedClothingIds.has(product.id)
-                                    ? "❤️"
-                                    : "🤍"}
+                                {likingInProgress.has(product.id) ? (
+                                  <Clock size={16} />
+                                ) : likedClothingIds.has(product.id) ? (
+                                  <Heart size={16} fill="currentColor" />
+                                ) : (
+                                  <Heart size={16} />
+                                )}
                               </span>
                             </button>
                           </div>
@@ -521,7 +534,7 @@ const MainPage = () => {
                           <div className={styles.productMeta}>
                             <span className={styles.productCategory}>{product.gender}</span>
                             <span className={styles.likesCount}>
-                              <span className={styles.likesIcon}>❤️</span>
+                              <Heart size={14} className={styles.likesIcon} />
                               {product.likes.toLocaleString()}
                             </span>
                           </div>
@@ -554,7 +567,9 @@ const MainPage = () => {
                   </div>
                 ) : likedProducts.length === 0 ? (
                   <div className={styles.emptyContent}>
-                    <div className={styles.emptyIcon}>💝</div>
+                    <div className={styles.emptyIcon}>
+                      <Gift size={48} />
+                    </div>
                     <h3>좋아요한 의류가 없습니다</h3>
                     <p>마음에 드는 상품에 좋아요를 눌러보세요!</p>
                   </div>
@@ -573,7 +588,13 @@ const MainPage = () => {
                             onClick={(e) => handleLikeToggle(e, product.id)}
                             disabled={likingInProgress.has(product.id)}
                           >
-                            <span className={styles.heartIcon}>{likingInProgress.has(product.id) ? "⏳" : "❤️"}</span>
+                            <span className={styles.heartIcon}>
+                              {likingInProgress.has(product.id) ? (
+                                <Clock size={16} />
+                              ) : (
+                                <Heart size={16} fill="currentColor" />
+                              )}
+                            </span>
                           </button>
                         </div>
                       </div>
@@ -584,7 +605,7 @@ const MainPage = () => {
                         <div className={styles.productMeta}>
                           <span className={styles.productCategory}>{product.category}</span>
                           <span className={styles.likesCount}>
-                            <span className={styles.likesIcon}>❤️</span>
+                            <Heart size={14} className={styles.likesIcon} />
                             {product.likes.toLocaleString()}
                           </span>
                         </div>

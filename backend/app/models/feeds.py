@@ -7,7 +7,7 @@ class Feeds(Base):
     __tablename__ = "feeds"
 
     feed_id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
     title = Column(String(50), nullable=False)
     content = Column(Text, nullable=False)
     image_url = Column(String(255), nullable=True) # 피드 이미지 URL

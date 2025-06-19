@@ -7,7 +7,7 @@ class FeedImages(Base):
     __tablename__ = "feed_images"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    feed_id = Column(Integer, ForeignKey("feeds.feed_id"), nullable=False)
+    feed_id = Column(Integer, ForeignKey("feeds.feed_id", ondelete="CASCADE"), nullable=False)
     image_url = Column(String(255), nullable=False)
     image_order = Column(Integer, nullable=False, default=1)
     created_at = Column(DateTime, server_default=func.now())

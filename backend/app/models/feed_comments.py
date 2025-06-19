@@ -8,9 +8,9 @@ class FeedComments(Base):
     __tablename__ = "feed_comments"
 
     comment_id = Column(Integer, primary_key=True, autoincrement=True) # 댓글 ID값
-    user_id = Column(Integer, ForeignKey("users.user_id"), nullable=False) # 댓글 작성자 ID값
-    feed_id = Column(Integer, ForeignKey("feeds.feed_id"), nullable=False)
-    parent_id = Column(Integer, ForeignKey("feed_comments.comment_id"), nullable=True) # 부모 댓글 ID값
+    user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False) # 댓글 작성자 ID값
+    feed_id = Column(Integer, ForeignKey("feeds.feed_id", ondelete="CASCADE"), nullable=False)
+    parent_id = Column(Integer, ForeignKey("feed_comments.comment_id", ondelete="CASCADE"), nullable=True) # 부모 댓글 ID값
     
     content = Column(String(500), nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
