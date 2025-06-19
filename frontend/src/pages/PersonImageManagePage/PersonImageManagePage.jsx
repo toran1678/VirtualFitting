@@ -221,34 +221,15 @@ const PersonImageManagePage = () => {
   const handleUploadComplete = async (newImage) => {
     console.log("업로드 완료 콜백 받은 데이터:", newImage)
 
-    // 데이터 정규화 및 검증
-    const normalizedImage = {
-      ...newImage,
-      id: newImage.id || newImage.image_id || Date.now(),
-      created_at: newImage.created_at || newImage.createdAt || new Date().toISOString(),
-      description: newImage.description || "설명 없음",
-      image_url: newImage.image_url || newImage.url || newImage.file_path,
-    }
-
-    console.log("정규화된 이미지 데이터:", normalizedImage)
-
-    setImages((prev) => [normalizedImage, ...prev])
-    setTotalCount((prev) => {
-      const newCount = prev + 1
-      console.log("업로드 후 이미지 개수 업데이트:", prev, "->", newCount)
-      return newCount
-    })
+    // 모달 먼저 닫기
     setShowUploadModal(false)
     setSelectedImage(null)
 
-    // 서버에서 최신 개수 다시 조회 (동기화)
-    setTimeout(async () => {
-      try {
-        await loadImageCount()
-      } catch (error) {
-        console.warn("업로드 후 개수 재조회 실패:", error)
-      }
-    }, 1000)
+    // 업로드 완료 후 페이지 새로고침 실행
+    await handleRefresh()
+
+    // 성공 메시지 표시
+    // alert("이미지가 성공적으로 업로드되었습니다!")
   }
 
   // 이미지 삭제

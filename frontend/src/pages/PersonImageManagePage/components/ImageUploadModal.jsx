@@ -17,6 +17,7 @@ const ImageUploadModal = ({ image, onClose, onUploadComplete }) => {
   const imgRef = useRef(null)
   const canvasRef = useRef(null)
   const [croppedImageSrc, setCroppedImageSrc] = useState("")
+  const [croppedImageBlob, setCroppedImageBlob] = useState(null) // blob 데이터 저장용 추가
 
   // 이미지 로드 시 초기 설정
   useEffect(() => {
@@ -50,49 +51,76 @@ const ImageUploadModal = ({ image, onClose, onUploadComplete }) => {
 
   // 크롭된 이미지를 캔버스에 그리기
   const getCroppedImg = useCallback(() => {
-    if (!completedCrop || !imgRef.current || !canvasRef.current) {
-      return null
-    }
-
-    const image = imgRef.current
-    const canvas = canvasRef.current
-    const ctx = canvas.getContext("2d")
-
-    const scaleX = image.naturalWidth / image.width
-    const scaleY = image.naturalHeight / image.height
-
-    canvas.width = completedCrop.width * scaleX
-    canvas.height = completedCrop.height * scaleY
-
-    ctx.drawImage(
-      image,
-      completedCrop.x * scaleX,
-      completedCrop.y * scaleY,
-      completedCrop.width * scaleX,
-      completedCrop.height * scaleY,
-      0,
-      0,
-      canvas.width,
-      canvas.height,
-    )
-
     return new Promise((resolve) => {
-      canvas.toBlob(resolve, "image/jpeg", 0.9)
+      if (!completedCrop || !imgRef.current || !canvasRef.current) {
+        console.error("크롭 정보가 없습니다")
+        resolve(null)
+        return
+      }
+
+      const image = imgRef.current
+      const canvas = canvasRef.current
+      const ctx = canvas.getContext("2d")
+
+      if (!ctx) {
+        console.error("캔버스 컨텍스트를 가져올 수 없습니다")
+        resolve(null)
+        return
+      }
+
+      const scaleX = image.naturalWidth / image.width
+      const scaleY = image.naturalHeight / image.height
+
+      canvas.width = completedCrop.width * scaleX
+      canvas.height = completedCrop.height * scaleY
+
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = "high"
+
+      ctx.drawImage(
+        image,
+        completedCrop.x * scaleX,
+        completedCrop.y * scaleY,
+        completedCrop.width * scaleX,
+        completedCrop.height * scaleY,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      )
+
+      canvas.toBlob(
+        (blob) => {
+          console.log("크롭된 이미지 생성:", blob)
+          resolve(blob)
+        },
+        "image/jpeg",
+        0.9,
+      )
     })
   }, [completedCrop])
 
   // 크롭 완료 처리
   const handleCropComplete = useCallback(async () => {
     if (!completedCrop || !imgRef.current || !canvasRef.current) {
+      console.warn("크롭 완료 조건이 충족되지 않음")
       setShowCrop(false)
       return
     }
 
+    console.log("크롭 완료 처리 시작")
     const croppedBlob = await getCroppedImg()
+
     if (croppedBlob) {
+      // blob 데이터와 URL 모두 저장
+      setCroppedImageBlob(croppedBlob)
       const croppedUrl = URL.createObjectURL(croppedBlob)
       setCroppedImageSrc(croppedUrl)
+      console.log("크롭된 이미지 저장 완료:", { blob: croppedBlob, url: croppedUrl })
+    } else {
+      console.error("크롭된 이미지 생성 실패")
     }
+
     setShowCrop(false)
   }, [completedCrop, getCroppedImg])
 
@@ -107,16 +135,17 @@ const ImageUploadModal = ({ image, onClose, onUploadComplete }) => {
     try {
       let fileToUpload = image.file
 
-      // 크롭이 적용된 경우 크롭된 이미지 사용
-      if (croppedImageSrc && completedCrop) {
-        const croppedBlob = await getCroppedImg()
-        if (croppedBlob) {
-          fileToUpload = new File([croppedBlob], image.file.name, {
-            type: "image/jpeg",
-          })
-        }
+      // 크롭된 이미지가 있으면 사용
+      if (croppedImageBlob) {
+        console.log("크롭된 이미지 사용:", croppedImageBlob)
+        fileToUpload = new File([croppedImageBlob], image.file.name, {
+          type: "image/jpeg",
+        })
+      } else {
+        console.log("원본 이미지 사용")
       }
 
+      console.log("업로드할 파일:", fileToUpload)
       const result = await uploadPersonImage(fileToUpload, description.trim())
 
       if (result.success) {
@@ -140,6 +169,15 @@ const ImageUploadModal = ({ image, onClose, onUploadComplete }) => {
       setUploading(false)
     }
   }
+
+  // 컴포넌트 언마운트 시 URL 정리
+  useEffect(() => {
+    return () => {
+      if (croppedImageSrc) {
+        URL.revokeObjectURL(croppedImageSrc)
+      }
+    }
+  }, [croppedImageSrc])
 
   return (
     <div className={styles.modalOverlay} onClick={onClose}>
