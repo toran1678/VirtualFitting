@@ -1,0 +1,1188 @@
+.myCloset {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-primary);
+  transition: background-color 0.3s;
+  padding-top: 90px;
+}
+
+.closetMain {
+  flex: 1;
+  padding: 2rem 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pageContainer {
+  background-color: var(--card-bg);
+  border-radius: 24px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+/* 헤더 섹션 */
+.headerSection {
+  padding: 3rem 3rem 2rem 3rem;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  position: relative;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.titleArea h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pageDescription {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  margin: 0;
+}
+
+.uploadButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+
+.uploadButton:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* 통계 섹션 */
+.statsSection {
+  padding: 2rem 3rem;
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  text-align: center;
+}
+
+.statItem {
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
+  transition: all 0.3s;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+}
+
+.statItem:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+  border-color: #8b5cf6; /* 보라색으로 변경 */
+}
+
+.statNumber {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #8b5cf6; /* 보라색으로 변경 */
+  margin-bottom: 0.5rem;
+}
+
+.statLabel {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* 필터 섹션 */
+.filterSection {
+  padding: 2rem 3rem;
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.searchArea {
+  margin-bottom: 1.5rem;
+}
+
+.searchBox {
+  position: relative;
+  max-width: 500px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+}
+
+.searchInput {
+  width: 100%;
+  padding: 1rem 1rem 1rem 3rem;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.1);
+}
+
+.filterArea {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filterGroup {
+  display: flex;
+  gap: 1rem;
+}
+
+.filterSelect {
+  padding: 0.75rem 1rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.3s;
+  min-width: 120px;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.viewControls {
+  display: flex;
+  gap: 0.5rem;
+  background-color: var(--bg-secondary);
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.viewButton {
+  padding: 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.viewButton.active {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.viewButton:hover:not(.active) {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+}
+
+/* 의류 섹션 */
+.clothesSection {
+  padding: 2rem 3rem 3rem 3rem;
+  background-color: var(--card-bg);
+}
+
+.sectionHeader {
+  margin-bottom: 2rem;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.clothesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.clothesGrid.listView {
+  grid-template-columns: 1fr;
+}
+
+.clothingItem {
+  background-color: var(--bg-primary);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s;
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.listView .clothingItem {
+  flex-direction: row;
+  height: 150px;
+}
+
+.clothingItem:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  border-color: var(--accent-color);
+}
+
+.clothingImage {
+  height: 280px;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-secondary);
+  cursor: pointer;
+}
+
+.listView .clothingImage {
+  width: 150px;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.clothingImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.clothingItem:hover .clothingImage img {
+  transform: scale(1.05);
+}
+
+.imagePlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+}
+
+.placeholderContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0.6;
+}
+
+.placeholderContent span {
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.clothingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.clothingItem:hover .clothingOverlay {
+  opacity: 1;
+}
+
+.overlayButton {
+  width: 44px;
+  height: 44px;
+  background-color: white !important; /* 항상 흰색 배경 */
+  color: #333 !important; /* 항상 어두운 아이콘 */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.overlayButton:hover {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.clothingInfo {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.clothingName {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+  line-height: 1.4;
+}
+
+.clothingBrand {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0 0 1rem 0;
+}
+
+.clothingMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+
+.clothingCategory {
+  background-color: var(--accent-color);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.clothingDate {
+  color: var(--text-secondary);
+}
+
+.clothingTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+
+.tag {
+  background-color: var(--bg-secondary);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* 빈 콘텐츠 */
+.emptyContent {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
+}
+
+.emptyIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+  color: var(--text-secondary);
+}
+
+.emptyContent h3 {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.emptyContent p {
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+
+.emptyActionButton {
+  padding: 1rem 2rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.emptyActionButton:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+/* 모달 */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modalContent {
+  background-color: var(--card-bg);
+  border-radius: 16px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.modalHeader h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.closeButton:hover {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.modalBody {
+  padding: 2rem;
+}
+
+/* 업로드 모달 */
+.uploadArea {
+  margin-bottom: 2rem;
+}
+
+.fileInput {
+  display: none;
+}
+
+.uploadBox {
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 4rem 2rem; /* 패딩 증가 */
+  text-align: center;
+  background-color: var(--bg-secondary);
+  transition: all 0.3s;
+  min-height: 300px; /* 최소 높이 설정 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.uploadBox svg {
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+}
+
+.uploadBox h3 {
+  font-size: 1.3rem;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.uploadBox p {
+  color: var(--text-secondary);
+  margin: 0 0 2rem 0;
+  font-size: 1rem;
+}
+
+.uploadTrigger {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.uploadTrigger:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+}
+
+.uploadTrigger:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.uploadTips {
+  background-color: var(--bg-secondary);
+  padding: 1.5rem;
+  border-radius: 8px;
+}
+
+.uploadTips h4 {
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+  font-size: 1rem;
+}
+
+.uploadTips ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  color: var(--text-secondary);
+}
+
+.uploadTips li {
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+/* 상세 모달 */
+.detailContent {
+  display: flex;
+  gap: 2rem;
+}
+
+.detailImage {
+  width: 200px;
+  height: 250px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--bg-secondary);
+  flex-shrink: 0;
+}
+
+.detailImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.detailInfo {
+  flex: 1;
+}
+
+.detailInfo h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.5rem 0;
+}
+
+.detailBrand {
+  font-size: 1rem;
+  color: var(--text-secondary);
+  margin: 0 0 1.5rem 0;
+}
+
+.detailMeta {
+  margin-bottom: 1.5rem;
+}
+
+.metaItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.metaItem:last-child {
+  border-bottom: none;
+}
+
+.metaLabel {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.metaValue {
+  color: var(--text-primary);
+}
+
+.detailTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.detailActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.tryOnButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.tryOnButton:hover {
+  background-color: var(--accent-hover);
+}
+
+.deleteButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.deleteButton:hover {
+  background-color: #dc2626;
+}
+
+/* 로딩 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem;
+  text-align: center;
+  min-height: 60vh;
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--bg-secondary);
+  border-top: 4px solid var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .clothesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .filterArea {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .filterGroup {
+    justify-content: space-between;
+  }
+
+  .viewControls {
+    align-self: flex-end;
+  }
+}
+
+@media (max-width: 768px) {
+  .closetMain {
+    padding: 1rem 0;
+  }
+
+  .headerSection,
+  .statsSection,
+  .filterSection,
+  .clothesSection {
+    padding: 1.5rem;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .titleArea h1 {
+    font-size: 2rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .clothesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .clothesGrid.listView .clothingItem {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .listView .clothingImage {
+    width: 100%;
+    height: 200px;
+  }
+
+  .filterGroup {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .filterSelect {
+    width: 100%;
+  }
+
+  .detailContent {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .detailImage {
+    width: 100%;
+    height: 300px;
+  }
+
+  .detailActions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerSection,
+  .statsSection,
+  .filterSection,
+  .clothesSection {
+    padding: 1rem;
+  }
+
+  .titleArea h1 {
+    font-size: 1.5rem;
+  }
+
+  .clothingImage {
+    height: 200px;
+  }
+
+  .modalContent {
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+
+  .modalHeader,
+  .modalBody {
+    padding: 1rem;
+  }
+
+  .uploadBox {
+    padding: 2rem 1rem;
+  }
+}
+
+/* 다크모드 지원 */
+.dark-mode .pageContainer {
+  background-color: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.dark-mode .headerSection {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+}
+
+.dark-mode .statItem {
+  background: linear-gradient(135deg, var(--bg-secondary), var(--bg-primary));
+  border-color: var(--border-color);
+}
+
+.dark-mode .clothingItem {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .clothingItem:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .modalContent {
+  background-color: var(--card-bg);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode .uploadBox {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.dark-mode .uploadBox:hover {
+  border-color: var(--accent-color);
+  background-color: var(--bg-primary);
+}
+
+.dark-mode .uploadTips {
+  background-color: var(--bg-secondary);
+}
+
+.listView .clothingInfo {
+  padding: 1rem;
+  min-height: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.listView .clothingMeta {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+.dark-mode .overlayButton {
+  background-color: white !important;
+  color: #333 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .overlayButton:hover {
+  background-color: var(--accent-color) !important;
+  color: white !important;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
+}
+
+.uploadFormContainer {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.uploadArea {
+  flex: 1.2; /* 업로드 영역을 더 크게 */
+}
+
+.uploadForm {
+  flex: 1;
+}
+
+.uploadForm h4 {
+  color: var(--text-primary);
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.formInput,
+.formSelect {
+  padding: 0.75rem;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  transition: all 0.3s;
+}
+
+.formInput:focus,
+.formSelect:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.1);
+}
+
+.clothingStyle {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 0.8rem;
+}
+
+/* 미리보기 컨테이너 */
+.previewContainer {
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1rem;
+  background-color: var(--bg-secondary);
+  min-height: 300px;
+}
+
+.previewImage {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  margin-bottom: 1rem;
+}
+
+.previewImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.removePreviewButton {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 32px;
+  height: 32px;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.removePreviewButton:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+  transform: scale(1.1);
+}
+
+.previewInfo {
+  text-align: center;
+}
+
+.fileName {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 0.25rem 0;
+  font-size: 0.9rem;
+  word-break: break-all;
+}
+
+.fileSize {
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+/* 업로드 액션 버튼 */
+.uploadActions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--border-color);
+}
+
+.cancelUploadButton {
+  flex: 1;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.cancelUploadButton:hover:not(:disabled) {
+  background-color: var(--bg-primary);
+  border-color: var(--accent-color);
+}
+
+.confirmUploadButton {
+  flex: 2;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.confirmUploadButton:hover:not(:disabled) {
+  background-color: var(--accent-hover);
+  transform: translateY(-1px);
+}
+
+.confirmUploadButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .uploadFormContainer {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .listView .clothingMeta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .uploadBox {
+    padding: 3rem 1.5rem;
+    min-height: 250px;
+  }
+
+  .previewImage {
+    height: 200px;
+  }
+
+  .uploadActions {
+    flex-direction: column;
+  }
+}
+
+/* 다크모드 폼 스타일 */
+.dark-mode .formInput,
+.dark-mode .formSelect {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  color: var(--text-primary);
+}
+
+.dark-mode .formInput:focus,
+.dark-mode .formSelect:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.1);
+}
+
+.dark-mode .clothingStyle {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* 다크모드 미리보기 스타일 */
+.dark-mode .previewContainer {
+  background-color: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+.dark-mode .previewImage {
+  background-color: var(--bg-primary);
+}
+
+.dark-mode .cancelUploadButton {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.dark-mode .cancelUploadButton:hover:not(:disabled) {
+  background-color: var(--bg-primary);
+  border-color: var(--accent-color);
+}

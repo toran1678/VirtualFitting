@@ -8,6 +8,9 @@ class UserClothes(Base):
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(100), nullable=False)
+    brand = Column(String(50), nullable=True)
+    category = Column(String(50), nullable=False)
     image_url = Column(String(255), nullable=False)
     color = Column(String(50))
     season = Column(String(20))

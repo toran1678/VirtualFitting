@@ -22,6 +22,7 @@ import FeedDetailPage from "./pages/FeedDetailPage/FeedDetailPage"
 import EditFeedPage from "./pages/EditFeedPage/EditFeedPage"
 import ProfileEditPage from "./pages/ProfileEditPage/ProfileEditPage"
 import PersonImageManagePage from "./pages/PersonImageManagePage/PersonImageManagePage"
+import MyCloset from "./pages/MyCloset/MyCloset"
 
 import "./App.css"
 
@@ -45,6 +46,7 @@ function App() {
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/my-avatar" element={<PersonImageManagePage />} />
             <Route path="/profile/edit" element={<ProfileEditPage />}/>
+            <Route path="/my-closet" element={<MyCloset />} />
             <Route path="/profile/:email" element={<UserProfilePage />} />
             <Route path="/follow/:email" element={<FollowPage />} />
           </Routes>
