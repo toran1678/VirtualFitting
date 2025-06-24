@@ -20,85 +20,162 @@
   box-sizing: border-box;
 }
 
-/* 페이지 헤더 */
-.pageHeader {
+.pageContainer {
+  background-color: var(--card-bg);
+  border-radius: 24px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+/* 헤더 섹션 */
+.headerSection {
+  padding: 3rem 3rem 2rem 3rem;
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+  color: white;
+  position: relative;
+}
+
+.headerContent {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 2rem;
   gap: 2rem;
 }
 
-.headerLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.backButton {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: none;
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.9rem;
-  align-self: flex-start;
-}
-
-.backButton:hover {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-}
-
-.titleSection {
-  margin-left: 0;
+.titleArea {
+  flex: 1;
 }
 
 .pageTitle {
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--text-primary);
   margin: 0 0 0.5rem 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .pageDescription {
   font-size: 1.1rem;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.8);
   margin: 0;
 }
 
 .headerActions {
   display: flex;
   gap: 1rem;
+  align-items: flex-start;
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
+  min-width: 44px;
+  height: 44px;
+}
+
+.refreshButton:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.refreshButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.refreshButton.refreshing svg {
+  animation: spin 1s linear infinite;
 }
 
 .uploadButton {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: var(--accent-color);
+  padding: 1rem 2rem;
+  background-color: rgba(255, 255, 255, 0.2);
   color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
 }
 
 .uploadButton:hover {
-  background-color: var(--accent-hover);
+  background-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
 }
 
-/* 드래그 앤 드롭 영역 */
+/* 컨트롤 섹션 */
+.controlSection {
+  padding: 2rem 3rem 1rem 3rem;
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.controlContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sectionTitle {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.viewControls {
+  display: flex;
+  gap: 0.5rem;
+  background-color: var(--bg-secondary);
+  padding: 0.5rem;
+  border-radius: 8px;
+}
+
+.viewButton {
+  padding: 0.5rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.viewButton.active {
+  background-color: #14b8a6;
+  color: white;
+}
+
+.viewButton:hover:not(.active) {
+  background-color: var(--card-bg);
+  color: var(--text-primary);
+}
+
+/* 업로드 섹션 */
+.uploadSection {
+  padding: 2rem 3rem;
+  background-color: var(--card-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
 .dropZone {
   border: 2px dashed var(--border-color);
   border-radius: 16px;
@@ -107,15 +184,14 @@
   background-color: var(--bg-secondary);
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-bottom: 3rem;
 }
 
 .dropZone:hover,
 .dropZone.dragOver {
-  border-color: var(--accent-color);
+  border-color: #14b8a6;
   background-color: var(--card-bg);
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 25px rgba(20, 184, 166, 0.1);
 }
 
 .dropIcon {
@@ -138,40 +214,63 @@
   font-size: 0.95rem;
 }
 
-/* 이미지 그리드 */
+/* 이미지 섹션 */
+.imagesSection {
+  padding: 2rem 3rem 3rem 3rem;
+  background-color: var(--card-bg);
+}
+
 .imageGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 2rem;
-  margin-bottom: 2rem;
+  gap: 1.5rem;
+}
+
+.imageGrid.listView {
+  grid-template-columns: 1fr;
 }
 
 .imageCard {
-  background-color: var(--card-bg);
+  background-color: var(--bg-primary);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: var(--card-shadow);
-  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s;
   border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.listView .imageCard {
+  flex-direction: row;
+  height: 150px;
 }
 
 .imageCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  border-color: var(--accent-color);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  border-color: #14b8a6;
 }
 
 .imageContainer {
   position: relative;
   aspect-ratio: 3 / 4;
   overflow: hidden;
+  background-color: var(--bg-secondary);
+}
+
+.listView .imageContainer {
+  width: 150px;
+  height: 100%;
+  flex-shrink: 0;
+  aspect-ratio: auto;
 }
 
 .image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s ease;
+  transition: transform 0.3s;
 }
 
 .imageCard:hover .image {
@@ -184,47 +283,56 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.7) 100%);
+  background: rgba(0, 0, 0, 0.7);
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  padding: 1rem;
+  gap: 1rem;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s;
 }
 
 .imageCard:hover .imageOverlay {
   opacity: 1;
 }
 
-.actionButton {
-  background-color: rgba(255, 255, 255, 0.9);
-  color: var(--text-primary);
+.overlayButton {
+  width: 44px;
+  height: 44px;
+  background-color: white !important;
+  color: #333 !important;
   border: none;
-  padding: 0.5rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(10px);
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.actionButton:hover {
-  background-color: white;
-  transform: translateY(-2px);
+.overlayButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
 }
 
-.deleteButton {
-  background-color: rgba(239, 68, 68, 0.9);
-  color: white;
-}
-
-.deleteButton:hover {
-  background-color: #ef4444;
+.overlayButton.deleteButton:hover {
+  background-color: #ef4444 !important;
+  color: white !important;
 }
 
 .imageInfo {
   padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.listView .imageInfo {
+  padding: 1rem;
+  justify-content: center;
 }
 
 .imageDescription {
@@ -245,58 +353,81 @@
   margin: 0;
 }
 
-/* 빈 상태 */
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
+/* 빈 콘텐츠 */
+.emptyContent {
   text-align: center;
-  background-color: var(--bg-secondary);
-  border-radius: 16px;
-  border: 1px solid var(--border-color);
+  padding: 4rem 2rem;
+  color: var(--text-secondary);
 }
 
 .emptyIcon {
-  width: 64px;
-  height: 64px;
-  color: var(--text-secondary);
-  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
   opacity: 0.7;
+  color: var(--text-secondary);
 }
 
-.emptyState h3 {
+.emptyContent h3 {
   font-size: 1.5rem;
   color: var(--text-primary);
-  margin: 0 0 0.5rem 0;
+  margin-bottom: 0.5rem;
 }
 
-.emptyState p {
-  color: var(--text-secondary);
-  margin: 0 0 2rem 0;
+.emptyContent p {
   font-size: 1rem;
+  margin-bottom: 2rem;
 }
 
-.emptyUploadButton {
+.emptyActionButton {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: var(--accent-color);
+  padding: 1rem 2rem;
+  background-color: #14b8a6;
   color: white;
   border: none;
-  padding: 1rem 2rem;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1rem;
+  transition: all 0.3s;
+  margin: 0 auto;
 }
 
-.emptyUploadButton:hover {
-  background-color: var(--accent-hover);
+.emptyActionButton:hover {
+  background-color: #0d9488;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+/* 더 보기 버튼 */
+.loadMoreContainer {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.loadMoreButton {
+  padding: 1rem 2rem;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.loadMoreButton:hover:not(:disabled) {
+  background-color: #14b8a6;
+  color: white;
+  border-color: #14b8a6;
+  transform: translateY(-2px);
+}
+
+.loadMoreButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* 모달 스타일 */
@@ -321,12 +452,10 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   max-width: 600px;
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.previewModal {
-  max-width: 800px;
+  max-height: 85vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .modalHeader {
@@ -361,6 +490,8 @@
 
 .modalContent {
   padding: 2rem;
+  flex: 1;
+  overflow-y: auto;
 }
 
 /* 업로드 모달 */
@@ -405,9 +536,9 @@
 
 .cropToggleButton:hover,
 .cropToggleButton.active {
-  background-color: var(--accent-color);
+  background-color: #14b8a6;
   color: white;
-  border-color: var(--accent-color);
+  border-color: #14b8a6;
 }
 
 .descriptionSection {
@@ -443,8 +574,8 @@
 
 .descriptionInput:focus {
   outline: none;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(var(--accent-color-rgb), 0.1);
+  border-color: #14b8a6;
+  box-shadow: 0 0 0 3px rgba(20, 184, 166, 0.1);
 }
 
 .characterCount {
@@ -460,6 +591,8 @@
   gap: 1rem;
   padding: 1.5rem 2rem;
   border-top: 1px solid var(--border-color);
+  background-color: var(--card-bg);
+  flex-shrink: 0;
 }
 
 .cancelButton,
@@ -488,14 +621,14 @@
 }
 
 .uploadSubmitButton {
-  background-color: var(--accent-color);
+  background-color: #14b8a6;
   color: white;
 }
 
 .uploadSubmitButton:hover:not(:disabled) {
-  background-color: var(--accent-hover);
+  background-color: #0d9488;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
 }
 
 .uploadSubmitButton:disabled {
@@ -580,7 +713,7 @@
 }
 
 .primaryActionButton {
-  background-color: var(--accent-color);
+  background-color: #14b8a6;
   color: white;
   border: none;
   padding: 1rem 1.5rem;
@@ -592,14 +725,41 @@
 }
 
 .primaryActionButton:hover {
-  background-color: var(--accent-hover);
+  background-color: #0d9488;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.3);
 }
 
 .secondaryActions {
   display: flex;
   gap: 0.5rem;
+}
+
+.actionButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.actionButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  transform: translateY(-2px);
+}
+
+.deleteButton {
+  background-color: rgba(239, 68, 68, 0.9);
+  color: white;
+}
+
+.deleteButton:hover {
+  background-color: #ef4444;
 }
 
 /* 로딩 */
@@ -616,7 +776,7 @@
   width: 50px;
   height: 50px;
   border: 4px solid var(--bg-secondary);
-  border-top: 4px solid var(--accent-color);
+  border-top: 4px solid #14b8a6;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1.5rem;
@@ -635,7 +795,16 @@
 @media (max-width: 1024px) {
   .imageGrid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 1.5rem;
+  }
+
+  .controlContent {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .viewControls {
+    align-self: flex-end;
   }
 
   .previewContent {
@@ -653,19 +822,22 @@
     padding: 1.5rem 0;
   }
 
-  .pageHeader {
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1.5rem;
+  }
+
+  .headerContent {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 1.5rem;
   }
 
   .headerActions {
     width: 100%;
-  }
-
-  .uploadButton {
-    width: 100%;
-    justify-content: center;
+    justify-content: space-between;
   }
 
   .pageTitle {
@@ -673,13 +845,38 @@
   }
 
   .imageGrid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: 1fr;
+  }
+
+  .imageGrid.listView .imageCard {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .listView .imageContainer {
+    width: 100%;
+    height: 200px;
+  }
+
+  .uploadModal {
+    margin: 1rem;
+    max-height: 90vh;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem;
+    flex-direction: row;
     gap: 1rem;
   }
 
-  .dropZone {
-    padding: 2rem 1rem;
-    margin-bottom: 2rem;
+  .cancelButton,
+  .uploadSubmitButton {
+    flex: 1;
+    justify-content: center;
   }
 
   .uploadModal,
@@ -705,20 +902,24 @@
 }
 
 @media (max-width: 480px) {
-  .imageGrid {
-    grid-template-columns: repeat(2, 1fr);
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1rem;
   }
 
   .pageTitle {
     font-size: 1.8rem;
   }
 
-  .pageDescription {
-    font-size: 1rem;
+  .imageGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 
   .dropZone {
-    padding: 1.5rem 1rem;
+    padding: 2rem 1rem;
   }
 
   .dropIcon {
@@ -730,7 +931,7 @@
     font-size: 1.1rem;
   }
 
-  .emptyState {
+  .emptyContent {
     padding: 3rem 1rem;
   }
 
@@ -741,77 +942,1600 @@
 }
 
 /* 다크모드 지원 */
-.dark-mode .dropZone:hover,
-.dark-mode .dropZone.dragOver {
-  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+.dark-mode .pageContainer {
+  background-color: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.dark-mode .headerSection {
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+}
+
+.dark-mode .imageCard {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .dark-mode .imageCard:hover {
-  box-shadow: 0 12px 30px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
-.dark-mode .uploadButton:hover,
-.dark-mode .emptyUploadButton:hover,
-.dark-mode .primaryActionButton:hover,
-.dark-mode .uploadSubmitButton:hover:not(:disabled) {
-  box-shadow: 0 4px 12px rgba(58, 134, 255, 0.4);
+.dark-mode .dropZone:hover,
+.dark-mode .dropZone.dragOver {
+  box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
 }
 
-/* 접근성 개선 */
-.uploadButton:focus,
-.backButton:focus,
-.actionButton:focus,
-.cropToggleButton:focus,
-.cancelButton:focus,
-.uploadSubmitButton:focus,
-.primaryActionButton:focus,
-.closeButton:focus {
-  outline: 2px solid var(--accent-color);
-  outline-offset: 2px;
+/* 다크모드에서도 아이콘 색상 통일 */
+.dark-mode .overlayButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* 애니메이션 성능 최적화 */
-.uploadButton,
-.actionButton,
-.imageCard,
-.dropZone {
-  will-change: transform;
+.dark-mode .overlayButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
 }
 
-.refreshButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: var(--bg-secondary);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
-  padding: 0.75rem;
+.dark-mode .overlayButton.deleteButton:hover {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+/* 미리보기 모달의 액션 버튼들도 동일하게 적용 */
+.actionButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  border: none;
+  padding: 0.5rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 44px;
-  height: 44px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-.refreshButton:hover:not(:disabled) {
-  background-color: var(--card-bg);
-  color: var(--text-primary);
-  border-color: var(--accent-color);
+.actionButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.refreshButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
+.deleteButton {
+  background-color: rgba(239, 68, 68, 0.9);
+  color: white;
 }
 
-.refreshButton.refreshing {
+.deleteButton:hover {
+  background-color: #ef4444;
+}
+
+/* 로딩 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--text-secondary);
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--bg-secondary);
+  border-top: 4px solid #14b8a6;
+  border-radius: 50%;
   animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
 }
 
-.refreshButton.refreshing svg {
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .imageGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .controlContent {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .viewControls {
+    align-self: flex-end;
+  }
+
+  .previewContent {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .previewInfo {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .personImageMain {
+    padding: 1.5rem 0;
+  }
+
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1.5rem;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .headerActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pageTitle {
+    font-size: 2rem;
+  }
+
+  .imageGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .imageGrid.listView .imageCard {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .listView .imageContainer {
+    width: 100%;
+    height: 200px;
+  }
+
+  .uploadModal {
+    margin: 1rem;
+    max-height: 90vh;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem;
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .cancelButton,
+  .uploadSubmitButton {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .uploadModal,
+  .previewModal {
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem;
+    flex-direction: column;
+  }
+
+  .cancelButton,
+  .uploadSubmitButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1rem;
+  }
+
+  .pageTitle {
+    font-size: 1.8rem;
+  }
+
+  .imageGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .dropZone {
+    padding: 2rem 1rem;
+  }
+
+  .dropIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dropZone h3 {
+    font-size: 1.1rem;
+  }
+
+  .emptyContent {
+    padding: 3rem 1rem;
+  }
+
+  .emptyIcon {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* 다크모드 지원 */
+.dark-mode .pageContainer {
+  background-color: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.dark-mode .headerSection {
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+}
+
+.dark-mode .imageCard {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .imageCard:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .dropZone:hover,
+.dark-mode .dropZone.dragOver {
+  box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
+}
+
+/* 다크모드에서도 아이콘 색상 통일 */
+.dark-mode .overlayButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .overlayButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+}
+
+.dark-mode .overlayButton.deleteButton:hover {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+/* 미리보기 모달의 액션 버튼들도 동일하게 적용 */
+.actionButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.actionButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  transform: translateY(-2px);
+}
+
+.deleteButton {
+  background-color: rgba(239, 68, 68, 0.9);
+  color: white;
+}
+
+.deleteButton:hover {
+  background-color: #ef4444;
+}
+
+/* 로딩 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--text-secondary);
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--bg-secondary);
+  border-top: 4px solid #14b8a6;
+  border-radius: 50%;
   animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .imageGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .controlContent {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .viewControls {
+    align-self: flex-end;
+  }
+
+  .previewContent {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .previewInfo {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .personImageMain {
+    padding: 1.5rem 0;
+  }
+
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1.5rem;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .headerActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pageTitle {
+    font-size: 2rem;
+  }
+
+  .imageGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .imageGrid.listView .imageCard {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .listView .imageContainer {
+    width: 100%;
+    height: 200px;
+  }
+
+  .uploadModal {
+    margin: 1rem;
+    max-height: 90vh;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem;
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .cancelButton,
+  .uploadSubmitButton {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .uploadModal,
+  .previewModal {
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem;
+    flex-direction: column;
+  }
+
+  .cancelButton,
+  .uploadSubmitButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1rem;
+  }
+
+  .pageTitle {
+    font-size: 1.8rem;
+  }
+
+  .imageGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .dropZone {
+    padding: 2rem 1rem;
+  }
+
+  .dropIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dropZone h3 {
+    font-size: 1.1rem;
+  }
+
+  .emptyContent {
+    padding: 3rem 1rem;
+  }
+
+  .emptyIcon {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* 다크모드 지원 */
+.dark-mode .pageContainer {
+  background-color: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.dark-mode .headerSection {
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+}
+
+.dark-mode .imageCard {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .imageCard:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .dropZone:hover,
+.dark-mode .dropZone.dragOver {
+  box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
+}
+
+/* 다크모드에서도 아이콘 색상 통일 */
+.dark-mode .overlayButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .overlayButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+}
+
+.dark-mode .overlayButton.deleteButton:hover {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+/* 미리보기 모달의 액션 버튼들도 동일하게 적용 */
+.actionButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.actionButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  transform: translateY(-2px);
+}
+
+.deleteButton {
+  background-color: rgba(239, 68, 68, 0.9);
+  color: white;
+}
+
+.deleteButton:hover {
+  background-color: #ef4444;
+}
+
+/* 로딩 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--text-secondary);
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--bg-secondary);
+  border-top: 4px solid #14b8a6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .imageGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .controlContent {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .viewControls {
+    align-self: flex-end;
+  }
+
+  .previewContent {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .previewInfo {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .personImageMain {
+    padding: 1.5rem 0;
+  }
+
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1.5rem;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .headerActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pageTitle {
+    font-size: 2rem;
+  }
+
+  .imageGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .imageGrid.listView .imageCard {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .listView .imageContainer {
+    width: 100%;
+    height: 200px;
+  }
+
+  .uploadModal {
+    margin: 1rem;
+    max-height: 90vh;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem;
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .cancelButton,
+  .uploadSubmitButton {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .uploadModal,
+  .previewModal {
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem;
+    flex-direction: column;
+  }
+
+  .cancelButton,
+  .uploadSubmitButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1rem;
+  }
+
+  .pageTitle {
+    font-size: 1.8rem;
+  }
+
+  .imageGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .dropZone {
+    padding: 2rem 1rem;
+  }
+
+  .dropIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dropZone h3 {
+    font-size: 1.1rem;
+  }
+
+  .emptyContent {
+    padding: 3rem 1rem;
+  }
+
+  .emptyIcon {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* 다크모드 지원 */
+.dark-mode .pageContainer {
+  background-color: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.dark-mode .headerSection {
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+}
+
+.dark-mode .imageCard {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .imageCard:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .dropZone:hover,
+.dark-mode .dropZone.dragOver {
+  box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
+}
+
+/* 다크모드에서도 아이콘 색상 통일 */
+.dark-mode .overlayButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .overlayButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+}
+
+.dark-mode .overlayButton.deleteButton:hover {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+/* 미리보기 모달의 액션 버튼들도 동일하게 적용 */
+.actionButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.actionButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  transform: translateY(-2px);
+}
+
+.deleteButton {
+  background-color: rgba(239, 68, 68, 0.9);
+  color: white;
+}
+
+.deleteButton:hover {
+  background-color: #ef4444;
+}
+
+/* 로딩 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--text-secondary);
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--bg-secondary);
+  border-top: 4px solid #14b8a6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .imageGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .controlContent {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .viewControls {
+    align-self: flex-end;
+  }
+
+  .previewContent {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .previewInfo {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .personImageMain {
+    padding: 1.5rem 0;
+  }
+
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1.5rem;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .headerActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pageTitle {
+    font-size: 2rem;
+  }
+
+  .imageGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .imageGrid.listView .imageCard {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .listView .imageContainer {
+    width: 100%;
+    height: 200px;
+  }
+
+  .uploadModal {
+    margin: 1rem;
+    max-height: 90vh;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem;
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .cancelButton,
+  .uploadSubmitButton {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .uploadModal,
+  .previewModal {
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem;
+    flex-direction: column;
+  }
+
+  .cancelButton,
+  .uploadSubmitButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1rem;
+  }
+
+  .pageTitle {
+    font-size: 1.8rem;
+  }
+
+  .imageGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .dropZone {
+    padding: 2rem 1rem;
+  }
+
+  .dropIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dropZone h3 {
+    font-size: 1.1rem;
+  }
+
+  .emptyContent {
+    padding: 3rem 1rem;
+  }
+
+  .emptyIcon {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* 다크모드 지원 */
+.dark-mode .pageContainer {
+  background-color: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.dark-mode .headerSection {
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+}
+
+.dark-mode .imageCard {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .imageCard:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .dropZone:hover,
+.dark-mode .dropZone.dragOver {
+  box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
+}
+
+/* 다크모드에서도 아이콘 색상 통일 */
+.dark-mode .overlayButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .overlayButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+}
+
+.dark-mode .overlayButton.deleteButton:hover {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+/* 미리보기 모달의 액션 버튼들도 동일하게 적용 */
+.actionButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.actionButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  transform: translateY(-2px);
+}
+
+.deleteButton {
+  background-color: rgba(239, 68, 68, 0.9);
+  color: white;
+}
+
+.deleteButton:hover {
+  background-color: #ef4444;
+}
+
+/* 로딩 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--text-secondary);
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--bg-secondary);
+  border-top: 4px solid #14b8a6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .imageGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .controlContent {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .viewControls {
+    align-self: flex-end;
+  }
+
+  .previewContent {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .previewInfo {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .personImageMain {
+    padding: 1.5rem 0;
+  }
+
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1.5rem;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .headerActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pageTitle {
+    font-size: 2rem;
+  }
+
+  .imageGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .imageGrid.listView .imageCard {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .listView .imageContainer {
+    width: 100%;
+    height: 200px;
+  }
+
+  .uploadModal {
+    margin: 1rem;
+    max-height: 90vh;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem;
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .cancelButton,
+  .uploadSubmitButton {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .uploadModal,
+  .previewModal {
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem;
+    flex-direction: column;
+  }
+
+  .cancelButton,
+  .uploadSubmitButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1rem;
+  }
+
+  .pageTitle {
+    font-size: 1.8rem;
+  }
+
+  .imageGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .dropZone {
+    padding: 2rem 1rem;
+  }
+
+  .dropIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dropZone h3 {
+    font-size: 1.1rem;
+  }
+
+  .emptyContent {
+    padding: 3rem 1rem;
+  }
+
+  .emptyIcon {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* 다크모드 지원 */
+.dark-mode .pageContainer {
+  background-color: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.dark-mode .headerSection {
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+}
+
+.dark-mode .imageCard {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .imageCard:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .dropZone:hover,
+.dark-mode .dropZone.dragOver {
+  box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
+}
+
+/* 다크모드에서도 아이콘 색상 통일 */
+.dark-mode .overlayButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .overlayButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+}
+
+.dark-mode .overlayButton.deleteButton:hover {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+/* 미리보기 모달의 액션 버튼들도 동일하게 적용 */
+.actionButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.actionButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  transform: translateY(-2px);
+}
+
+.deleteButton {
+  background-color: rgba(239, 68, 68, 0.9);
+  color: white;
+}
+
+.deleteButton:hover {
+  background-color: #ef4444;
+}
+
+/* 로딩 */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: var(--text-secondary);
+}
+
+.loadingSpinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--bg-secondary);
+  border-top: 4px solid #14b8a6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 반응형 디자인 */
+@media (max-width: 1024px) {
+  .imageGrid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .controlContent {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .viewControls {
+    align-self: flex-end;
+  }
+
+  .previewContent {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .previewInfo {
+    order: -1;
+  }
+}
+
+@media (max-width: 768px) {
+  .personImageMain {
+    padding: 1.5rem 0;
+  }
+
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1.5rem;
+  }
+
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  .headerActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .pageTitle {
+    font-size: 2rem;
+  }
+
+  .imageGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .imageGrid.listView .imageCard {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .listView .imageContainer {
+    width: 100%;
+    height: 200px;
+  }
+
+  .uploadModal {
+    margin: 1rem;
+    max-height: 90vh;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem;
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .cancelButton,
+  .uploadSubmitButton {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .uploadModal,
+  .previewModal {
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+  }
+
+  .modalFooter {
+    padding: 1rem 1.5rem;
+    flex-direction: column;
+  }
+
+  .cancelButton,
+  .uploadSubmitButton {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .headerSection,
+  .controlSection,
+  .uploadSection,
+  .imagesSection {
+    padding: 1rem;
+  }
+
+  .pageTitle {
+    font-size: 1.8rem;
+  }
+
+  .imageGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .dropZone {
+    padding: 2rem 1rem;
+  }
+
+  .dropIcon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dropZone h3 {
+    font-size: 1.1rem;
+  }
+
+  .emptyContent {
+    padding: 3rem 1rem;
+  }
+
+  .emptyIcon {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* 다크모드 지원 */
+.dark-mode .pageContainer {
+  background-color: var(--card-bg);
+  box-shadow: var(--card-shadow);
+}
+
+.dark-mode .headerSection {
+  background: linear-gradient(135deg, #14b8a6, #0d9488);
+}
+
+.dark-mode .imageCard {
+  background-color: var(--bg-primary);
+  border-color: var(--border-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .imageCard:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .dropZone:hover,
+.dark-mode .dropZone.dragOver {
+  box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
+}
+
+/* 다크모드에서도 아이콘 색상 통일 */
+.dark-mode .overlayButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .overlayButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.4);
+}
+
+.dark-mode .overlayButton.deleteButton:hover {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+/* 미리보기 모달의 액션 버튼들도 동일하게 적용 */
+.actionButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.actionButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  transform: translateY(-2px);
+}
+
+.deleteButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #ef4444 !important;
+}
+
+.deleteButton:hover {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+.dark-mode .actionButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #333 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .actionButton:hover {
+  background-color: #14b8a6 !important;
+  color: white !important;
+  transform: translateY(-2px);
+}
+
+.dark-mode .actionButton.deleteButton {
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  color: #ef4444 !important;
+}
+
+.dark-mode .actionButton.deleteButton:hover {
+  background-color: #ef4444 !important;
+  color: white !important;
+}
+
+.dark-mode .dropZone:hover,
+.dark-mode .dropZone.dragOver {
+  box-shadow: 0 8px 25px rgba(20, 184, 166, 0.2);
 }
