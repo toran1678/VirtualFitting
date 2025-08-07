@@ -68,7 +68,7 @@ app.add_middleware(
     allow_headers=["*"],  # 모든 헤더 허용
 )
 
-# 정적 파일 제공을 위한 디렉토리 생성성
+# 정적 파일 제공을 위한 디렉토리 생성
 os.makedirs("uploads/profile_pictures", exist_ok=True)
 os.makedirs("uploads/feeds", exist_ok=True)
 

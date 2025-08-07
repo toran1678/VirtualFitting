@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom"
 import { ThemeContext } from "../../context/ThemeContext"
 import Header from "../../components/Header/Header"
 import Footer from "../../components/Footer/Footer"
-import { User, Shirt, Heart, ImageIcon, Camera, Upload, Palette, ChevronDown } from 'lucide-react'
+import { User, Shirt, Heart, ImageIcon, Camera, Upload, Palette, ChevronDown, Download } from 'lucide-react'
 import { isLoggedIn } from "../../api/auth"
 import { getMyLikedClothes } from "../../api/likedClothes"
 import { startVirtualFitting } from "../../api/virtual_fitting"
@@ -31,7 +31,7 @@ const VirtualFittingPage = () => {
   
   const [selectedPersonImage, setSelectedPersonImage] = useState(null)
   const [selectedClothingImage, setSelectedClothingImage] = useState(null)
-  const [selectedClothingData, setSelectedClothingData] = useState(null) // 선택된 의류 데이터
+  const [selectedClothingData, setSelectedClothingData] = useState(null)
   const [activeTab, setActiveTab] = useState("liked")
   const [likedClothing, setLikedClothing] = useState([])
   const [likedClothingLoading, setLikedClothingLoading] = useState(false)
@@ -43,9 +43,14 @@ const VirtualFittingPage = () => {
   const [myClosetLoading, setMyClosetLoading] = useState(false)
   
   // 카테고리 관련 상태
-  const [selectedCategory, setSelectedCategory] = useState(null) // 0: 상체, 1: 하체, 2: 드레스
+  const [selectedCategory, setSelectedCategory] = useState(null)
   const [showCategorySelector, setShowCategorySelector] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+
+  // 🔥 간단한 상태만 유지
+  const [isConverting, setIsConverting] = useState(false)
+  const [showDownloadHelper, setShowDownloadHelper] = useState(false)
+  const [failedImageUrl, setFailedImageUrl] = useState("")
 
   // 카테고리 매핑 함수
   const mapCategoryToNumber = (categoryName) => {
@@ -89,7 +94,7 @@ const VirtualFittingPage = () => {
       return 2
     }
     
-    return null // 매핑되지 않는 경우
+    return null
   }
 
   const getCategoryName = (categoryNumber) => {
@@ -122,7 +127,94 @@ const VirtualFittingPage = () => {
     },
   ]
 
-  // URL 파라미터에서 의류 정보 확인 (나중에 다른 페이지에서 넘어올 때 사용)
+  // 🔥 외부 이미지 감지 함수 추가
+  const isExternalImage = (url) => {
+    if (!url || url.startsWith('data:') || url.startsWith('/')) return false
+    
+    try {
+      const urlObj = new URL(url)
+      const currentHost = window.location.hostname
+      
+      // localhost:8000은 허용 (백엔드 서버)
+      if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
+        return false
+      }
+      
+      // 현재 도메인과 다르면 외부 이미지
+      return urlObj.hostname !== currentHost
+    } catch {
+      return false
+    }
+  }
+
+  // 🔥 간단한 이미지 변환 함수 수정
+  const simpleImageConvert = async (imageUrl, imageName) => {
+    console.log(`🔄 간단 변환 시작: ${imageName}`)
+    console.log(`🔍 이미지 URL: ${imageUrl}`)
+    
+    // 외부 이미지 체크
+    if (isExternalImage(imageUrl)) {
+      console.log(`⚠️ 외부 이미지 감지: ${imageUrl}`)
+      throw new Error(`외부 이미지는 브라우저 보안 정책으로 인해 직접 변환할 수 없습니다.\n\n도메인: ${new URL(imageUrl).hostname}`)
+    }
+    
+    return new Promise((resolve, reject) => {
+      const img = new Image()
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      
+      // 10초 타임아웃
+      const timeout = setTimeout(() => {
+        reject(new Error('타임아웃 (10초)'))
+      }, 10000)
+      
+      img.onload = () => {
+        clearTimeout(timeout)
+        try {
+          console.log(`✅ 이미지 로드 성공: ${img.width}x${img.height}`)
+          
+          // 간단한 캔버스 변환
+          canvas.width = img.width
+          canvas.height = img.height
+          
+          // 흰색 배경
+          ctx.fillStyle = '#FFFFFF'
+          ctx.fillRect(0, 0, canvas.width, canvas.height)
+          
+          // 이미지 그리기
+          ctx.drawImage(img, 0, 0)
+          
+          // JPEG 변환
+          const base64 = canvas.toDataURL('image/jpeg', 0.9)
+          console.log(`✅ 간단 변환 성공: ${imageName}`)
+          resolve(base64)
+          
+        } catch (error) {
+          clearTimeout(timeout)
+          reject(new Error(`Canvas 변환 실패: ${error.message}`))
+        }
+      }
+      
+      img.onerror = (error) => {
+        clearTimeout(timeout)
+        console.error(`❌ 이미지 로드 실패:`, error)
+        reject(new Error(`이미지 로드 실패: ${imageUrl}`))
+      }
+      
+      // 🔥 로컬 이미지는 crossOrigin 없이
+      if (!isExternalImage(imageUrl)) {
+        console.log(`✅ 로컬 이미지 로드: ${imageUrl}`)
+        img.src = imageUrl
+      } else {
+        // 외부 이미지는 이미 위에서 차단됨
+        console.log(`❌ 외부 이미지 차단: ${imageUrl}`)
+        img.crossOrigin = 'anonymous'
+        img.src = imageUrl
+      }
+    })
+  }
+
+  // URL 파라미터에서 의류 정보 확인
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const clothingId = params.get('clothingId')
@@ -150,15 +242,15 @@ const VirtualFittingPage = () => {
     try {
       const data = await getMyLikedClothes()
 
-      // API 응답을 컴포넌트에서 사용할 형태로 변환
       const formattedData = data.map((item) => ({
         id: item.clothing_id,
         name: item.product_name,
         image: item.product_image_url,
-        category: item.main_category, // 메인 카테고리만 표시
+        category: item.main_category,
         brand: item.brand_name,
       }))
 
+      console.log("좋아요한 의류 로드 완료:", formattedData)
       setLikedClothing(formattedData)
     } catch (error) {
       console.error("좋아요한 의류 로드 실패:", error)
@@ -178,12 +270,11 @@ const VirtualFittingPage = () => {
 
     setPersonImagesLoading(true)
     try {
-      const data = await getPersonImages(1, 50) // 첫 페이지, 최대 50개
+      const data = await getPersonImages(1, 50)
       console.log("인물 이미지 API 응답:", data)
 
       const validImages = filterValidPersonImages(data.images || [])
 
-      // API 응답을 컴포넌트에서 사용할 형태로 변환
       const formattedData = validImages.map((item) => ({
         id: item.id,
         name: item.description || `인물 이미지 ${item.id}`,
@@ -214,7 +305,6 @@ const VirtualFittingPage = () => {
       const data = await getUserClothes({ page: 1, perPage: 50 })
       console.log("내 옷장 API 응답:", data)
 
-      // API 응답을 컴포넌트에서 사용할 형태로 변환
       const formattedData = data.clothes.map((item) => ({
         id: item.id,
         name: item.name,
@@ -226,6 +316,7 @@ const VirtualFittingPage = () => {
         style: item.style,
       }))
 
+      console.log("내 옷장 로드 완료:", formattedData)
       setMyClosetClothes(formattedData)
     } catch (error) {
       console.error("내 옷장 의류 로드 실패:", error)
@@ -236,7 +327,6 @@ const VirtualFittingPage = () => {
   }
 
   useEffect(() => {
-    // 컴포넌트 마운트 시 데이터 로드
     loadLikedClothes()
     loadPersonImages()
     loadMyClosetClothes()
@@ -259,34 +349,95 @@ const VirtualFittingPage = () => {
       const reader = new FileReader()
       reader.onload = (e) => {
         setSelectedClothingImage(e.target.result)
-        setSelectedClothingData(null) // 직접 업로드한 경우 데이터 초기화
-        setSelectedCategory(null) // 카테고리도 초기화
-        setShowCategorySelector(true) // 카테고리 선택기 표시
+        setSelectedClothingData(null)
+        setSelectedCategory(null)
+        setShowCategorySelector(true)
       }
       reader.readAsDataURL(file)
     }
   }
 
-  const handleUserImageSelect = (userImage) => {
-    setSelectedPersonImage(userImage.image)
-  }
-
-  const handleClothingSelect = (clothing) => {
-    setSelectedClothingImage(clothing.image)
-    setSelectedClothingData(clothing)
+  // 🔥 의류 이미지 선택 함수 수정
+  const handleClothingSelect = async (clothing) => {
+    console.log("의류 이미지 선택:", clothing.image)
+    console.log("이미지 타입:", isExternalImage(clothing.image) ? '외부 이미지' : '로컬 이미지')
     
-    // 카테고리 자동 매핑 시도
-    const autoCategory = mapCategoryToNumber(clothing.category)
-    if (autoCategory !== null) {
-      setSelectedCategory(autoCategory)
-      setShowCategorySelector(false) // 자동 매핑 성공 시 선택기 숨김
-    } else {
-      setSelectedCategory(null)
-      setShowCategorySelector(true) // 자동 매핑 실패 시 선택기 표시
+    setIsConverting(true)
+    
+    try {
+      const base64Image = await simpleImageConvert(clothing.image, clothing.name)
+      setSelectedClothingImage(base64Image)
+      setSelectedClothingData(clothing)
+      
+      const autoCategory = mapCategoryToNumber(clothing.category)
+      if (autoCategory !== null) {
+        setSelectedCategory(autoCategory)
+        setShowCategorySelector(false)
+      } else {
+        setSelectedCategory(null)
+        setShowCategorySelector(true)
+      }
+      
+      console.log("✅ 의류 이미지 변환 성공")
+    } catch (error) {
+      console.error("❌ 의류 이미지 변환 실패:", error)
+      
+      // 🔥 외부 이미지 전용 안내 메시지
+      if (isExternalImage(clothing.image)) {
+        setFailedImageUrl(clothing.image)
+        setShowDownloadHelper(true)
+        
+        alert(`외부 이미지는 브라우저 보안 정책으로 인해 직접 사용할 수 없습니다.\n\n해결 방법:\n1. 우클릭 후 "이미지를 다른 이름으로 저장" 클릭\n2. 다운로드된 이미지를 "의류 이미지" 섹션에서 직접 업로드\n\n이미지 출처: ${new URL(clothing.image).hostname}`)
+      } else {
+        alert(`이미지 변환에 실패했습니다: ${error.message}`)
+      }
+    } finally {
+      setIsConverting(false)
     }
   }
 
-  // 이미지 에러 처리 함수 추가 (handleClothingSelect 함수 다음에)
+  // 🔥 인물 이미지 선택 함수도 동일하게 수정
+  const handleUserImageSelect = async (userImage) => {
+    console.log("인물 이미지 선택:", userImage.image)
+    console.log("이미지 타입:", isExternalImage(userImage.image) ? '외부 이미지' : '로컬 이미지')
+    
+    setIsConverting(true)
+    
+    try {
+      const base64Image = await simpleImageConvert(userImage.image, userImage.name)
+      setSelectedPersonImage(base64Image)
+      console.log("✅ 인물 이미지 변환 성공")
+    } catch (error) {
+      console.error("❌ 인물 이미지 변환 실패:", error)
+      
+      // 🔥 외부 이미지 전용 안내 메시지
+      if (isExternalImage(userImage.image)) {
+        setFailedImageUrl(userImage.image)
+        setShowDownloadHelper(true)
+        
+        alert(`외부 이미지는 브라우저 보안 정책으로 인해 직접 사용할 수 없습니다.\n\n📍 해결 방법:\n1. 아래 "이미지 다운로드" 버튼 클릭\n2. 다운로드된 이미지를 "인물 이미지" 섹션에서 직접 업로드\n\n🔗 이미지 출처: ${new URL(userImage.image).hostname}`)
+      } else {
+        alert(`이미지 변환에 실패했습니다: ${error.message}`)
+      }
+    } finally {
+      setIsConverting(false)
+    }
+  }
+
+  // 🔥 이미지 다운로드 도우미
+  const handleDownloadImage = () => {
+    const link = document.createElement('a')
+    link.href = failedImageUrl
+    link.download = 'image.jpg'
+    link.target = '_blank'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    
+    setShowDownloadHelper(false)
+    setFailedImageUrl("")
+  }
+
   const handleImageError = (e, title) => {
     e.target.style.display = "none"
     const placeholder = e.target.nextElementSibling
@@ -324,38 +475,31 @@ const VirtualFittingPage = () => {
     setIsProcessing(true)
     
     try {
-      console.log("가상 피팅 시작 준비:", {
-        personImageType: selectedPersonImage.startsWith('data:') ? 'Base64' : 'URL',
-        clothingImageType: selectedClothingImage.startsWith('data:') ? 'Base64' : 'URL',
-        category: selectedCategory,
-        categoryName: getCategoryName(selectedCategory)
-      })
+      console.log("=== 가상 피팅 시작 ===")
+      console.log("카테고리:", selectedCategory, getCategoryName(selectedCategory))
 
-      // 이미지를 File 객체로 변환
       console.log("인물 이미지 변환 시작...")
       const personImageFile = await urlToFile(selectedPersonImage, 'person-image.jpg')
-      console.log("인물 이미지 변환 완료")
+      console.log("인물 이미지 변환 완료:", personImageFile.size, "bytes")
       
       console.log("의류 이미지 변환 시작...")
       const clothingImageFile = await urlToFile(selectedClothingImage, 'clothing-image.jpg')
-      console.log("의류 이미지 변환 완료")
+      console.log("의류 이미지 변환 완료:", clothingImageFile.size, "bytes")
 
       console.log("가상 피팅 API 호출 시작...")
 
-      // 가상 피팅 API 호출
       const result = await startVirtualFitting(
         personImageFile,
         clothingImageFile,
-        selectedCategory, // 0, 1, 2 중 하나
-        "dc", // 기본 모델 타입
-        2.0, // 기본 스케일
-        4 // 기본 샘플 수
+        selectedCategory,
+        "dc",
+        2.0,
+        4
       )
 
       console.log("가상 피팅 결과:", result)
       alert("가상 피팅이 시작되었습니다! 메인 페이지에서 결과를 확인하세요.")
       
-      // 메인 페이지로 이동
       navigate('/virtual-fitting-main')
       
     } catch (error) {
@@ -366,141 +510,20 @@ const VirtualFittingPage = () => {
     }
   }
 
-  // 이미지를 RGB로 변환하고 압축하는 함수
-  const processImageForML = async (imageUrl) => {
-    return new Promise((resolve, reject) => {
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      const img = new Image()
-      
-      img.crossOrigin = 'anonymous' // CORS 설정
-      
-      img.onload = () => {
-        try {
-          // 이미지 크기 조정 (최대 1024x1024)
-          const maxSize = 1024
-          let { width, height } = img
-          
-          if (width > maxSize || height > maxSize) {
-            const ratio = Math.min(maxSize / width, maxSize / height)
-            width = Math.floor(width * ratio)
-            height = Math.floor(height * ratio)
-          }
-          
-          canvas.width = width
-          canvas.height = height
-          
-          // 흰색 배경으로 채우기 (RGBA -> RGB 변환)
-          ctx.fillStyle = '#FFFFFF'
-          ctx.fillRect(0, 0, width, height)
-          
-          // 이미지 그리기
-          ctx.drawImage(img, 0, 0, width, height)
-          
-          // JPEG로 변환 (품질 90%)
-          canvas.toBlob((blob) => {
-            if (blob) {
-              resolve(blob)
-            } else {
-              reject(new Error('이미지 변환에 실패했습니다.'))
-            }
-          }, 'image/jpeg', 0.9)
-          
-        } catch (error) {
-          reject(new Error(`이미지 처리 중 오류: ${error.message}`))
-        }
-      }
-      
-      img.onerror = () => {
-        reject(new Error('이미지 로드에 실패했습니다.'))
-      }
-      
-      img.src = imageUrl
-    })
-  }
-
-  // URL을 File 객체로 변환하는 헬퍼 함수 (개선됨)
+  // 🔥 간단한 urlToFile 함수
   const urlToFile = async (url, filename) => {
     try {
-      console.log("이미지 변환 시작:", url.substring(0, 100) + "...")
-      
-      let blob
-      
-      // Base64 데이터 URL인 경우
-      if (url.startsWith('data:')) {
-        console.log("Base64 데이터 URL 처리 중...")
-        
-        // Base64를 blob으로 변환
-        const response = await fetch(url)
-        const originalBlob = await response.blob()
-        
-        // 이미지 처리 (RGB 변환 및 압축)
-        blob = await processImageForML(url)
-        
-        console.log("Base64 변환 및 처리 완료, 파일 크기:", blob.size)
-        
-      } else {
-        // 일반 URL인 경우
-        console.log("일반 URL 처리 중...")
-        
-        // 상대 경로인 경우 절대 경로로 변환
-        let fullUrl = url
-        if (url.startsWith('/')) {
-          fullUrl = window.location.origin + url
-        }
-        
-        console.log("최종 URL:", fullUrl)
-        
-        try {
-          // 먼저 프록시 없이 직접 시도
-          const response = await fetch(fullUrl, {
-            mode: 'cors',
-            credentials: 'include'
-          })
-          
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-          }
-          
-          const originalBlob = await response.blob()
-          
-          // 이미지 처리 (RGB 변환 및 압축)
-          blob = await processImageForML(fullUrl)
-          
-        } catch (corsError) {
-          console.log("CORS 오류 발생, 프록시 방식으로 재시도...")
-          
-          // CORS 오류 시 이미지를 canvas로 처리
-          blob = await processImageForML(fullUrl)
-        }
-        
-        console.log("URL 변환 및 처리 완료, 파일 크기:", blob.size)
+      if (!url.startsWith('data:')) {
+        throw new Error('Base64 데이터가 아닙니다')
       }
       
-      // 파일 타입 확인 및 설정
-      const fileType = blob.type || 'image/jpeg'
+      const response = await fetch(url)
+      const blob = await response.blob()
       
-      return new File([blob], filename, { type: fileType })
+      return new File([blob], filename, { type: 'image/jpeg' })
       
     } catch (error) {
-      console.error("이미지 변환 상세 오류:", {
-        url: url.substring(0, 100) + "...",
-        error: error.message,
-        stack: error.stack
-      })
-      
-      // 더 구체적인 오류 메시지 제공
-      if (error.message.includes('CORS')) {
-        throw new Error("이미지 접근 권한 문제가 발생했습니다. 다른 이미지를 시도해보세요.")
-      } else if (error.message.includes('404')) {
-        throw new Error("이미지를 찾을 수 없습니다.")
-      } else if (error.message.includes('Failed to fetch')) {
-        throw new Error("네트워크 연결 문제가 발생했습니다.")
-      } else if (error.message.includes('로드에 실패')) {
-        throw new Error("이미지 로드에 실패했습니다. 이미지 URL을 확인해주세요.")
-      } else {
-        throw new Error(`이미지 처리에 실패했습니다: ${error.message}`)
-      }
+      throw new Error(`파일 변환 실패: ${error.message}`)
     }
   }
 
@@ -711,6 +734,95 @@ const VirtualFittingPage = () => {
       <Header />
 
       <div className={styles.virtualFittingContainer}>
+        {/* 간단한 변환 상태 표시 */}
+        {isConverting && (
+          <div style={{
+            background: darkMode ? '#2a2a2a' : '#f0f8ff',
+            border: '2px solid #4CAF50',
+            borderRadius: '8px',
+            padding: '16px',
+            margin: '16px 0',
+            textAlign: 'center',
+            fontWeight: 'bold',
+            color: darkMode ? '#fff' : '#333'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+              <div style={{
+                width: '20px',
+                height: '20px',
+                border: '2px solid #4CAF50',
+                borderTop: '2px solid transparent',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite'
+              }}></div>
+              <span>이미지 변환 중...</span>
+            </div>
+          </div>
+        )}
+
+        {/* 🔥 다운로드 도우미 */}
+        {showDownloadHelper && (
+          <div style={{
+            background: darkMode ? '#2a2a2a' : '#fff3cd',
+            border: '2px solid #ffc107',
+            borderRadius: '8px',
+            padding: '20px',
+            margin: '16px 0',
+            textAlign: 'center'
+          }}>
+            <h3 style={{ margin: '0 0 10px 0', color: '#856404' }}>외부 이미지 보안 제한</h3>
+            <p style={{ margin: '0 0 10px 0', color: '#856404' }}>
+              <strong>{new URL(failedImageUrl).hostname}</strong> 도메인의 이미지는<br/>
+              브라우저 CORS 정책으로 인해 직접 변환할 수 없습니다.
+            </p>
+            <div style={{ 
+              background: darkMode ? '#1a1a1a' : '#f8f9fa', 
+              padding: '10px', 
+              borderRadius: '5px', 
+              margin: '10px 0',
+              fontSize: '14px',
+              color: '#495057'
+            }}>
+              <strong>해결 방법:</strong><br/>
+              1. 아래 버튼으로 이미지 다운로드<br/>
+              2. 상단 "의류 이미지" 또는 "인물 이미지" 섹션에서 직접 업로드
+            </div>
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <button
+                onClick={handleDownloadImage}
+                style={{
+                  background: '#007bff',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '5px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  fontWeight: 'bold'
+                }}
+              >
+                <Download size={18} />
+                이미지 다운로드
+              </button>
+              <button
+                onClick={() => setShowDownloadHelper(false)}
+                style={{
+                  background: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  padding: '12px 24px',
+                  borderRadius: '5px',
+                  cursor: 'pointer'
+                }}
+              >
+                닫기
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* 메인 업로드 섹션 */}
         <div className={styles.mainUploadSection}>
           {/* 왼쪽: 인물 이미지 업로드 */}
@@ -892,12 +1004,17 @@ const VirtualFittingPage = () => {
           <button
             className={styles.fittingBtn}
             onClick={handleVirtualFitting}
-            disabled={!selectedPersonImage || !selectedClothingImage || selectedCategory === null || isProcessing}
+            disabled={!selectedPersonImage || !selectedClothingImage || selectedCategory === null || isProcessing || isConverting}
           >
             {isProcessing ? (
               <>
                 <div className={styles.processingSpinner}></div>
                 가상 피팅 처리 중...
+              </>
+            ) : isConverting ? (
+              <>
+                <div className={styles.processingSpinner}></div>
+                이미지 변환 중...
               </>
             ) : (
               '가상 피팅 시작하기'

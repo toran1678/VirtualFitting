@@ -53,12 +53,13 @@ const VirtualFittingMainPage = () => {
       console.log("데이터 로드 시작...")
       
       // 병렬로 데이터 로드
-      const [queueData, savedData, processingData, queuedData, completedData] = await Promise.all([
+      const [queueData, savedData, processingData, queuedData, completedData, failedData] = await Promise.all([
         getQueueInfo(),
         getFittingHistory(1, 50),
         getUserFittingProcesses('PROCESSING', 1, 10),
         getUserFittingProcesses('QUEUED', 1, 10),
-        getUserFittingProcesses('COMPLETED', 1, 10)
+        getUserFittingProcesses('COMPLETED', 1, 10),
+        getUserFittingProcesses('FAILED', 1, 10)
       ])
 
       console.log("큐 정보:", queueData)
@@ -86,7 +87,8 @@ const VirtualFittingMainPage = () => {
           result_images: Array.from({ length: p.result_image_count || 0 }, (_, i) => 
             getProcessImageUrl(p.process_id, i + 1)
           )
-        })) : [])
+        })) : []),
+        ...(Array.isArray(failedData) ? failedData.map(p => ({ ...p, type: 'failed' })) : [])
       ]
 
       // 시작 시간 기준으로 정렬하고 최대 4개만

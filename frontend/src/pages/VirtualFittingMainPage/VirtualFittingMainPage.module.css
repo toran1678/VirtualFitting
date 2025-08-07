@@ -387,6 +387,10 @@
   background: var(--error-light);
   border-radius: var(--border-radius-sm);
   border-left: 4px solid var(--error-color);
+  
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .clickHint {
