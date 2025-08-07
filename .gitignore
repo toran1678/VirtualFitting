@@ -8,6 +8,7 @@ frontend/.pnp.js
 # backend
 backend/venv
 backend/uploads
+backend/app/api/ml_models/OOTDiffusion
 __pycache__/
 *.py[cod]
 

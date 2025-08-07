@@ -13,6 +13,7 @@ from .liked_clothes import LikedClothes
 from .liked_feeds import LikedFeeds
 from .verification import EmailVerification
 from .person_images import PersonImages
+from .virtual_fitting_process import VirtualFittingProcess
 
 __all__ = ["Base",
            "Users",
@@ -25,6 +26,7 @@ __all__ = ["Base",
            "FeedImages",
            "FeedComments",
            "VirtualFittings",
+           "VirtualFittingProcess",
            "CustomClothingItems",
            "LikedClothes",
            "LikedFeeds",

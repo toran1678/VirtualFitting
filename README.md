@@ -27,7 +27,31 @@ project-root/
 ***
 
 ## ✅ 실행 방법
-### ▶️ Frontend (React)
+### 1️⃣ Redis 서버 실행
+```bash
+# Redis Docker 이미지 다운로드
+docker pull redis
+
+# Redis 서버 실행(포트 6379)
+docker run -p 6379:6379 redis
+
+cd backend/scripts
+# 워커 실행
+python scripts/start_worker.py
+```
+
+***
+
+### 2️⃣ AI 모델 설치 (필수)
+OOTDiffusion 모델을 다음 경로에 설치해야 합니다:
+```
+backend/app/api/ml_models/OOTDiffusion/
+```
+OOTDiffusion 모델 파일은 용량이 크므로 별도로 다운로드하여 위 경로에 배치
+
+***
+
+### 3️⃣ Frontend (React)
 ```bash
 # 1. frontend 디렉토리로 이동
 cd frontend
@@ -52,7 +76,7 @@ REACT_APP_KAKAO_REDIRECT_URI=http://localhost:3000/auth/kakao/callback
 
 ***
 
-## ▶️ Backend (FastAPI)
+## 4️⃣ Backend (FastAPI)
 ```bash
 # 1. backend 디렉토리로 이동
 cd backend

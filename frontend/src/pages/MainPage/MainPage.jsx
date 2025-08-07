@@ -62,7 +62,7 @@ const MainPage = () => {
       subtitle: "개성 있는 디자인으로 특별한 옷을 만들어보세요",
       image: "/placeholder.svg?height=600&width=1200",
       buttonText: "커스텀 시작하기",
-      buttonAction: () => navigate("/custom"),
+      buttonAction: () => navigate("/clothing-customizer"),
     },
   ]
 

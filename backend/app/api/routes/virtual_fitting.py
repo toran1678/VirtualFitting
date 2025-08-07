@@ -1,0 +1,347 @@
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query
+from fastapi.responses import JSONResponse, FileResponse
+from sqlalchemy.orm import Session
+from typing import Optional, List
+import os
+
+from app.db.database import get_db
+from app.api.dependencies import get_current_user
+from app.models.users import Users
+from app.models.virtual_fittings import VirtualFittings
+from app.utils.virtual_fitting_service import fitting_service_redis
+from app.crud.virtual_fitting import VirtualFittingCRUD
+from app.core.task_queue import task_queue
+from app.schemas.virtual_fitting import (
+    VirtualFittingStartRequest,
+    VirtualFittingStartResponse,
+    VirtualFittingStatusResponse,
+    VirtualFittingSelectRequest,
+    VirtualFittingSelectResponse,
+    VirtualFittingListResponse,
+    VirtualFittingProcessItem,
+    VirtualFittingProcessListResponse
+)
+
+router = APIRouter(prefix="/api/virtual-fitting-redis", tags=["virtual-fitting-redis"])
+
+@router.post("/start", response_model=VirtualFittingStartResponse)
+async def start_virtual_fitting_redis(
+    model_image: UploadFile = File(..., description="모델 이미지"),
+    cloth_image: UploadFile = File(..., description="의류 이미지"),
+    category: int = Form(..., description="카테고리 (0:상체, 1:하체, 2:드레스)"),
+    model_type: str = Form("dc", description="모델 타입 (hd/dc)"),
+    scale: float = Form(2.0, description="스케일"),
+    samples: int = Form(4, description="생성할 샘플 수"),
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    """가상 피팅 시작 (Redis 큐 사용)"""
+    try:
+        # 카테고리 유효성 검사
+        if category not in [0, 1, 2]:
+            raise HTTPException(status_code=400, detail="카테고리는 0, 1, 2 중 하나여야 합니다.")
+        
+        # 모델 타입 유효성 검사
+        if model_type not in ["hd", "dc"]:
+            raise HTTPException(status_code=400, detail="모델 타입은 'hd' 또는 'dc'여야 합니다.")
+        
+        # HD 모델은 상체만 지원
+        if model_type == "hd" and category != 0:
+            raise HTTPException(status_code=400, detail="HD 모델은 상체(category=0)만 지원합니다.")
+        
+        # 이미지 파일 저장
+        model_image_path = await save_temp_image(model_image, "model")
+        cloth_image_path = await save_temp_image(cloth_image, "cloth")
+        
+        # Redis 큐를 사용한 가상 피팅 시작
+        process_id = await fitting_service_redis.start_virtual_fitting(
+            db=db,
+            user_id=current_user.user_id,
+            model_image_path=model_image_path,
+            cloth_image_path=cloth_image_path,
+            category=category,
+            model_type=model_type,
+            scale=scale,
+            samples=samples
+        )
+        
+        return VirtualFittingStartResponse(
+            success=True,
+            message="가상 피팅이 큐에 추가되었습니다.",
+            process_id=process_id
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"가상 피팅 시작 중 오류가 발생했습니다: {str(e)}")
+
+@router.get("/status/{process_id}", response_model=VirtualFittingStatusResponse)
+async def get_fitting_status_redis(
+    process_id: int,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    """가상 피팅 처리 상태 조회 (Redis 큐 사용)"""
+    process = fitting_service_redis.get_fitting_status(db, process_id, current_user.user_id)
+    
+    if not process:
+        raise HTTPException(status_code=404, detail="가상 피팅 처리를 찾을 수 없습니다.")
+    
+    # 결과 이미지 URL 생성
+    result_images = []
+    if process.status == 'COMPLETED':
+        for i in range(1, 7):
+            image_path = getattr(process, f'result_image_{i}', None)
+            if image_path:
+                result_images.append(f"/api/virtual-fitting-redis/image/{process_id}/{i}")
+    
+    return VirtualFittingStatusResponse(
+        process_id=process_id,
+        status=process.status,
+        started_at=process.started_at,
+        completed_at=process.completed_at,
+        result_images=result_images,
+        error_message=process.error_message if process.status == 'FAILED' else None
+    )
+    
+@router.get("/processes", response_model=VirtualFittingProcessListResponse)
+async def get_user_processes(
+    page: int = Query(1, ge=1, description="페이지 번호"),
+    per_page: int = Query(20, ge=1, le=50, description="페이지당 항목 수"),
+    status: Optional[str] = Query(None, description="상태 필터 (QUEUED, PROCESSING, COMPLETED, FAILED)"),
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    """사용자의 모든 가상 피팅 프로세스 목록 조회"""
+    skip = (page - 1) * per_page
+    
+    # 상태 필터 유효성 검사
+    if status and status not in ['QUEUED', 'PROCESSING', 'COMPLETED', 'FAILED']:
+        raise HTTPException(status_code=400, detail="유효하지 않은 상태입니다.")
+    
+    # CRUD를 통한 프로세스 목록 조회
+    processes, total = VirtualFittingCRUD.get_user_fitting_processes(
+        db=db,
+        user_id=current_user.user_id,
+        skip=skip,
+        limit=per_page,
+        status_filter=status
+    )
+    
+    total_pages = (total + per_page - 1) // per_page
+    
+    # 응답 데이터 구성
+    process_list = []
+    for process in processes:
+        # 결과 이미지 개수 계산
+        result_image_count = 0
+        if process.status == 'COMPLETED':
+            for i in range(1, 7):
+                if getattr(process, f'result_image_{i}', None):
+                    result_image_count += 1
+        
+        process_data = {
+            "process_id": process.id,
+            "status": process.status,
+            "started_at": process.started_at,
+            "completed_at": process.completed_at,
+            "result_image_count": result_image_count,
+            "error_message": process.error_message if process.status == 'FAILED' else None
+        }
+        process_list.append(process_data)
+    
+    return VirtualFittingProcessListResponse(
+        processes=process_list,
+        total=total,
+        page=page,
+        per_page=per_page,
+        total_pages=total_pages
+    )
+
+@router.get("/statistics")
+async def get_user_statistics(
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    """사용자의 가상 피팅 프로세스 통계"""
+    stats = VirtualFittingCRUD.get_user_process_statistics(db, current_user.user_id)
+    
+    return {
+        "success": True,
+        "data": {
+            "process_stats": stats,
+            "total_processes": sum(stats.values())
+        }
+    }
+
+@router.get("/queue-info")
+async def get_queue_info(current_user: Users = Depends(get_current_user)):
+    """큐 정보 조회"""
+    queue_info = task_queue.get_queue_info()
+    return {
+        "success": True,
+        "data": queue_info
+    }
+
+@router.post("/select", response_model=VirtualFittingSelectResponse)
+async def select_fitting_result_redis(
+    request: VirtualFittingSelectRequest,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    """가상 피팅 결과 선택 (선택 후 프로세스 삭제)"""
+    if request.selected_image_index < 1 or request.selected_image_index > 6:
+        raise HTTPException(status_code=400, detail="선택할 이미지 인덱스는 1-6 사이여야 합니다.")
+    
+    result = fitting_service_redis.select_fitting_result(
+        db=db,
+        process_id=request.process_id,
+        user_id=current_user.user_id,
+        selected_image_index=request.selected_image_index
+    )
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="가상 피팅 결과를 선택할 수 없습니다.")
+    
+    return VirtualFittingSelectResponse(
+        success=True,
+        message="가상 피팅 결과가 저장되었습니다. 임시 작업 데이터가 정리되었습니다.",
+        fitting_id=result.fitting_id,
+        image_url=f"/api/virtual-fitting-redis/result/{result.fitting_id}"
+    )
+
+@router.delete("/process/{process_id}")
+async def cancel_fitting_process(
+    process_id: int,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    """가상 피팅 프로세스 취소 및 삭제"""
+    process = fitting_service_redis.get_fitting_status(db, process_id, current_user.user_id)
+    
+    if not process:
+        raise HTTPException(status_code=404, detail="가상 피팅 처리를 찾을 수 없습니다.")
+    
+    try:
+        # 프로세스의 모든 이미지들 정리
+        fitting_service_redis._cleanup_all_process_images(process)
+        
+        # 프로세스 삭제
+        db.delete(process)
+        db.commit()
+        
+        return {
+            "success": True,
+            "message": "가상 피팅 프로세스가 취소되고 삭제되었습니다."
+        }
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"프로세스 삭제 중 오류가 발생했습니다: {str(e)}")
+
+@router.get("/image/{process_id}/{image_index}")
+async def get_result_image_redis(
+    process_id: int,
+    image_index: int,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    """가상 피팅 결과 이미지 조회"""
+    process = fitting_service_redis.get_fitting_status(db, process_id, current_user.user_id)
+    
+    if not process or process.status != 'COMPLETED':
+        raise HTTPException(status_code=404, detail="이미지를 찾을 수 없습니다.")
+    
+    relative_path = getattr(process, f'result_image_{image_index}', None)
+    if not relative_path:
+        raise HTTPException(status_code=404, detail="이미지 파일을 찾을 수 없습니다.")
+    
+    # 상대 경로를 절대 경로로 변환
+    from pathlib import Path
+    project_root = Path(__file__).parent.parent.parent.parent
+    absolute_path = project_root / relative_path
+    
+    if not absolute_path.exists():
+        raise HTTPException(status_code=404, detail="이미지 파일을 찾을 수 없습니다.")
+    
+    return FileResponse(str(absolute_path))
+
+@router.get("/result/{fitting_id}")
+async def get_fitting_result_image_redis(
+    fitting_id: int,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    """저장된 가상 피팅 결과 이미지 조회"""
+    result = db.query(VirtualFittings).filter(
+        VirtualFittings.fitting_id == fitting_id,
+        VirtualFittings.user_id == current_user.user_id
+    ).first()
+    
+    if not result:
+        raise HTTPException(status_code=404, detail="가상 피팅 결과를 찾을 수 없습니다.")
+    
+    # 상대 경로를 절대 경로로 변환
+    from pathlib import Path
+    project_root = Path(__file__).parent.parent.parent.parent
+    absolute_path = project_root / result.fitting_image_url
+    
+    if not absolute_path.exists():
+        raise HTTPException(status_code=404, detail="이미지 파일을 찾을 수 없습니다.")
+    
+    return FileResponse(str(absolute_path))
+
+@router.get("/history", response_model=VirtualFittingListResponse)
+async def get_fitting_history_redis(
+    page: int = Query(1, ge=1, description="페이지 번호"),
+    per_page: int = Query(20, ge=1, le=50, description="페이지당 항목 수"),
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    """사용자의 가상 피팅 히스토리 조회"""
+    skip = (page - 1) * per_page
+    
+    results, total = VirtualFittingCRUD.get_user_fitting_results(
+        db=db,
+        user_id=current_user.user_id,
+        skip=skip,
+        limit=per_page
+    )
+    
+    total_pages = (total + per_page - 1) // per_page
+    
+    return VirtualFittingListResponse(
+        fittings=[
+            {
+                "fitting_id": result.fitting_id,
+                "image_url": f"/api/virtual-fitting-redis/result/{result.fitting_id}",
+                "created_at": result.created_at
+            }
+            for result in results
+        ],
+        total=total,
+        page=page,
+        per_page=per_page,
+        total_pages=total_pages
+    )
+
+async def save_temp_image(file: UploadFile, prefix: str) -> str:
+    """임시 이미지 파일 저장"""
+    import uuid
+    
+    # 임시 디렉토리 생성
+    temp_dir = "uploads/temp_images"
+    os.makedirs(temp_dir, exist_ok=True)
+    
+    # 고유한 파일명 생성
+    file_ext = os.path.splitext(file.filename)[1]
+    filename = f"{prefix}_{uuid.uuid4().hex}{file_ext}"
+    file_path = os.path.join(temp_dir, filename)
+    
+    # 파일 저장
+    with open(file_path, "wb") as buffer:
+        content = await file.read()
+        buffer.write(content)
+    
+    return file_path

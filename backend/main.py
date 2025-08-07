@@ -23,6 +23,7 @@ from app.api import follow_system_router
 from app.api.routes import user_profile_router # 사용자 프로필 수정정
 from app.api.routes import person_images_router
 from app.api.routes import user_clothes_router
+from app.api.routes import virtual_fitting_router
 
 # 환경 변수 로드
 load_dotenv()
@@ -89,6 +90,8 @@ app.include_router(comments_router)
 
 app.include_router(user_profiles_router)
 app.include_router(follow_system_router)
+
+app.include_router(virtual_fitting_router)
 
 # 서버 상태 확인 엔드포인트
 @app.get("/health")

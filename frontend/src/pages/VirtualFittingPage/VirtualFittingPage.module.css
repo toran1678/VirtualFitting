@@ -158,6 +158,176 @@
   background-color: #f59e0b;
 }
 
+/* 카테고리 정보 */
+.categoryInfo {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+.categoryDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.categoryLabel {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.categoryValue {
+  font-size: 1rem;
+  color: var(--accent-color);
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  background-color: var(--accent-light);
+  border-radius: 16px;
+}
+
+.categoryChangeBtn {
+  background-color: var(--text-secondary);
+  color: white;
+  border: none;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.categoryChangeBtn:hover {
+  background-color: var(--text-primary);
+}
+
+.categoryWarning {
+  text-align: center;
+  color: var(--warning-color);
+  font-weight: 500;
+}
+
+/* 카테고리 선택 모달 */
+.categoryModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(8px);
+}
+
+.categoryModalContent {
+  background-color: var(--card-bg);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-color);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.categoryModalContent h3 {
+  margin: 0 0 0.5rem 0;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.categoryModalContent p {
+  margin: 0 0 2rem 0;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.categoryOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.categoryOption {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  background-color: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.categoryOption:hover {
+  border-color: var(--accent-color);
+  background-color: var(--accent-light);
+  transform: translateY(-2px);
+}
+
+.categoryOption.selected {
+  border-color: var(--accent-color);
+  background-color: var(--accent-light);
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.categoryIcon {
+  width: 32px;
+  height: 32px;
+  color: var(--accent-color);
+}
+
+.categoryOption span {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.categoryOption small {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.categoryModalClose {
+  width: 100%;
+  background-color: var(--text-secondary);
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.categoryModalClose:hover {
+  background-color: var(--text-primary);
+}
+
 /* 피팅 버튼 섹션 */
 .fittingButtonSection {
   display: flex;
@@ -177,6 +347,10 @@
   transition: all 0.3s ease;
   box-shadow: 0 6px 20px rgba(0, 123, 255, 0.3);
   min-width: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .fittingBtn:hover:not(:disabled) {
@@ -190,6 +364,15 @@
   opacity: 0.6;
   transform: none;
   box-shadow: none;
+}
+
+.processingSpinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
 /* 하단 탭 섹션 */
@@ -231,6 +414,14 @@
   background-color: var(--accent-color);
   color: white;
   box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.tabBtn.active .inlineIcon {
+  color: white !important;
+}
+
+.tabBtn.active:hover .inlineIcon {
+  color: white !important;
 }
 
 .tabContent {
@@ -517,6 +708,15 @@
   .personImageGridItem {
     height: 260px;
   }
+
+  .categoryOptions {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+
+  .categoryOption {
+    padding: 1rem;
+  }
 }
 
 @media (max-width: 768px) {
@@ -572,6 +772,14 @@
 
   .personImageGridItem img {
     height: 140px;
+  }
+
+  .categoryOptions {
+    flex-direction: column;
+  }
+
+  .categoryModalContent {
+    padding: 1.5rem;
   }
 }
 
@@ -669,7 +877,8 @@
 .uploadPlaceholder:focus,
 .fittingBtn:focus,
 .tabBtn:focus,
-.controlBtn:focus {
+.controlBtn:focus,
+.categoryOption:focus {
   outline: 2px solid var(--accent-color);
   outline-offset: 2px;
 }
@@ -678,6 +887,7 @@
 .gridItem,
 .uploadPlaceholder,
 .fittingBtn,
-.controlBtn {
+.controlBtn,
+.categoryOption {
   will-change: transform;
 }

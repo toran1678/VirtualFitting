@@ -12,6 +12,7 @@ import RegisterPage from "./pages/RegisterPage/RegisterPage"
 import KakaoCallback from "./components/KakaoCallback/KakaoCallback"
 import LoginPage from "./pages/LoginPage/LoginPage"
 import VirtualFittingPage from "./pages/VirtualFittingPage/VirtualFittingPage"
+import VirtualFittingMainPage from "./pages/VirtualFittingMainPage/VirtualFittingMainPage"
 import ClothingBrowsePage from "./pages/ClothingBrowsePage/ClothingBrowsePage"
 import MyPage from "./pages/MyPage/MyPage"
 import UserProfilePage from "./pages/UserProfilePage/UserProfilePage"
@@ -23,6 +24,7 @@ import EditFeedPage from "./pages/EditFeedPage/EditFeedPage"
 import ProfileEditPage from "./pages/ProfileEditPage/ProfileEditPage"
 import PersonImageManagePage from "./pages/PersonImageManagePage/PersonImageManagePage"
 import MyCloset from "./pages/MyCloset/MyCloset"
+import ClothingCustomizer from "./pages/ClothingCustomizer/ClothingCustomizer"
 
 import "./App.css"
 
@@ -39,6 +41,7 @@ function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/clothing-browse" element={<ClothingBrowsePage />} />
             <Route path="/virtual-fitting" element={<VirtualFittingPage />} />
+            <Route path="/virtual-fitting-main" element={<VirtualFittingMainPage />} />
             <Route path="/feed" element={<FeedPage />} />
             <Route path="/create-feed" element={<CreateFeedPage />} />
             <Route path="/feed/:feedId" element={<FeedDetailPage />} />
@@ -49,6 +52,7 @@ function App() {
             <Route path="/my-closet" element={<MyCloset />} />
             <Route path="/profile/:email" element={<UserProfilePage />} />
             <Route path="/follow/:email" element={<FollowPage />} />
+            <Route path="/clothing-customizer" element={<ClothingCustomizer />} />
           </Routes>
         </Router>
       </AuthProvider>

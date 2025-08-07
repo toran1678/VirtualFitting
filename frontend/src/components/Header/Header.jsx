@@ -149,10 +149,10 @@ const Header = () => {
                   <Link to="/clothing-browse">의류</Link>
                 </li>
                 <li className={styles.navItem}>
-                  <Link to="/virtual-fitting">가상피팅</Link>
+                  <Link to="/virtual-fitting-main">가상피팅</Link>
                 </li>
                 <li className={styles.navItem}>
-                  <Link to="/custom">커스텀</Link>
+                  <Link to="/clothing-customizer">커스텀</Link>
                 </li>
                 <li className={styles.navItem}>
                   <Link to="/feed">피드</Link>

@@ -47,6 +47,8 @@ class Users(Base):
     
     # 인물 이미지 관계 설정
     person_images = relationship("PersonImages", back_populates="user", cascade="all, delete")
+    
+    virtual_fitting_process = relationship("VirtualFittingProcess", back_populates="user", cascade="all, delete")  # 가상 피팅 처리 관계 설정
 
 # 팔로우 테이블 추가
 class Followers(Base):
