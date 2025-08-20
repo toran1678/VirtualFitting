@@ -1,0 +1,116 @@
+.page {
+  min-height: 100vh;
+  padding-top: 72px; /* 헤더와 겹침 방지 (다른 페이지와 유사하게 여백 확보) */
+}
+
+.darkMode {
+}
+
+.container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.helper {
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.label {
+  min-width: 80px;
+  font-weight: 600;
+}
+
+.input {
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.inputsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin: 8px 0 16px;
+}
+
+.inputCard {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px;
+}
+
+.inputLabel {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.inputImage {
+  width: 100%;
+  height: 220px;
+  object-fit: contain;
+  background: #1112;
+  border-radius: 8px;
+}
+
+.inputPlaceholder {
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  background: #1112;
+  border-radius: 8px;
+}
+
+.item {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.image {
+  width: 100%;
+  height: 320px;
+  object-fit: contain;
+  background: #1112;
+  border-radius: 8px;
+}
+
+.selectBtn {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.loading, .error {
+  padding: 20px;
+}
+
+

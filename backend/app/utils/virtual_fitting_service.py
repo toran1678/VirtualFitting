@@ -20,6 +20,14 @@ from app.core.task_queue import task_queue
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+env = os.environ.copy()
+env.update({
+    "PYTORCH_CUDA_ALLOC_CONF": "garbage_collection_threshold:0.6,max_split_size_mb:64",
+    "CUDA_LAUNCH_BLOCKING": "1",     # 디버깅 정확도↑ (안정 뒤엔 빼도 됨)
+    "XFORMERS_DISABLED": "0",        # 아래 3-1에서 xFormers 쓰는 모드일 때만 0
+    "USE_FLASH_ATTENTION": "0",      # Flash-Attn은 끄는 걸 권장(Windows/버전빨)
+})
+
 class VirtualFittingServiceRedis:
     def __init__(self):
         # 현재 프로젝트 루트 경로
@@ -56,6 +64,13 @@ class VirtualFittingServiceRedis:
         db.add(process)
         db.commit()
         db.refresh(process)
+        # 입력 이미지 경로를 프로세스에 저장하여 선택 페이지에서 표시 가능하도록 함
+        try:
+            process.model_image_path = model_image_path
+            process.cloth_image_path = cloth_image_path
+            db.commit()
+        except Exception as e:
+            logger.warning(f"입력 이미지 경로 저장 실패(무시): {e}")
         
         logger.info(f"가상 피팅 프로세스 생성: {process.id}")
         
@@ -107,17 +122,72 @@ class VirtualFittingServiceRedis:
                 return False
             
             process.status = 'PROCESSING'
+            # 입력 이미지 경로 저장 (상대/절대 혼재 가능하므로 그대로 보관)
+            process.model_image_path = task_data.get("model_image_path")
+            process.cloth_image_path = task_data.get("cloth_image_path")
             db.commit()
             
-            # 실제 가상 피팅 실행
-            result_paths = self._run_ootd_diffusion(
-                task_data["model_image_path"],
-                task_data["cloth_image_path"],
-                task_data["category"],
-                task_data["model_type"],
-                task_data["scale"],
-                task_data["samples"]
-            )
+            # 실제 가상 피팅 실행 (메모리 이슈 대비 재시도 로직)
+            base_scale = float(task_data.get("scale", 2.0))
+            base_samples = int(task_data.get("samples", 4))
+
+            attempts = [
+                (base_scale, base_samples),             # 1차: 원본
+                (min(base_scale, 1.5), min(base_samples, 2)),  # 2차: 스케일/샘플 감소
+                (1.0, 1),                               # 3차: 최소 설정
+            ]
+
+            last_error: Optional[Exception] = None
+            result_paths = None
+            for scale_try, samples_try in attempts:
+                try:
+                    logger.info(f"가상 피팅 시도: scale={scale_try}, samples={samples_try}")
+                    result_paths = self._run_ootd_diffusion(
+                        task_data["model_image_path"],
+                        task_data["cloth_image_path"],
+                        task_data["category"],
+                        task_data["model_type"],
+                        scale_try,
+                        samples_try
+                    )
+                    # 성공
+                    break
+                except Exception as e:
+                    last_error = e
+                    err_msg = str(e)
+                    if "CUDA" in err_msg or "cublas" in err_msg.lower() or "out of memory" in err_msg.lower():
+                        logger.warning(f"GPU 메모리 관련 오류 감지, 재시도 진행: {err_msg}")
+                        continue
+                    else:
+                        logger.error(f"가상 피팅 실행 실패(재시도 불가 오류): {err_msg}")
+                        break
+
+            if not result_paths:
+                if last_error:
+                    raise last_error
+                raise Exception("생성된 결과 이미지를 찾을 수 없습니다.")
+
+            # 결과 개수를 4개로 보장 (부족 시 추가 실행 또는 중복 채움)
+            if len(result_paths) < 4:
+                try:
+                    # 부족한 개수만큼 1씩 추가 실행하여 보충
+                    missing = 4 - len(result_paths)
+                    for i in range(missing):
+                        extra = self._run_ootd_diffusion(
+                            task_data["model_image_path"],
+                            task_data["cloth_image_path"],
+                            task_data["category"],
+                            task_data["model_type"],
+                            scale_try,
+                            1
+                        )
+                        if extra:
+                            result_paths.extend(extra[:1])
+                except Exception as e:
+                    logger.warning(f"추가 생성 실패, 중복으로 채움: {e}")
+                # 그래도 부족하면 기존 결과 중복으로 채우기
+                while len(result_paths) < 4 and result_paths:
+                    result_paths.append(result_paths[-1])
             
             if not result_paths:
                 raise Exception("생성된 결과 이미지를 찾을 수 없습니다.")
@@ -151,11 +221,8 @@ class VirtualFittingServiceRedis:
             db.commit()
             logger.info(f"가상 피팅 완료: {process_id}")
             
-            # 임시 입력 이미지 정리
-            self._cleanup_temp_files([
-                task_data["model_image_path"],
-                task_data["cloth_image_path"]
-            ])
+            # 입력 이미지는 선택 페이지에서 미리보기를 위해 유지
+            # 최종 선택 또는 취소 시 정리
             
             return True
             
@@ -231,7 +298,13 @@ class VirtualFittingServiceRedis:
         logger.info(f"실행 명령어: {' '.join(cmd)}")
         logger.info(f"작업 디렉토리: {self.ootd_model_path}")
         
-        # subprocess 실행
+        # subprocess 실행 (CUDA 메모리 설정 추가)
+        env = os.environ.copy()
+        # VRAM 파편화 완화 설정
+        env.setdefault('PYTORCH_CUDA_ALLOC_CONF', 'max_split_size_mb:128,garbage_collection_threshold:0.6')
+        # 일부 환경에서 xFormers 비활성화가 안정적인 경우가 있어 옵션 제공 (없으면 무시)
+        # env.setdefault('XFORMERS_DISABLED', '1')
+
         result = subprocess.run(
             cmd,
             cwd=str(self.ootd_model_path),
@@ -239,7 +312,7 @@ class VirtualFittingServiceRedis:
             text=True,
             timeout=1800,  # 30분 타임아웃
             shell=False,
-            env=os.environ.copy()
+            env=env
         )
         
         logger.info(f"subprocess 반환 코드: {result.returncode}")
@@ -318,7 +391,8 @@ class VirtualFittingServiceRedis:
         db: Session, 
         process_id: int, 
         user_id: int, 
-        selected_image_index: int
+        selected_image_index: int,
+        title: Optional[str] = None
     ) -> Optional[VirtualFittings]:
         """가상 피팅 결과 선택 및 저장 (작업 완료 후 프로세스 레코드 삭제)"""
         
@@ -347,6 +421,10 @@ class VirtualFittingServiceRedis:
             fitting_result = VirtualFittings(
                 user_id=user_id,
                 fitting_image_url=final_image_path,  # 최종 저장 경로
+                title=title,
+                # 참고용 입력 이미지(가능하면 상대 경로로 저장)
+                source_model_image_url=self._normalize_to_relative(process.model_image_path),
+                source_cloth_image_url=self._normalize_to_relative(process.cloth_image_path),
                 created_at=datetime.now(timezone.utc)
             )
             
@@ -405,8 +483,22 @@ class VirtualFittingServiceRedis:
             logger.error(f"선택된 이미지 복사 실패: {e}")
             return None
 
+    def _normalize_to_relative(self, path_str: Optional[str]) -> Optional[str]:
+        if not path_str:
+            return None
+        try:
+            p = Path(path_str)
+            if 'uploads' in p.parts:
+                idx = p.parts.index('uploads')
+                relative = '/'.join(p.parts[idx:])
+                return relative
+            return path_str
+        except Exception:
+            return path_str
+
     def _cleanup_all_process_images(self, process: VirtualFittingProcess):
         """프로세스의 모든 이미지들 정리"""
+        # 결과 이미지 정리
         for i in range(1, 7):  # result_image_1 ~ result_image_6
             relative_path = getattr(process, f'result_image_{i}', None)
             if relative_path:
@@ -418,6 +510,18 @@ class VirtualFittingServiceRedis:
                         logger.info(f"프로세스 이미지 삭제: {absolute_path}")
                     except Exception as e:
                         logger.warning(f"프로세스 이미지 삭제 실패: {e}")
+        # 입력 이미지 정리
+        for p in [process.model_image_path, process.cloth_image_path]:
+            if p:
+                try:
+                    abspath = Path(p)
+                    if not abspath.is_absolute():
+                        abspath = self.project_root / p
+                    if abspath.exists():
+                        os.remove(str(abspath))
+                        logger.info(f"입력 임시 이미지 삭제: {abspath}")
+                except Exception as e:
+                    logger.warning(f"입력 이미지 삭제 실패: {e}")
     
     def _cleanup_unselected_images(self, process: VirtualFittingProcess, selected_index: int):
         """선택되지 않은 이미지들 정리"""

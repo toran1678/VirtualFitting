@@ -10,8 +10,15 @@ class VirtualFittingProcess(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)  # 고유 아이디
     user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False, index=True)  # 사용자 아이디
     
+    # 입력 이미지 경로 (선택 페이지에서 표시를 위해 보관)
+    model_image_path = Column(String(500), nullable=True)
+    cloth_image_path = Column(String(500), nullable=True)
+    
     # 처리 상태
-    status = Column(Enum('PROCESSING', 'COMPLETED', 'FAILED', 'QUEUED', name='fitting_process_status'), default='PROCESSING')  # 처리 중/처리 완료/처리 실패
+    status = Column(
+        Enum('PROCESSING', 'COMPLETED', 'FAILED', 'QUEUED', name='fitting_process_status'),
+        default='PROCESSING'
+    )  # 처리 중/처리 완료/처리 실패
     
     # 에러 메시지 추가
     error_message = Column(String(1000), nullable=True)  # 에러 발생 시 메시지

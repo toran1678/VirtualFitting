@@ -19,17 +19,23 @@ class VirtualFittingStatusResponse(BaseModel):
     started_at: datetime
     completed_at: Optional[datetime] = None
     result_images: List[str] = []
+    # 인덱스-URL 매핑 (정확한 선택을 위해 추가)
+    result_items: List[dict] = []
     error_message: Optional[str] = None  # 에러 메시지 추가
+    model_image_url: Optional[str] = None
+    cloth_image_url: Optional[str] = None
 
 class VirtualFittingSelectRequest(BaseModel):
     process_id: int
     selected_image_index: int
+    title: Optional[str] = None
 
 class VirtualFittingSelectResponse(BaseModel):
     success: bool
     message: str
     fitting_id: int
     image_url: str
+    title: Optional[str] = None
 
 class VirtualFittingItem(BaseModel):
     fitting_id: int

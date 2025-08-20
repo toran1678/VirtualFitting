@@ -8,8 +8,13 @@ class VirtualFittings(Base):
 
     fitting_id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.user_id", ondelete="CASCADE"), nullable=False)
-    # product_id = Column(Integer, ForeignKey("clothing_items.product_id"), nullable=False)
+    
     fitting_image_url = Column(String(255), nullable=False)
+    title = Column(String(200), nullable=True) # 사용자가 결과에 붙인 이름
+    # 선택 당시의 입력 이미지 경로(참조용)
+    source_model_image_url = Column(String(500), nullable=True)
+    source_cloth_image_url = Column(String(500), nullable=True)
+    
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=datetime.now)
 

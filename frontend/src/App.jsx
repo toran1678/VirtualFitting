@@ -25,6 +25,7 @@ import ProfileEditPage from "./pages/ProfileEditPage/ProfileEditPage"
 import PersonImageManagePage from "./pages/PersonImageManagePage/PersonImageManagePage"
 import MyCloset from "./pages/MyCloset/MyCloset"
 import ClothingCustomizer from "./pages/ClothingCustomizer/ClothingCustomizer"
+import VirtualFittingSelectPage from "./pages/VirtualFittingSelectPage/VirtualFittingSelectPage"
 
 import "./App.css"
 
@@ -42,6 +43,7 @@ function App() {
             <Route path="/clothing-browse" element={<ClothingBrowsePage />} />
             <Route path="/virtual-fitting" element={<VirtualFittingPage />} />
             <Route path="/virtual-fitting-main" element={<VirtualFittingMainPage />} />
+            <Route path="/virtual-fitting/select/:processId" element={<VirtualFittingSelectPage />} />
             <Route path="/feed" element={<FeedPage />} />
             <Route path="/create-feed" element={<CreateFeedPage />} />
             <Route path="/feed/:feedId" element={<FeedDetailPage />} />

@@ -70,8 +70,8 @@ const VirtualFittingMainPage = () => {
 
       // 큐 정보 설정
       setQueueInfo({
-        queued: queueData.queued || 0,
-        processing: queueData.processing || 0
+        queued: Math.max(0, Number(queueData.queued || 0)),
+        processing: Math.max(0, Number(queueData.processing || 0))
       })
 
       // 저장된 결과 설정
@@ -166,8 +166,8 @@ const VirtualFittingMainPage = () => {
   // 프로세스 클릭 처리
   const handleProcessClick = (process) => {
     if (process.status === 'COMPLETED') {
-      setSelectedProcess(process)
-      setShowResultModal(true)
+      // 결과 선택 전용 페이지로 이동
+      navigate(`/virtual-fitting/select/${process.process_id}`)
     }
   }
 
@@ -554,45 +554,7 @@ const VirtualFittingMainPage = () => {
       </div>
 
       {/* 결과 선택 모달 */}
-      {showResultModal && selectedProcess && (
-        <div className={styles.modalOverlay} onClick={() => setShowResultModal(false)}>
-          <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <h3>결과 선택</h3>
-              <button 
-                className={styles.modalCloseBtn}
-                onClick={() => setShowResultModal(false)}
-              >
-                <X className={styles.btnIcon} />
-              </button>
-            </div>
-            
-            <div className={styles.modalContent}>
-              <div className={styles.resultImagesGrid}>
-                {selectedProcess.result_images?.map((imageUrl, index) => (
-                  <div key={index} className={styles.resultImageItem}>
-                    <img 
-                      src={imageUrl || "/placeholder.svg"} 
-                      alt={`결과 ${index + 1}`}
-                      className={styles.resultImage}
-                      onError={(e) => {
-                        console.error(`이미지 로드 실패: ${imageUrl}`)
-                        e.target.src = "/placeholder.svg?height=200&width=150&text=이미지+로드+실패"
-                      }}
-                    />
-                    <button 
-                      className={styles.selectResultBtn}
-                      onClick={() => handleSelectResult(index + 1)}
-                    >
-                      선택
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {false && showResultModal && selectedProcess && (<div />)}
 
       {/* 이미지 미리보기 모달 */}
       {showPreviewModal && previewImage && (

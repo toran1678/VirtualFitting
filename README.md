@@ -27,6 +27,20 @@ project-root/
 ***
 
 ## ✅ 실행 방법
+### 🗄️ Database (MySQL)
+```sql
+-- MySQL 접속 후 실행
+CREATE DATABASE capstone DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### 크롤링 데이터 삽입
+```bash
+cd backend/crawling
+python insert_csv.py
+```
+
+***
+
 ### 1️⃣ Redis 서버 실행
 ```bash
 # Redis Docker 이미지 다운로드
@@ -35,7 +49,7 @@ docker pull redis
 # Redis 서버 실행(포트 6379)
 docker run -p 6379:6379 redis
 
-cd backend/scripts
+cd backend
 # 워커 실행
 python scripts/start_worker.py
 ```

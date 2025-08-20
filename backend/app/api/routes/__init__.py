@@ -8,3 +8,4 @@ from .profile import router as user_profile_router
 from .person_images import router as person_images_router
 from .user_clothes import router as user_clothes_router
 from .virtual_fitting import router as virtual_fitting_router
+from .image_proxy import router as image_proxy_router

@@ -11,6 +11,7 @@ import { getProfileImageUrl, getFeedImageUrl } from "../../utils/imageUtils"
 import { getMyFeeds } from "../../api/feeds"
 import { getUserProfileByEmail } from "../../api/userProfiles"
 import { Heart, Clock } from "lucide-react"
+import { getFittingHistory, getFittingResultImageUrl } from "../../api/virtual_fitting"
 
 const MyPage = () => {
   const [activeTab, setActiveTab] = useState("피드")
@@ -42,8 +43,8 @@ const MyPage = () => {
   // 통계 데이터
   const [stats, setStats] = useState({
     feeds: 0,
-    virtualFittings: 18,
-    customClothes: 12,
+    virtualFittings: 0,
+    customClothes: 0,
     likedClothes: 0,
   })
 
@@ -55,50 +56,7 @@ const MyPage = () => {
 
   const [tabData, setTabData] = useState({
     피드: [],
-    "가상 피팅": [
-      {
-        id: 1,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "나이키 후드티",
-        brand: "나이키",
-        date: "2024-01-15",
-      },
-      {
-        id: 2,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "유니클로 청바지",
-        brand: "유니클로",
-        date: "2024-01-14",
-      },
-      {
-        id: 3,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "자라 코트",
-        brand: "자라",
-        date: "2024-01-13",
-      },
-      {
-        id: 4,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "아디다스 운동화",
-        brand: "아디다스",
-        date: "2024-01-12",
-      },
-      {
-        id: 5,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "H&M 셔츠",
-        brand: "H&M",
-        date: "2024-01-11",
-      },
-      {
-        id: 6,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "무신사 맨투맨",
-        brand: "무신사",
-        date: "2024-01-10",
-      },
-    ],
+    "가상 피팅": [],
     "커스텀 의류": [
       {
         id: 1,
@@ -145,6 +103,28 @@ const MyPage = () => {
     ],
     "좋아요 의류": [],
   })
+
+  // 가상 피팅 결과 로드
+  const loadVirtualFittings = async () => {
+    if (!isLoggedIn()) return
+    try {
+      const data = await getFittingHistory(1, 20)
+      const fittings = Array.isArray(data?.fittings) ? data.fittings : []
+      const formatted = fittings.map((f) => ({
+        id: f.fitting_id,
+        image: getFittingResultImageUrl(f.fitting_id),
+        title: f.title || `가상 피팅 #${f.fitting_id}`,
+        brand: f.title || "",
+        date: new Date(f.created_at).toLocaleDateString("ko-KR"),
+      }))
+      setTabData((prev) => ({ ...prev, "가상 피팅": formatted }))
+      setStats((prev) => ({ ...prev, virtualFittings: fittings.length }))
+    } catch (error) {
+      console.error("가상 피팅 결과 로드 실패:", error)
+      setTabData((prev) => ({ ...prev, "가상 피팅": [] }))
+      setStats((prev) => ({ ...prev, virtualFittings: 0 }))
+    }
+  }
 
   // URL 파라미터 변경 감지 및 탭 동기화
   useEffect(() => {
@@ -343,8 +323,13 @@ const MyPage = () => {
       navigate("/login")
       return
     }
-
-    navigate(`/virtual-fitting/try/${productId}`)
+    const item = likedClothes.find((c) => c.id === productId)
+    const q = new URLSearchParams({
+      clothingId: String(productId),
+      clothingImage: item?.image ? encodeURIComponent(item.image) : "",
+      clothingCategory: item?.category?.split('>')[0]?.trim() || "",
+    }).toString()
+    navigate(`/virtual-fitting?${q}`)
   }
 
   // 팔로잉 페이지로 이동
@@ -379,7 +364,7 @@ const MyPage = () => {
       // 사용자 정보가 설정된 후 데이터 로드
       if (user?.email) {
         // 병렬로 데이터 로드
-        await Promise.all([loadMyFeeds(), loadLikedClothes(), loadUserProfile(user.email)])
+        await Promise.all([loadMyFeeds(), loadLikedClothes(), loadUserProfile(user.email), loadVirtualFittings()])
       }
     }
 

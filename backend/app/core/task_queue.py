@@ -126,8 +126,26 @@ class TaskQueue:
         
         try:
             queued = redis_client.llen(self.queue_name)
-            processing = redis_client.scard(self.processing_set)
-            return {"queued": queued, "processing": processing}
+            # processing 집합 청소: PROCESSING 상태가 아닌 항목 제거
+            processing_ids = list(redis_client.smembers(self.processing_set) or [])
+            valid_processing = 0
+            for raw_id in processing_ids:
+                task_id = raw_id.decode() if isinstance(raw_id, (bytes, bytearray)) else raw_id
+                status_data = redis_client.get(f"{self.status_prefix}:{task_id}")
+                if status_data:
+                    try:
+                        status_json = json.loads(status_data)
+                        if status_json.get("status") == "PROCESSING":
+                            valid_processing += 1
+                        else:
+                            redis_client.srem(self.processing_set, task_id)
+                    except Exception:
+                        # 파싱 실패 시 정리
+                        redis_client.srem(self.processing_set, task_id)
+                else:
+                    # 상태 정보가 없으면 정리
+                    redis_client.srem(self.processing_set, task_id)
+            return {"queued": queued, "processing": valid_processing}
             
         except Exception as e:
             logger.error(f"큐 정보 조회 실패: {e}")

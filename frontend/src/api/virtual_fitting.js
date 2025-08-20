@@ -78,7 +78,7 @@ export const getUserFittingProcesses = async (status = null, page = 1, perPage =
 }
 
 // 가상 피팅 결과 선택
-export const selectFittingResult = async (processId, selectedImageIndex) => {
+export const selectFittingResult = async (processId, selectedImageIndex, title = null) => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/virtual-fitting-redis/select`, {
       method: "POST",
@@ -89,6 +89,7 @@ export const selectFittingResult = async (processId, selectedImageIndex) => {
       body: JSON.stringify({
         process_id: processId,
         selected_image_index: selectedImageIndex,
+        title,
       }),
     })
 

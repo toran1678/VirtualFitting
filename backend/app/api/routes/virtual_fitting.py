@@ -88,21 +88,44 @@ async def get_fitting_status_redis(
     if not process:
         raise HTTPException(status_code=404, detail="가상 피팅 처리를 찾을 수 없습니다.")
     
-    # 결과 이미지 URL 생성
+    # 결과 이미지 URL 생성 (정적 경로 반환하여 인증 없이 표시 가능)
     result_images = []
+    result_items = []
     if process.status == 'COMPLETED':
         for i in range(1, 7):
             image_path = getattr(process, f'result_image_{i}', None)
             if image_path:
-                result_images.append(f"/api/virtual-fitting-redis/image/{process_id}/{i}")
+                # DB에는 'uploads/...'로 저장되므로 앞에 '/'만 붙여 정적 경로 제공
+                url = f"/{image_path}"
+                result_images.append(url)
+                result_items.append({"index": i, "url": url})
     
+    # 입력 이미지 경로를 정적 URL 형태로 정규화
+    def _to_static_url(path_str: Optional[str]) -> Optional[str]:
+        if not path_str:
+            return None
+        try:
+            # 윈도우 경로 구분자 처리 및 'uploads' 이하만 반환
+            norm = str(path_str).replace('\\', '/')
+            idx = norm.lower().find('uploads')
+            if idx != -1:
+                norm = norm[idx:]
+            if not norm.startswith('uploads/'):
+                return None
+            return f"/{norm}"
+        except Exception:
+            return None
+
     return VirtualFittingStatusResponse(
         process_id=process_id,
         status=process.status,
         started_at=process.started_at,
         completed_at=process.completed_at,
         result_images=result_images,
-        error_message=process.error_message if process.status == 'FAILED' else None
+        result_items=result_items,
+        error_message=process.error_message if process.status == 'FAILED' else None,
+        model_image_url=_to_static_url(process.model_image_path),
+        cloth_image_url=_to_static_url(process.cloth_image_path)
     )
     
 @router.get("/processes", response_model=VirtualFittingProcessListResponse)
@@ -176,7 +199,10 @@ async def get_user_statistics(
     }
 
 @router.get("/queue-info")
-async def get_queue_info(current_user: Users = Depends(get_current_user)):
+async def get_queue_info(
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
     """큐 정보 조회"""
     queue_info = task_queue.get_queue_info()
     return {
@@ -198,7 +224,8 @@ async def select_fitting_result_redis(
         db=db,
         process_id=request.process_id,
         user_id=current_user.user_id,
-        selected_image_index=request.selected_image_index
+        selected_image_index=request.selected_image_index,
+        title=request.title
     )
     
     if not result:
@@ -208,7 +235,8 @@ async def select_fitting_result_redis(
         success=True,
         message="가상 피팅 결과가 저장되었습니다. 임시 작업 데이터가 정리되었습니다.",
         fitting_id=result.fitting_id,
-        image_url=f"/api/virtual-fitting-redis/result/{result.fitting_id}"
+        image_url=f"/api/virtual-fitting-redis/result/{result.fitting_id}",
+        title=result.title
     )
 
 @router.delete("/process/{process_id}")

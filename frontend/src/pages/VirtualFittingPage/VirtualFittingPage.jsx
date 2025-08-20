@@ -10,6 +10,7 @@ import { isLoggedIn } from "../../api/auth"
 import { getMyLikedClothes } from "../../api/likedClothes"
 import { startVirtualFitting } from "../../api/virtual_fitting"
 import styles from "./VirtualFittingPage.module.css"
+import { proxyImage } from "../../api/imageProxy"
 import {
   getPersonImages,
   getPersonImageUrl,
@@ -28,6 +29,7 @@ const VirtualFittingPage = () => {
   const { darkMode } = useContext(ThemeContext)
   const navigate = useNavigate()
   const location = useLocation()
+   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000"
   
   const [selectedPersonImage, setSelectedPersonImage] = useState(null)
   const [selectedClothingImage, setSelectedClothingImage] = useState(null)
@@ -127,91 +129,41 @@ const VirtualFittingPage = () => {
     },
   ]
 
-  // 🔥 외부 이미지 감지 함수 추가
+  // 🔥 외부 이미지 감지 함수 (origin 기준)
   const isExternalImage = (url) => {
-    if (!url || url.startsWith('data:') || url.startsWith('/')) return false
-    
+    if (!url || url.startsWith('data:')) return false
+    if (url.startsWith('/')) return false // 같은 오리진 상대 경로
     try {
       const urlObj = new URL(url)
-      const currentHost = window.location.hostname
-      
-      // localhost:8000은 허용 (백엔드 서버)
-      if (urlObj.hostname === 'localhost' || urlObj.hostname === '127.0.0.1') {
-        return false
-      }
-      
-      // 현재 도메인과 다르면 외부 이미지
-      return urlObj.hostname !== currentHost
+      const current = window.location
+      const currentOrigin = `${current.protocol}//${current.hostname}${current.port ? ':' + current.port : ''}`
+      // 백엔드 오리진 허용 (정적 파일 및 API)
+      let apiOrigin = null
+      try {
+        const apiUrl = new URL(API_BASE_URL)
+        apiOrigin = apiUrl.origin
+      } catch {}
+      const allowedOrigins = new Set([currentOrigin])
+      if (apiOrigin) allowedOrigins.add(apiOrigin)
+      return !allowedOrigins.has(urlObj.origin)
     } catch {
-      return false
+      return true
     }
   }
 
-  // 🔥 간단한 이미지 변환 함수 수정
+  // 🔥 간단한 이미지 변환: 캔버스 사용하지 않고 URL만 정규화 (외부 이미지는 프록시)
   const simpleImageConvert = async (imageUrl, imageName) => {
-    console.log(`🔄 간단 변환 시작: ${imageName}`)
-    console.log(`🔍 이미지 URL: ${imageUrl}`)
-    
-    // 외부 이미지 체크
+    console.log(`🔄 선택 이미지 처리: ${imageName}`)
+    if (!imageUrl) throw new Error('유효하지 않은 이미지 URL')
+    // 이미 base64인 경우 그대로 사용
+    if (imageUrl.startsWith('data:')) return imageUrl
+    // 외부 오리진(현 오리진/백엔드 오리진이 아닌 경우)만 프록시
     if (isExternalImage(imageUrl)) {
-      console.log(`⚠️ 외부 이미지 감지: ${imageUrl}`)
-      throw new Error(`외부 이미지는 브라우저 보안 정책으로 인해 직접 변환할 수 없습니다.\n\n도메인: ${new URL(imageUrl).hostname}`)
+      const proxied = await proxyImage(imageUrl)
+      return proxied.url
     }
-    
-    return new Promise((resolve, reject) => {
-      const img = new Image()
-      const canvas = document.createElement('canvas')
-      const ctx = canvas.getContext('2d')
-      
-      // 10초 타임아웃
-      const timeout = setTimeout(() => {
-        reject(new Error('타임아웃 (10초)'))
-      }, 10000)
-      
-      img.onload = () => {
-        clearTimeout(timeout)
-        try {
-          console.log(`✅ 이미지 로드 성공: ${img.width}x${img.height}`)
-          
-          // 간단한 캔버스 변환
-          canvas.width = img.width
-          canvas.height = img.height
-          
-          // 흰색 배경
-          ctx.fillStyle = '#FFFFFF'
-          ctx.fillRect(0, 0, canvas.width, canvas.height)
-          
-          // 이미지 그리기
-          ctx.drawImage(img, 0, 0)
-          
-          // JPEG 변환
-          const base64 = canvas.toDataURL('image/jpeg', 0.9)
-          console.log(`✅ 간단 변환 성공: ${imageName}`)
-          resolve(base64)
-          
-        } catch (error) {
-          clearTimeout(timeout)
-          reject(new Error(`Canvas 변환 실패: ${error.message}`))
-        }
-      }
-      
-      img.onerror = (error) => {
-        clearTimeout(timeout)
-        console.error(`❌ 이미지 로드 실패:`, error)
-        reject(new Error(`이미지 로드 실패: ${imageUrl}`))
-      }
-      
-      // 🔥 로컬 이미지는 crossOrigin 없이
-      if (!isExternalImage(imageUrl)) {
-        console.log(`✅ 로컬 이미지 로드: ${imageUrl}`)
-        img.src = imageUrl
-      } else {
-        // 외부 이미지는 이미 위에서 차단됨
-        console.log(`❌ 외부 이미지 차단: ${imageUrl}`)
-        img.crossOrigin = 'anonymous'
-        img.src = imageUrl
-      }
-    })
+    // 같은 오리진 URL은 그대로 사용
+    return imageUrl
   }
 
   // URL 파라미터에서 의류 정보 확인
@@ -510,17 +462,13 @@ const VirtualFittingPage = () => {
     }
   }
 
-  // 🔥 간단한 urlToFile 함수
+  // 🔥 urlToFile: base64, blob:, http(s), /uploads 모두 지원
   const urlToFile = async (url, filename) => {
     try {
-      if (!url.startsWith('data:')) {
-        throw new Error('Base64 데이터가 아닙니다')
-      }
-      
       const response = await fetch(url)
       const blob = await response.blob()
-      
-      return new File([blob], filename, { type: 'image/jpeg' })
+      const type = blob.type || 'image/jpeg'
+      return new File([blob], filename, { type })
       
     } catch (error) {
       throw new Error(`파일 변환 실패: ${error.message}`)

@@ -505,7 +505,20 @@ const ClothingBrowsePage = () => {
                           </div>
 
                           <div className={styles.productOverlay}>
-                            <button className={styles.tryOnButton}>가상 피팅</button>
+                            <button
+                              className={styles.tryOnButton}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                const q = new URLSearchParams({
+                                  clothingId: String(product.id),
+                                  clothingImage: product.image ? encodeURIComponent(product.image) : "",
+                                  clothingCategory: product.category || "",
+                                }).toString()
+                                navigate(`/virtual-fitting?${q}`)
+                              }}
+                            >
+                              가상 피팅
+                            </button>
                             <button
                               className={`${styles.likeButton} ${likedClothingIds.has(product.id) ? styles.liked : ""}`}
                               onClick={(e) => handleLikeToggle(e, product.id)}

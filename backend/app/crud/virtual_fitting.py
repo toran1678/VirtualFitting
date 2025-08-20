@@ -61,6 +61,27 @@ class VirtualFittingCRUD:
         ).first()
     
     @staticmethod
+    def get_user_process_statistics(
+        db: Session,
+        user_id: int
+    ) -> dict:
+        """사용자의 프로세스 상태 통계 집계"""
+        from sqlalchemy import func
+        rows = db.query(
+            VirtualFittingProcess.status,
+            func.count()
+        ).filter(
+            VirtualFittingProcess.user_id == user_id
+        ).group_by(
+            VirtualFittingProcess.status
+        ).all()
+        stats = { status: count for status, count in rows }
+        # 누락 상태 0으로 채우기
+        for s in ['QUEUED','PROCESSING','COMPLETED','FAILED']:
+            stats.setdefault(s, 0)
+        return stats
+    
+    @staticmethod
     def delete_fitting_result(
         db: Session, 
         fitting_id: int, 

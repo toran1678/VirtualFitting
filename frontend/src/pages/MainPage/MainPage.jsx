@@ -292,8 +292,12 @@ const MainPage = () => {
       navigate("/login")
       return
     }
-    console.log("가상 피팅:", product)
-    // navigate(`/virtual-fitting/try/${product.id}`)
+    const q = new URLSearchParams({
+      clothingId: String(product.id),
+      clothingImage: product.image ? encodeURIComponent(product.image) : "",
+      clothingCategory: product.category || "",
+    }).toString()
+    navigate(`/virtual-fitting?${q}`)
   }
 
   // 배너 자동 슬라이드

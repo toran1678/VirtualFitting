@@ -85,7 +85,7 @@ const FeedPage = () => {
         window.location.href = "/virtual-fitting"
         break
       case "clothing-browse":
-        window.location.href = "/clothing"
+        window.location.href = "/clothing-browse"
         break
       case "my-closet":
         window.location.href = "/my-closet"
