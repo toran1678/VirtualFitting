@@ -54,6 +54,7 @@ app.add_middleware(SessionMiddleware, secret_key="your_secret_key")
 
 # CORS 설정
 origins = [
+    "http://localhost",
     "http://localhost:3000",    # React 프론트엔드
     "http://localhost:5173",    # Vite 사용 시
     "http://127.0.0.1:3000",

@@ -343,6 +343,7 @@ async def get_fitting_history_redis(
         fittings=[
             {
                 "fitting_id": result.fitting_id,
+                "title": result.title,
                 "image_url": f"/api/virtual-fitting-redis/result/{result.fitting_id}",
                 "created_at": result.created_at
             }

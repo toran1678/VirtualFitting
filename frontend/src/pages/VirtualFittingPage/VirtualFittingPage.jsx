@@ -134,18 +134,9 @@ const VirtualFittingPage = () => {
     if (!url || url.startsWith('data:')) return false
     if (url.startsWith('/')) return false // 같은 오리진 상대 경로
     try {
-      const urlObj = new URL(url)
-      const current = window.location
-      const currentOrigin = `${current.protocol}//${current.hostname}${current.port ? ':' + current.port : ''}`
-      // 백엔드 오리진 허용 (정적 파일 및 API)
-      let apiOrigin = null
-      try {
-        const apiUrl = new URL(API_BASE_URL)
-        apiOrigin = apiUrl.origin
-      } catch {}
-      const allowedOrigins = new Set([currentOrigin])
-      if (apiOrigin) allowedOrigins.add(apiOrigin)
-      return !allowedOrigins.has(urlObj.origin)
+      const to = new URL(url, window.location.href)
+      // 프론트(3000)와 오리진이 다르면 전부 프록시 필요
+      return to.origin !== window.location.origin
     } catch {
       return true
     }
@@ -465,11 +456,19 @@ const VirtualFittingPage = () => {
   // 🔥 urlToFile: base64, blob:, http(s), /uploads 모두 지원
   const urlToFile = async (url, filename) => {
     try {
-      const response = await fetch(url)
-      const blob = await response.blob()
+      let fetchUrl = url
+      // data:는 그대로, 나머지는 프론트 오리진과 다르면 프록시 경유
+      if (url && !url.startsWith('data:')) {
+        const to = new URL(url, window.location.href)
+        if (to.origin !== window.location.origin) {
+          const proxied = await proxyImage(to.href) // 이미 쓰고 있는 프록시 API
+          fetchUrl = proxied.url
+        }
+      }
+      const res = await fetch(fetchUrl, { credentials: 'omit' })
+      const blob = await res.blob()
       const type = blob.type || 'image/jpeg'
       return new File([blob], filename, { type })
-      
     } catch (error) {
       throw new Error(`파일 변환 실패: ${error.message}`)
     }

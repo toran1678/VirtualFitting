@@ -39,6 +39,7 @@ class VirtualFittingSelectResponse(BaseModel):
 
 class VirtualFittingItem(BaseModel):
     fitting_id: int
+    title: Optional[str] = None
     image_url: str
     created_at: datetime
 

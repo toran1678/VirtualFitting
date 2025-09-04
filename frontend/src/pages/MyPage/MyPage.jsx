@@ -627,8 +627,8 @@ const MyPage = () => {
                         )}
                         {activeTab === "가상 피팅" && (
                           <div className={styles.overlayInfo}>
-                            <span className={styles.brand}>{item.brand}</span>
-                            <span className={styles.date}>{item.date}</span>
+                            {/*<span className={styles.brand}>{item.brand}</span>*/}
+                            {/*<span className={styles.date}>{item.date}</span>*/}
                           </div>
                         )}
                         {activeTab === "커스텀 의류" && (
