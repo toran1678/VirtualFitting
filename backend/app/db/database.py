@@ -8,11 +8,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # MySQL 연결 정보를 환경 변수에서 가져오기
-DB_USER = os.getenv("DB_USER", "root")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "123456")
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "3307")
-DB_NAME = os.getenv("DB_NAME", "capstone")
+DB_USER = os.getenv("MYSQL_USER", os.getenv("DB_USER", "root"))
+DB_PASSWORD = os.getenv("MYSQL_PASSWORD", os.getenv("DB_PASSWORD", "123456"))
+DB_HOST = os.getenv("MYSQL_HOST", os.getenv("DB_HOST", "localhost"))
+DB_PORT = os.getenv("MYSQL_PORT", os.getenv("DB_PORT", "3306"))
+DB_NAME = os.getenv("MYSQL_DATABASE", os.getenv("DB_NAME", "capstone"))
 
 # MySQL 데이터베이스 연결 URL
 DB_URL = f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?charset=utf8"
