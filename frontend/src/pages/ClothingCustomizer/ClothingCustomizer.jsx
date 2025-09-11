@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom"
 import Header from "../../components/Header/Header"
 import Footer from "../../components/Footer/Footer"
 import { isLoggedIn, getCurrentUser } from "../../api/auth"
+import { createCustomClothing } from "../../api/customClothingAPI"
 import styles from "./ClothingCustomizer.module.css"
 import {
   Palette,
@@ -356,7 +357,7 @@ const ClothingCustomizer = () => {
       setHistoryIndex(0)
     }
     init()
-  }, [navigate])
+  }, [navigate, customization])
 
   const undo = useCallback(() => {
     if (historyIndex > 0) {
@@ -560,14 +561,165 @@ const ClothingCustomizer = () => {
 
   // 저장/공유/초기화
   const handleSave = useCallback(async () => {
+    if (!isLoggedIn()) {
+      alert("로그인이 필요합니다.")
+      navigate("/login")
+      return
+    }
+
+    // 커스터마이징 이름 입력 받기
+    const customName = prompt("커스터마이징 의류의 이름을 입력해주세요:", `내가 디자인한 ${selectedProduct.name}`)
+    if (!customName || customName.trim() === "") {
+      alert("커스터마이징 이름을 입력해주세요.")
+      return
+    }
+
     setIsLoading(true)
     try {
-      await new Promise((r) => setTimeout(r, 600))
-      alert("저장되었습니다.")
+      // 캔버스에서 이미지 생성
+      const canvas = document.createElement("canvas")
+      const ctx = canvas.getContext("2d")
+      
+      // 고해상도로 설정
+      const scale = 3
+      const baseW = 400
+      const baseH = 500
+      canvas.width = baseW * scale
+      canvas.height = baseH * scale
+      ctx.scale(scale, scale)
+
+      // 의류 이미지 로드
+      const garmentImg = await new Promise((resolve, reject) => {
+        const img = new Image()
+        img.onload = () => resolve(img)
+        img.onerror = reject
+        img.src = selectedProduct.image
+      })
+
+      // 의류 그리기
+      const imgAR = garmentImg.naturalWidth / garmentImg.naturalHeight
+      const baseAR = baseW / baseH
+      let dW, dH, dx, dy
+      if (imgAR > baseAR) {
+        dW = baseW
+        dH = baseW / imgAR
+        dx = 0
+        dy = (baseH - dH) / 2
+      } else {
+        dH = baseH
+        dW = baseH * imgAR
+        dx = (baseW - dW) / 2
+        dy = 0
+      }
+      ctx.drawImage(garmentImg, dx, dy, dW, dH)
+
+      // 색상 틴트 적용
+      const tintColor = withSofterBlack(customization.color || "#ffffff")
+      if (tintColor.toLowerCase() !== "#ffffff") {
+        const tint = document.createElement("canvas")
+        tint.width = baseW
+        tint.height = baseH
+        const tctx = tint.getContext("2d")
+        tctx.fillStyle = tintColor
+        tctx.fillRect(dx, dy, dW, dH)
+        tctx.globalCompositeOperation = "destination-in"
+        tctx.drawImage(garmentImg, dx, dy, dW, dH)
+        ctx.globalCompositeOperation = "multiply"
+        ctx.drawImage(tint, 0, 0)
+        ctx.globalCompositeOperation = "source-over"
+      }
+
+      // 레이어 그리기
+      for (const layer of layers) {
+        if (!layer.visible) continue
+        const x = (layer.position.x / 100) * baseW
+        const y = (layer.position.y / 100) * baseH
+
+        if (layer.type === "text") {
+          const text = layer.content ?? ""
+          const st = layer.style || {}
+          const fontPx = Math.round(st.fontSize || 16)
+          const weight = st.fontWeight || "normal"
+          const italic = st.fontStyle === "italic" ? "italic " : ""
+          const color = st.color || "#000000"
+          const letter = Math.round(st.letterSpacing || 0)
+          const rot = (st.rotation || 0) * Math.PI / 180
+
+          ctx.save()
+          ctx.translate(x, y)
+          ctx.rotate(rot)
+          ctx.fillStyle = color
+          ctx.textBaseline = "middle"
+          ctx.font = `${italic}${weight} ${fontPx}px ${st.fontFamily || "Arial"}`
+
+          const measures = [...text].map(ch => ctx.measureText(ch).width)
+          const totalW = measures.reduce((a, b) => a + b, 0) + Math.max(0, text.length - 1) * letter
+          let cursor = -totalW / 2
+
+          for (let i = 0; i < text.length; i++) {
+            const ch = text[i]
+            ctx.fillText(ch, Math.round(cursor), 0)
+            cursor += measures[i] + letter
+          }
+
+          if (st.underline || st.strike) {
+            const thickness = Math.max(1, Math.round(fontPx/15))
+            ctx.strokeStyle = color
+            ctx.lineWidth = thickness
+            const startX = Math.round(-totalW/2)
+            const endX = Math.round(totalW/2)
+
+            if (st.underline) {
+              const uy = Math.round(fontPx * 0.35)
+              ctx.beginPath()
+              ctx.moveTo(startX, uy)
+              ctx.lineTo(endX, uy)
+              ctx.stroke()
+            }
+            if (st.strike) {
+              const sy = Math.round(-fontPx * 0.05)
+              ctx.beginPath()
+              ctx.moveTo(startX, sy)
+              ctx.lineTo(endX, sy)
+              ctx.stroke()
+            }
+          }
+          ctx.restore()
+        } else if (layer.type === "logo") {
+          const logoImg = await new Promise((resolve, reject) => {
+            const img = new Image()
+            img.onload = () => resolve(img)
+            img.onerror = reject
+            img.src = layer.content
+          })
+          const w = Math.round(layer.style.size || 100)
+          const ar = (logoImg.naturalWidth || 1) / (logoImg.naturalHeight || 1)
+          const h = Math.round(w / ar)
+          ctx.drawImage(logoImg, Math.round(x - w / 2), Math.round(y - h / 2), w, h)
+        }
+      }
+
+      // 캔버스를 Blob으로 변환
+      const blob = await new Promise(resolve => {
+        canvas.toBlob(resolve, 'image/png', 1.0)
+      })
+
+      // File 객체 생성
+      const file = new File([blob], `${customName}.png`, { type: 'image/png' })
+
+      // 서버에 저장
+      const result = await createCustomClothing(customName.trim(), file)
+      
+      alert("커스터마이징 의류가 저장되었습니다!")
+      console.log("저장된 커스터마이징 의류:", result)
+      
+    } catch (error) {
+      console.error("저장 실패:", error)
+      alert(`저장 중 오류가 발생했습니다: ${error.message}`)
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [customization, layers, selectedProduct, navigate])
 
   const handleShare = useCallback(async () => {
     if (navigator.share) {

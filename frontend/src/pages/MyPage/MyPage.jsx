@@ -12,6 +12,7 @@ import { getMyFeeds } from "../../api/feeds"
 import { getUserProfileByEmail } from "../../api/userProfiles"
 import { Heart, Clock } from "lucide-react"
 import { getFittingHistory, getFittingResultImageUrl } from "../../api/virtual_fitting"
+import { getMyCustomClothes, getCustomClothingImageUrl } from "../../api/customClothingAPI"
 
 const MyPage = () => {
   const [activeTab, setActiveTab] = useState("피드")
@@ -54,53 +55,14 @@ const MyPage = () => {
     followers: 0,
   })
 
+  // 이미지 모달 상태
+  const [selectedImage, setSelectedImage] = useState(null)
+  const [showImageModal, setShowImageModal] = useState(false)
+
   const [tabData, setTabData] = useState({
     피드: [],
     "가상 피팅": [],
-    "커스텀 의류": [
-      {
-        id: 1,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "커스텀 후드티",
-        status: "제작 완료",
-        date: "2024-01-15",
-      },
-      {
-        id: 2,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "개인 맞춤 셔츠",
-        status: "제작 중",
-        date: "2024-01-14",
-      },
-      {
-        id: 3,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "커스텀 청바지",
-        status: "제작 완료",
-        date: "2024-01-13",
-      },
-      {
-        id: 4,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "맞춤 코트",
-        status: "디자인 중",
-        date: "2024-01-12",
-      },
-      {
-        id: 5,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "개인 티셔츠",
-        status: "제작 완료",
-        date: "2024-01-11",
-      },
-      {
-        id: 6,
-        image: "/placeholder.svg?height=300&width=300",
-        title: "커스텀 원피스",
-        status: "제작 중",
-        date: "2024-01-10",
-      },
-    ],
+    "커스텀 의류": [],
     "좋아요 의류": [],
   })
 
@@ -123,6 +85,28 @@ const MyPage = () => {
       console.error("가상 피팅 결과 로드 실패:", error)
       setTabData((prev) => ({ ...prev, "가상 피팅": [] }))
       setStats((prev) => ({ ...prev, virtualFittings: 0 }))
+    }
+  }
+
+  // 커스터마이징 의류 로드
+  const loadCustomClothes = async () => {
+    if (!isLoggedIn()) return
+    try {
+      const data = await getMyCustomClothes(1, 20)
+      const customClothes = Array.isArray(data?.custom_clothes) ? data.custom_clothes : []
+      const formatted = customClothes.map((item) => ({
+        id: item.custom_clothing_id,
+        image: getCustomClothingImageUrl(item.custom_image_url),
+        title: item.custom_name,
+        status: "완료", // 커스터마이징은 항상 완료 상태
+        date: new Date(item.created_at).toLocaleDateString("ko-KR"),
+      }))
+      setTabData((prev) => ({ ...prev, "커스텀 의류": formatted }))
+      setStats((prev) => ({ ...prev, customClothes: customClothes.length }))
+    } catch (error) {
+      console.error("커스터마이징 의류 로드 실패:", error)
+      setTabData((prev) => ({ ...prev, "커스텀 의류": [] }))
+      setStats((prev) => ({ ...prev, customClothes: 0 }))
     }
   }
 
@@ -364,7 +348,7 @@ const MyPage = () => {
       // 사용자 정보가 설정된 후 데이터 로드
       if (user?.email) {
         // 병렬로 데이터 로드
-        await Promise.all([loadMyFeeds(), loadLikedClothes(), loadUserProfile(user.email), loadVirtualFittings()])
+        await Promise.all([loadMyFeeds(), loadLikedClothes(), loadUserProfile(user.email), loadVirtualFittings(), loadCustomClothes()])
       }
     }
 
@@ -411,7 +395,9 @@ const MyPage = () => {
         navigate(`/virtual-fitting/${item.id}`)
         break
       case "커스텀 의류":
-        navigate(`/custom/${item.id}`)
+        // 커스터마이징 의류는 이미지 모달로 표시
+        setSelectedImage(item)
+        setShowImageModal(true)
         break
       case "좋아요 의류":
         if (item.productUrl) {
@@ -425,8 +411,23 @@ const MyPage = () => {
     }
   }
 
+  // 이미지 모달 닫기
+  const handleCloseImageModal = () => {
+    setShowImageModal(false)
+    setSelectedImage(null)
+  }
+
+  // 모달 배경 클릭 시 닫기
+  const handleModalBackgroundClick = (e) => {
+    if (e.target === e.currentTarget) {
+      handleCloseImageModal()
+    }
+  }
+
   const getStatusColor = (status) => {
     switch (status) {
+      case "완료":
+        return styles.completed
       case "제작 완료":
         return styles.completed
       case "제작 중":
@@ -633,8 +634,8 @@ const MyPage = () => {
                         )}
                         {activeTab === "커스텀 의류" && (
                           <div className={styles.overlayInfo}>
-                            <span className={`${styles.status} ${getStatusColor(item.status)}`}>{item.status}</span>
-                            <span className={styles.date}>{item.date}</span>
+                            {/*<span className={`${styles.status} ${getStatusColor(item.status)}`}>{item.status}</span>
+                            <span className={styles.date}>{item.date}</span>*/}
                           </div>
                         )}
                         {activeTab === "좋아요 의류" && (
@@ -730,6 +731,42 @@ const MyPage = () => {
       </main>
 
       <Footer />
+
+      {/* 이미지 모달 */}
+      {showImageModal && selectedImage && (
+        <div 
+          className={styles.imageModal} 
+          onClick={handleModalBackgroundClick}
+        >
+          <div className={styles.imageModalContent}>
+            <button 
+              className={styles.imageModalClose}
+              onClick={handleCloseImageModal}
+              aria-label="닫기"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+            <div className={styles.imageModalImageContainer}>
+              <img 
+                src={selectedImage.image || "/placeholder.svg"} 
+                alt={selectedImage.title}
+                className={styles.imageModalImage}
+                onError={(e) => handleImageError(e, selectedImage.title)}
+              />
+            </div>
+            <div className={styles.imageModalInfo}>
+              <h3 className={styles.imageModalTitle}>{selectedImage.title}</h3>
+              <div className={styles.imageModalMeta}>
+                <span className={styles.imageModalStatus}>{selectedImage.status}</span>
+                <span className={styles.imageModalDate}>{selectedImage.date}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

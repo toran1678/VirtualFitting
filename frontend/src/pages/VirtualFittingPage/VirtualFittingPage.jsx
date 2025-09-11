@@ -5,7 +5,7 @@ import { useNavigate, useLocation } from "react-router-dom"
 import { ThemeContext } from "../../context/ThemeContext"
 import Header from "../../components/Header/Header"
 import Footer from "../../components/Footer/Footer"
-import { User, Shirt, Heart, ImageIcon, Camera, Upload, Palette, ChevronDown, Download } from 'lucide-react'
+import { User, Shirt, Heart, ImageIcon, Camera, Upload, Palette, Download } from 'lucide-react'
 import { isLoggedIn } from "../../api/auth"
 import { getMyLikedClothes } from "../../api/likedClothes"
 import { startVirtualFitting } from "../../api/virtual_fitting"
@@ -23,6 +23,10 @@ import {
   handleClothingImageError,
   VALID_CATEGORIES,
 } from "../../api/userClothesAPI"
+import {
+  getMyCustomClothes,
+  getCustomClothingImageUrl,
+} from "../../api/customClothingAPI"
 import { ShirtIcon } from 'lucide-react'
 
 const VirtualFittingPage = () => {
@@ -43,6 +47,8 @@ const VirtualFittingPage = () => {
   const [personImagesLoading, setPersonImagesLoading] = useState(false)
   const [myClosetClothes, setMyClosetClothes] = useState([])
   const [myClosetLoading, setMyClosetLoading] = useState(false)
+  const [customClothes, setCustomClothes] = useState([])
+  const [customClothesLoading, setCustomClothesLoading] = useState(false)
   
   // 카테고리 관련 상태
   const [selectedCategory, setSelectedCategory] = useState(null)
@@ -108,26 +114,36 @@ const VirtualFittingPage = () => {
     }
   }
 
-  const customClothing = [
-    {
-      id: 7,
-      name: "커스텀 셔츠",
-      image: "/placeholder.svg?height=200&width=200&text=커스텀+셔츠",
-      category: "상의",
-    },
-    {
-      id: 8,
-      name: "커스텀 바지",
-      image: "/placeholder.svg?height=200&width=200&text=커스텀+바지",
-      category: "하의",
-    },
-    {
-      id: 9,
-      name: "커스텀 재킷",
-      image: "/placeholder.svg?height=200&width=200&text=커스텀+재킷",
-      category: "아우터",
-    },
-  ]
+  // 커스터마이징 의류 데이터 로드
+  const loadCustomClothes = async () => {
+    if (!isLoggedIn()) {
+      console.log("로그인이 필요합니다.")
+      setCustomClothes([])
+      return
+    }
+
+    setCustomClothesLoading(true)
+    try {
+      const data = await getMyCustomClothes(1, 50)
+      console.log("커스터마이징 의류 API 응답:", data)
+
+      const formattedData = data.custom_clothes.map((item) => ({
+        id: item.custom_clothing_id,
+        name: item.custom_name,
+        image: getCustomClothingImageUrl(item.custom_image_url),
+        category: "커스텀", // 커스터마이징 의류는 별도 카테고리
+        created_at: item.created_at,
+      }))
+
+      console.log("커스터마이징 의류 로드 완료:", formattedData)
+      setCustomClothes(formattedData)
+    } catch (error) {
+      console.error("커스터마이징 의류 로드 실패:", error)
+      setCustomClothes([])
+    } finally {
+      setCustomClothesLoading(false)
+    }
+  }
 
   // 🔥 외부 이미지 감지 함수 (origin 기준)
   const isExternalImage = (url) => {
@@ -273,6 +289,7 @@ const VirtualFittingPage = () => {
     loadLikedClothes()
     loadPersonImages()
     loadMyClosetClothes()
+    loadCustomClothes()
   }, [])
 
   const handlePersonImageUpload = (event) => {
@@ -648,9 +665,38 @@ const VirtualFittingPage = () => {
           </div>
         )
       case "custom":
+        if (customClothesLoading) {
+          return (
+            <div className={styles.loadingContainer}>
+              <div className={styles.loadingSpinner}></div>
+              <p>커스터마이징 의류를 불러오는 중...</p>
+            </div>
+          )
+        }
+
+        if (!isLoggedIn()) {
+          return (
+            <div className={styles.emptyState}>
+              <Palette className={styles.emptyIcon} />
+              <h3>로그인이 필요합니다</h3>
+              <p>커스터마이징 의류를 보려면 로그인해주세요.</p>
+            </div>
+          )
+        }
+
+        if (customClothes.length === 0) {
+          return (
+            <div className={styles.emptyState}>
+              <Palette className={styles.emptyIcon} />
+              <h3>커스터마이징 의류가 없습니다</h3>
+              <p>의류 커스터마이징 페이지에서 나만의 의류를 만들어보세요!</p>
+            </div>
+          )
+        }
+
         return (
           <div className={styles.itemsGrid}>
-            {customClothing.map((item) => (
+            {customClothes.map((item) => (
               <div key={item.id} className={styles.gridItem} onClick={() => handleClothingSelect(item)}>
                 <img
                   src={item.image || "/placeholder.svg"}
@@ -665,6 +711,9 @@ const VirtualFittingPage = () => {
                   <h4>{item.name}</h4>
                   <div className={styles.itemMeta}>
                     <span className={styles.category}>{item.category}</span>
+                    <div className={styles.date}>
+                      {new Date(item.created_at).toLocaleDateString("ko-KR")}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -998,6 +1047,7 @@ const VirtualFittingPage = () => {
               onClick={() => setActiveTab("custom")}
             >
               <Palette className={styles.inlineIcon} /> 커스터마이징 의류
+              {customClothesLoading && <span style={{ marginLeft: "0.5rem", color: "var(--accent-color)" }}>...</span>}
             </button>
           </div>
 

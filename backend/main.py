@@ -25,6 +25,7 @@ from app.api.routes import person_images_router
 from app.api.routes import user_clothes_router
 from app.api.routes import virtual_fitting_router
 from app.api.routes import image_proxy_router
+from app.api.routes import custom_clothing_items_router
 
 # 환경 변수 로드
 load_dotenv()
@@ -73,6 +74,7 @@ app.add_middleware(
 # 정적 파일 제공을 위한 디렉토리 생성
 os.makedirs("uploads/profile_pictures", exist_ok=True)
 os.makedirs("uploads/feeds", exist_ok=True)
+os.makedirs("uploads/custom_clothing", exist_ok=True)
 
 # 정적 파일 제공
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
@@ -95,6 +97,7 @@ app.include_router(follow_system_router)
 
 app.include_router(virtual_fitting_router)
 app.include_router(image_proxy_router)
+app.include_router(custom_clothing_items_router, prefix="/api/custom-clothing", tags=["custom-clothing"])
 
 # 서버 상태 확인 엔드포인트
 @app.get("/health")
