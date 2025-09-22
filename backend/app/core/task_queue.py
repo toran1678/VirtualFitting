@@ -3,6 +3,7 @@ import uuid
 import time
 from typing import Dict, Any, Optional, List
 from datetime import datetime, timezone
+import pytz
 import logging
 from .redis_config import redis_manager
 
@@ -28,7 +29,7 @@ class TaskQueue:
                 "id": task_id,
                 "type": task_type,
                 "data": task_data,
-                "created_at": datetime.now(timezone.utc).isoformat(),
+                "created_at": datetime.now(pytz.timezone('Asia/Seoul')).isoformat(),
                 "status": "QUEUED"
             }
             
@@ -83,7 +84,7 @@ class TaskQueue:
         try:
             status_data = {
                 "status": status,
-                "updated_at": datetime.now(timezone.utc).isoformat()
+                "updated_at": datetime.now(pytz.timezone('Asia/Seoul')).isoformat()
             }
             
             if result_data:

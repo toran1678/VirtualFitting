@@ -137,15 +137,22 @@ const EditFeedPage = () => {
     try {
       // 새로 업로드할 이미지만 필터링 (기존 이미지 제외)
       const newImages = images.filter((img) => img.file && !img.isExisting)
+      
+      // 유지할 기존 이미지 ID들 추출
+      const existingImageIds = images
+        .filter((img) => img.isExisting && img.imageId)
+        .map((img) => img.imageId)
+        .join(',')
 
       console.log("수정 요청 데이터:", {
         formData,
         newImages: newImages.length,
         totalImages: images.length,
+        existingImageIds,
       })
 
       // 백엔드 API 호출
-      await updateFeed(feedId, formData, newImages)
+      await updateFeed(feedId, formData, newImages, existingImageIds)
 
       alert("피드가 성공적으로 수정되었습니다!")
       navigate(`/feed/${feedId}`)

@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
+import pytz
 from app.db.database import Base
 
 class VirtualFittings(Base):
@@ -15,8 +16,8 @@ class VirtualFittings(Base):
     source_model_image_url = Column(String(500), nullable=True)
     source_cloth_image_url = Column(String(500), nullable=True)
     
-    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=datetime.now)
+    created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(pytz.timezone('Asia/Seoul')))
+    updated_at = Column(DateTime(timezone=True), default=lambda: datetime.now(pytz.timezone('Asia/Seoul')), onupdate=lambda: datetime.now(pytz.timezone('Asia/Seoul')))
 
     # 관계 설정
     user = relationship("Users", back_populates="virtual_fitting")

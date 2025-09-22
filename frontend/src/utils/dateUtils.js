@@ -156,3 +156,32 @@ export const formatTime = (dateString) => {
     return "알 수 없음"
   }
 }
+
+/**
+ * 가상 피팅용 날짜/시간 포맷팅 (한국 시간대 명시적 적용)
+ * @param {string|Date} dateString - 날짜 문자열 또는 Date 객체
+ * @returns {string} - 포맷된 날짜/시간 (예: "6월 4일 오후 10:19")
+ */
+export const formatVirtualFittingDateTime = (dateString) => {
+  if (!dateString) return "알 수 없음"
+
+  try {
+    const date = new Date(dateString)
+    
+    // 한국 시간대로 변환 (UTC+9)
+    const koreanDate = new Date(date.getTime() + (9 * 60 * 60 * 1000))
+    
+    const month = koreanDate.getUTCMonth() + 1
+    const day = koreanDate.getUTCDate()
+    const hours = koreanDate.getUTCHours()
+    const minutes = koreanDate.getUTCMinutes()
+    
+    const period = hours >= 12 ? '오후' : '오전'
+    const displayHours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours
+    
+    return `${month}월 ${day}일 ${period} ${displayHours}:${minutes.toString().padStart(2, '0')}`
+  } catch (error) {
+    console.error("가상 피팅 날짜 포맷팅 오류:", error)
+    return "알 수 없음"
+  }
+}

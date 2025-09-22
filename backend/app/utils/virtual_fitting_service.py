@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 from typing import List, Optional, Dict, Any
 from datetime import datetime, timezone
+import pytz
 from sqlalchemy.orm import Session
 from PIL import Image
 import logging
@@ -59,7 +60,7 @@ class VirtualFittingServiceRedis:
         process = VirtualFittingProcess(
             user_id=user_id,
             status='QUEUED',  # 큐에 대기 중 상태
-            started_at=datetime.now(timezone.utc)
+            started_at=datetime.now(pytz.timezone('Asia/Seoul'))
         )
         db.add(process)
         db.commit()
@@ -98,7 +99,7 @@ class VirtualFittingServiceRedis:
             # 큐 추가 실패 시 상태 업데이트
             process.status = 'FAILED'
             process.error_message = "작업 큐 추가 실패"
-            process.completed_at = datetime.now(timezone.utc)
+            process.completed_at = datetime.now(pytz.timezone('Asia/Seoul'))
             db.commit()
             logger.error(f"작업 큐 추가 실패: {process.id}")
         
@@ -196,7 +197,7 @@ class VirtualFittingServiceRedis:
             
             # 데이터베이스 업데이트
             process.status = 'COMPLETED'
-            process.completed_at = datetime.now(timezone.utc)
+            process.completed_at = datetime.now(pytz.timezone('Asia/Seoul'))
             
             # 결과 이미지 경로 저장 (상대 경로로 저장)
             for i, relative_path in enumerate(result_paths):
@@ -237,7 +238,7 @@ class VirtualFittingServiceRedis:
                 
                 if process:
                     process.status = 'FAILED'
-                    process.completed_at = datetime.now(timezone.utc)
+                    process.completed_at = datetime.now(pytz.timezone('Asia/Seoul'))
                     process.error_message = str(e)[:1000]
                     db.commit()
                     logger.info(f"가상 피팅 실패 상태 업데이트: {process_id}")
@@ -459,7 +460,7 @@ class VirtualFittingServiceRedis:
                 # 참고용 입력 이미지(가능하면 상대 경로로 저장)
                 source_model_image_url=self._normalize_to_relative(process.model_image_path),
                 source_cloth_image_url=self._normalize_to_relative(process.cloth_image_path),
-                created_at=datetime.now(timezone.utc)
+                created_at=datetime.now(pytz.timezone('Asia/Seoul'))
             )
             
             db.add(fitting_result)

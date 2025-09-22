@@ -8,7 +8,6 @@ import Footer from "../../components/Footer/Footer"
 import { Play, ImageIcon, RefreshCw, X, Eye, Download } from 'lucide-react'
 import { isLoggedIn } from "../../api/auth"
 import { 
-  getFittingStatus, 
   getFittingHistory, 
   getQueueInfo,
   selectFittingResult,
@@ -288,7 +287,7 @@ const VirtualFittingMainPage = () => {
     }
   }
 
-  // 날짜 포맷팅 함수
+  // 날짜 포맷팅 함수 (한국 시간대로 저장되므로 단순 포맷팅만)
   const formatDateTime = (dateString) => {
     const date = new Date(dateString)
     const month = date.getMonth() + 1

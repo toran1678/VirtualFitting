@@ -163,11 +163,16 @@ export const getFeedById = async (feedId) => {
  * @param {Array} imageFiles - 새로운 이미지 파일 배열
  * @returns {Promise<Object>} - 수정된 피드 정보
  */
-export const updateFeed = async (feedId, feedData, imageFiles = []) => {
+export const updateFeed = async (feedId, feedData, imageFiles = [], existingImageIds = '') => {
   try {
     const formData = new FormData()
     formData.append("title", feedData.title)
     formData.append("content", feedData.content)
+
+    // 유지할 기존 이미지 ID들 추가
+    if (existingImageIds) {
+      formData.append("existing_image_ids", existingImageIds)
+    }
 
     // 이미지 파일과 순서 정보 추가
     imageFiles.forEach((image, index) => {

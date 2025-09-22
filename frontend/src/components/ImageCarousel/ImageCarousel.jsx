@@ -33,20 +33,23 @@ const ImageCarousel = ({ images, alt = "이미지" }) => {
   }, [images, alt])
 
   // 이미지 네비게이션 함수들
-  const nextImage = useCallback(() => {
+  const nextImage = useCallback((e) => {
+    e?.stopPropagation() // 이벤트 전파 방지
     if (currentIndex < processedImages.length - 1) {
       setCurrentIndex((prev) => prev + 1)
     }
   }, [currentIndex, processedImages.length])
 
-  const prevImage = useCallback(() => {
+  const prevImage = useCallback((e) => {
+    e?.stopPropagation() // 이벤트 전파 방지
     if (currentIndex > 0) {
       setCurrentIndex((prev) => prev - 1)
     }
   }, [currentIndex])
 
   const goToImage = useCallback(
-    (index) => {
+    (index, e) => {
+      e?.stopPropagation() // 이벤트 전파 방지
       if (index >= 0 && index < processedImages.length) {
         setCurrentIndex(index)
       }
@@ -184,7 +187,7 @@ const ImageCarousel = ({ images, alt = "이미지" }) => {
         <>
           <button
             className={`${styles.navButton} ${styles.prev}`}
-            onClick={prevImage}
+            onClick={(e) => prevImage(e)}
             disabled={currentIndex === 0}
             aria-label="이전 이미지"
           >
@@ -195,7 +198,7 @@ const ImageCarousel = ({ images, alt = "이미지" }) => {
 
           <button
             className={`${styles.navButton} ${styles.next}`}
-            onClick={nextImage}
+            onClick={(e) => nextImage(e)}
             disabled={currentIndex === processedImages.length - 1}
             aria-label="다음 이미지"
           >
@@ -213,7 +216,7 @@ const ImageCarousel = ({ images, alt = "이미지" }) => {
             <button
               key={index}
               className={`${styles.indicator} ${index === currentIndex ? styles.active : ""}`}
-              onClick={() => goToImage(index)}
+              onClick={(e) => goToImage(index, e)}
               aria-label={`이미지 ${index + 1}로 이동`}
             />
           ))}

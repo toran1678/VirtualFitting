@@ -349,6 +349,7 @@ async def update_feed(
     content: str = Form(...),
     images: List[UploadFile] = File(None),
     image_orders: List[int] = Form(None),
+    existing_image_ids: str = Form(None),  # 유지할 기존 이미지 ID들 (쉼표로 구분)
     current_user: Users = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -373,20 +374,40 @@ async def update_feed(
         feed.content = content
         feed.updated_at = datetime.now()
         
-        # 기존 이미지 삭제 (새 이미지가 있는 경우)
-        if images:
-            existing_images = db.query(FeedImages).filter(FeedImages.feed_id == feed_id).all()
-            for img in existing_images:
+        # 이미지 처리 로직 개선
+        # 1. 유지할 기존 이미지 ID 파싱
+        keep_image_ids = []
+        if existing_image_ids:
+            try:
+                keep_image_ids = [int(id.strip()) for id in existing_image_ids.split(',') if id.strip()]
+            except ValueError:
+                keep_image_ids = []
+        
+        # 2. 기존 이미지 중 삭제할 이미지들 제거
+        existing_images = db.query(FeedImages).filter(FeedImages.feed_id == feed_id).all()
+        for img in existing_images:
+            if img.id not in keep_image_ids:
                 try:
                     file_path = img.image_url.replace("/uploads/", "uploads/")
                     if os.path.exists(file_path):
                         os.remove(file_path)
                 except Exception:
                     pass
-            
-            db.query(FeedImages).filter(FeedImages.feed_id == feed_id).delete()
-            
-            # 새 이미지 저장
+                db.delete(img)
+        
+        # 3. 유지할 기존 이미지들의 순서 업데이트
+        if keep_image_ids:
+            for i, image_id in enumerate(keep_image_ids):
+                existing_img = db.query(FeedImages).filter(
+                    FeedImages.id == image_id,
+                    FeedImages.feed_id == feed_id
+                ).first()
+                if existing_img:
+                    existing_img.image_order = i + 1
+        
+        # 4. 새 이미지 저장
+        if images:
+            start_order = len(keep_image_ids) + 1
             for i, image_file in enumerate(images):
                 file_ext = os.path.splitext(image_file.filename)[1]
                 unique_filename = f"{uuid.uuid4()}{file_ext}"
@@ -401,7 +422,7 @@ async def update_feed(
                 feed_image = FeedImages(
                     feed_id=feed_id,
                     image_url=image_url,
-                    image_order=image_orders[i] if image_orders and i < len(image_orders) else i + 1,
+                    image_order=image_orders[i] if image_orders and i < len(image_orders) else start_order + i,
                     created_at=datetime.now()
                 )
                 db.add(feed_image)

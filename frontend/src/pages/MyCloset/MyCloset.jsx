@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { Camera, Upload, Search, Grid, List, Plus, X, Trash2, Eye } from "lucide-react"
 import Header from "../../components/Header/Header"
@@ -92,28 +92,8 @@ const MyCloset = () => {
     { value: "romantic", label: "로맨틱" },
   ]
 
-  // 초기 인증 및 데이터 로드
-  useEffect(() => {
-    const checkAuth = async () => {
-      if (!isLoggedIn()) {
-        alert("로그인이 필요합니다.")
-        navigate("/login")
-        return
-      }
-
-      const user = getCurrentUser()
-      setUserData(user)
-
-      await loadClothesData()
-      await loadStatsData()
-      setLoading(false)
-    }
-
-    checkAuth()
-  }, [navigate])
-
   // 의류 데이터 로드
-  const loadClothesData = async (params = {}) => {
+  const loadClothesData = useCallback(async (params = {}) => {
     try {
       setError(null)
       const response = await getUserClothes({
@@ -135,7 +115,27 @@ const MyCloset = () => {
       console.error("의류 데이터 로드 실패:", error)
       setError("의류 데이터를 불러오는데 실패했습니다.")
     }
-  }
+  }, [pagination.page, pagination.perPage, selectedCategory, selectedSeason, searchTerm])
+
+  // 초기 인증 및 데이터 로드
+  useEffect(() => {
+    const checkAuth = async () => {
+      if (!isLoggedIn()) {
+        alert("로그인이 필요합니다.")
+        navigate("/login")
+        return
+      }
+
+      const user = getCurrentUser()
+      setUserData(user)
+
+      await loadClothesData()
+      await loadStatsData()
+      setLoading(false)
+    }
+
+    checkAuth()
+  }, [navigate, loadClothesData])
 
   // 통계 데이터 로드
   const loadStatsData = async () => {
@@ -147,20 +147,41 @@ const MyCloset = () => {
     }
   }
 
-  // 필터링 효과
+  // 필터링 효과 (백엔드에서 이미 필터링된 데이터를 받으므로 로컬 필터링은 검색어와 색상만)
   useEffect(() => {
+    console.log("🔍 필터링 시작:", {
+      clothesCount: clothes.length,
+      searchTerm,
+      selectedCategory,
+      selectedSeason,
+      selectedColor
+    })
+
     const filtered = clothes.filter((item) => {
+      console.log("🔍 아이템 체크:", {
+        name: item.name,
+        category: item.category,
+        season: item.season,
+        color: item.color,
+        brand: item.brand
+      })
+
       const matchesSearch =
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (item.brand && item.brand.toLowerCase().includes(searchTerm.toLowerCase()))
 
+      // 백엔드에서 이미 카테고리와 계절로 필터링했으므로 로컬에서는 색상만 필터링
       const matchesColor = selectedColor === "all" || item.color === selectedColor
 
-      return matchesSearch && matchesColor
+      const result = matchesSearch && matchesColor
+      console.log("🔍 필터 결과:", { matchesSearch, matchesColor, result })
+      
+      return result
     })
 
+    console.log("🔍 최종 필터링 결과:", filtered.length, "개")
     setFilteredClothes(filtered)
-  }, [clothes, searchTerm, selectedColor])
+  }, [clothes, searchTerm, selectedColor, selectedCategory, selectedSeason])
 
   // 필터 변경 시 데이터 다시 로드
   useEffect(() => {
@@ -172,7 +193,7 @@ const MyCloset = () => {
         search: searchTerm,
       })
     }
-  }, [selectedCategory, selectedSeason])
+  }, [selectedCategory, selectedSeason, loadClothesData, loading, searchTerm])
 
   // 검색어 디바운싱
   useEffect(() => {
@@ -186,7 +207,7 @@ const MyCloset = () => {
     }, 500)
 
     return () => clearTimeout(timeoutId)
-  }, [searchTerm])
+  }, [searchTerm, loadClothesData, loading])
 
   // 파일 선택 핸들러
   const handleFileSelect = async (event) => {
@@ -239,8 +260,32 @@ const MyCloset = () => {
       const result = await uploadClothing(clothingData)
 
       if (result.success) {
-        await loadClothesData({ page: 1 }) // 첫 페이지로 이동하여 새 데이터 로드
+        // 업로드 후 필터 초기화 및 전체 데이터 로드
+        setSelectedCategory("all")
+        setSelectedSeason("all")
+        setSelectedColor("all")
+        setSearchTerm("")
+        
+        // 모든 필터를 초기화한 상태로 데이터 로드
+        await loadClothesData({ 
+          page: 1,
+          category: null,
+          season: null,
+          search: null
+        })
         await loadStatsData() // 통계 업데이트
+        
+        // 약간의 지연 후 한 번 더 데이터 로드 (서버 반영 시간 고려)
+        setTimeout(async () => {
+          await loadClothesData({ 
+            page: 1,
+            category: null,
+            season: null,
+            search: null
+          })
+          await loadStatsData()
+        }, 1000)
+        
         handleCloseUploadModal()
         alert(result.message || "의류가 성공적으로 업로드되었습니다!")
       } else {
@@ -339,7 +384,24 @@ const MyCloset = () => {
 
   // 가상 피팅 시도
   const handleTryOn = (clothingId) => {
-    navigate(`/virtual-fitting/try/${clothingId}`)
+    // 의류 아이템 찾기
+    const clothing = clothes.find(c => c.id === clothingId)
+    if (!clothing) {
+      alert("의류 정보를 찾을 수 없습니다.")
+      return
+    }
+
+    // 마이페이지 방식과 동일하게 getClothingImageUrl 사용
+    const clothingImageUrl = getClothingImageUrl(clothing.image_url)
+    
+    // 가상 피팅 페이지로 이동 (카테고리 정보 포함)
+    const q = new URLSearchParams({
+      clothingId: String(clothingId),
+      clothingImage: clothingImageUrl ? encodeURIComponent(clothingImageUrl) : "",
+      clothingCategory: clothing.category || "",
+    }).toString()
+    
+    navigate(`/virtual-fitting?${q}`)
   }
 
   // 이미지 에러 처리 함수
