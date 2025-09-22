@@ -277,8 +277,12 @@ class VirtualFittingServiceRedis:
         model_image_abs = Path(model_image_path).resolve()
         cloth_image_abs = Path(cloth_image_path).resolve()
         
-        logger.info(f"모델 이미지: {model_image_abs}")
-        logger.info(f"의류 이미지: {cloth_image_abs}")
+        # 이미지 전처리: RGBA를 RGB로 변환
+        processed_model_path = self._preprocess_image(model_image_abs, "model")
+        processed_cloth_path = self._preprocess_image(cloth_image_abs, "cloth")
+        
+        logger.info(f"모델 이미지: {model_image_abs} -> {processed_model_path}")
+        logger.info(f"의류 이미지: {cloth_image_abs} -> {processed_cloth_path}")
         
         # Python 실행 파일 경로
         python_executable = sys.executable
@@ -287,8 +291,8 @@ class VirtualFittingServiceRedis:
         cmd = [
             python_executable,
             str(run_ootd_path),
-            "--model_path", str(model_image_abs),
-            "--cloth_path", str(cloth_image_abs),
+            "--model_path", str(processed_model_path),
+            "--cloth_path", str(processed_cloth_path),
             "--model_type", model_type,
             "--category", str(category),
             "--scale", str(scale),
@@ -332,6 +336,36 @@ class VirtualFittingServiceRedis:
         shutil.rmtree(temp_output_dir, ignore_errors=True)
         
         return result_paths
+    
+    def _preprocess_image(self, image_path: Path, image_type: str) -> Path:
+        """이미지 전처리: RGBA를 RGB로 변환"""
+        try:
+            # 이미지 열기
+            with Image.open(image_path) as img:
+                logger.info(f"{image_type} 이미지 모드: {img.mode}")
+                
+                # RGBA 모드인 경우 RGB로 변환
+                if img.mode == 'RGBA':
+                    # 흰색 배경으로 RGB 이미지 생성
+                    rgb_img = Image.new('RGB', img.size, (255, 255, 255))
+                    rgb_img.paste(img, mask=img.split()[-1])  # 알파 채널을 마스크로 사용
+                    
+                    # 전처리된 이미지를 임시 디렉토리에 저장
+                    temp_filename = f"processed_{image_type}_{uuid.uuid4().hex[:8]}.jpg"
+                    temp_path = self.temp_dir / temp_filename
+                    rgb_img.save(temp_path, 'JPEG', quality=95)
+                    
+                    logger.info(f"{image_type} 이미지 RGBA->RGB 변환 완료: {temp_path}")
+                    return temp_path
+                else:
+                    # 이미 RGB 모드이면 원본 경로 반환
+                    logger.info(f"{image_type} 이미지 이미 RGB 모드, 전처리 불필요")
+                    return image_path
+                    
+        except Exception as e:
+            logger.error(f"{image_type} 이미지 전처리 실패: {e}")
+            # 전처리 실패 시 원본 경로 반환
+            return image_path
     
     def _move_result_images(self, unique_id: str, model_type: str, samples: int) -> List[str]:
         """결과 이미지들을 최종 위치로 이동 (상대 경로 반환)"""

@@ -16,6 +16,7 @@ const ProfileImage = ({ profilePicture, nickname, size = "medium", className = "
         src={imageUrl || "/placeholder.svg"}
         alt={`${nickname || "사용자"}의 프로필`}
         className={`rounded-full object-cover ${sizeClasses[size]} ${className}`}
+        style={{ width: '100%', height: '100%' }}
         onError={(e) => handleImageError(e, "/placeholder.svg?height=60&width=60&query=user profile")}
       />
     )
@@ -25,6 +26,7 @@ const ProfileImage = ({ profilePicture, nickname, size = "medium", className = "
     return (
       <div
         className={`rounded-full bg-gray-300 flex items-center justify-center text-gray-600 font-semibold ${sizeClasses[size]} ${className}`}
+        style={{ width: '100%', height: '100%' }}
       >
         {nickname?.charAt(0)?.toUpperCase() || "U"}
       </div>

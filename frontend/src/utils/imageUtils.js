@@ -24,8 +24,9 @@ export const getProfileImageUrl = (profilePicturePath) => {
   }
 
   // 백엔드에서 "/uploads/profile_pictures/filename.jpg" 형태로 저장하는 경우
-  // 단순히 서버 URL과 결합
-  return addCacheBuster(`${API_BASE_URL}${profilePicturePath}`)
+  // 슬래시가 누락된 경우 대비하여 정규화
+  const normalizedPath = profilePicturePath.startsWith("/") ? profilePicturePath : `/${profilePicturePath}`
+  return addCacheBuster(`${API_BASE_URL}${normalizedPath}`)
 }
 
 /**
@@ -45,8 +46,9 @@ export const getFeedImageUrl = (feedImagePath) => {
   }
 
   // 백엔드에서 "/uploads/feeds/filename.jpg" 형태로 저장하는 경우
-  // 단순히 서버 URL과 결합
-  return addCacheBuster(`${API_BASE_URL}${feedImagePath}`)
+  // 슬래시가 누락된 경우 대비하여 정규화
+  const normalizedPath = feedImagePath.startsWith("/") ? feedImagePath : `/${feedImagePath}`
+  return addCacheBuster(`${API_BASE_URL}${normalizedPath}`)
 }
 
 /**
@@ -66,7 +68,9 @@ export const getProductImageUrl = (productImagePath) => {
 
   // 상품 이미지도 동일한 방식으로 처리
   // 백엔드에서 "/uploads/products/filename.jpg" 형태로 저장한다고 가정
-  return addCacheBuster(`${API_BASE_URL}${productImagePath}`)
+  // 슬래시가 누락된 경우 대비하여 정규화
+  const normalizedPath = productImagePath.startsWith("/") ? productImagePath : `/${productImagePath}`
+  return addCacheBuster(`${API_BASE_URL}${normalizedPath}`)
 }
 
 /**
@@ -86,8 +90,11 @@ export const getImageUrl = (imagePath, fallbackUrl = "/placeholder.svg?height=40
     return addCacheBuster(imagePath)
   }
 
-  // 상대 경로인 경우 서버 URL과 결합
-  return addCacheBuster(`${API_BASE_URL}${imagePath}`)
+  // 상대 경로인 경우 슬래시 추가 (백엔드에서 슬래시가 누락된 경우 대비)
+  const normalizedPath = imagePath.startsWith("/") ? imagePath : `/${imagePath}`
+  
+  // 서버 URL과 결합
+  return addCacheBuster(`${API_BASE_URL}${normalizedPath}`)
 }
 
 /**

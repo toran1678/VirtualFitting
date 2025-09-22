@@ -8,6 +8,7 @@ import Footer from "../../components/Footer/Footer"
 import ImageUploader from "../../components/ImageUploader/ImageUploader"
 import { getFeedById, updateFeed } from "../../api/feeds"
 import { getFeedImageUrl } from "../../utils/imageUtils"
+import ProfileImage from "../../components/ProfileImage"
 import styles from "./EditFeedPage.module.css"
 
 const EditFeedPage = () => {
@@ -180,15 +181,16 @@ const EditFeedPage = () => {
       {user && (
         <div className={styles.userInfo}>
           <div className={styles.userAvatar}>
-            {user.profile_picture ? (
-              <img src={user.profile_picture || "/placeholder.svg"} alt={user.nickname} />
-            ) : (
-              <span>{user.nickname?.charAt(0)?.toUpperCase()}</span>
-            )}
+            <ProfileImage 
+              profilePicture={user.profile_picture}
+              nickname={user.nickname}
+              size="small"
+              showFallback={true}
+            />
           </div>
           <div className={styles.userDetails}>
-            <h4>{user.nickname}</h4>
-            <span>@{user.id}</span>
+            <h4>{user.nickname || "사용자"}</h4>
+            <span>@{user.id || "unknown"}</span>
           </div>
         </div>
       )}

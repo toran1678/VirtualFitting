@@ -54,14 +54,14 @@ import {
 const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000"
 
 // axios 인스턴스 생성
-const userProfileAPI = axios.create({
+const apiClient = axios.create({
   baseURL: `${API_BASE_URL}/api/users/profile`,
   withCredentials: true, // 세션 쿠키 전송
   timeout: 30000, // 10초에서 30초로 늘림
 })
 
 // 요청 인터셉터
-userProfileAPI.interceptors.request.use(
+apiClient.interceptors.request.use(
   (config) => {
     console.log(`📤 UserProfile API 요청: ${config.method?.toUpperCase()} ${config.url}`, config.data)
     return config
@@ -73,7 +73,7 @@ userProfileAPI.interceptors.request.use(
 )
 
 // 응답 인터셉터
-userProfileAPI.interceptors.response.use(
+apiClient.interceptors.response.use(
   (response) => {
     console.log(
       `📥 UserProfile API 응답: ${response.config.method?.toUpperCase()} ${response.config.url}`,
@@ -102,7 +102,7 @@ userProfileAPI.interceptors.response.use(
 export const getUserProfileByEmail = async (email) => {
   try {
     return await retryApiCall(async () => {
-      const response = await userProfileAPI.get(`/${email}`)
+      const response = await apiClient.get(`/${email}`)
       return response.data
     })
   } catch (error) {
@@ -126,7 +126,7 @@ export const getUserFeeds = async (email, params = {}) => {
     })
 
     return await retryApiCall(async () => {
-      const response = await userProfileAPI.get(`/${email}/feeds?${queryParams}`)
+      const response = await apiClient.get(`/${email}/feeds?${queryParams}`)
       return response.data
     })
   } catch (error) {
@@ -150,7 +150,7 @@ export const getUserLikedClothes = async (email, params = {}) => {
     })
 
     return await retryApiCall(async () => {
-      const response = await userProfileAPI.get(`/${email}/liked-clothes?${queryParams}`)
+      const response = await apiClient.get(`/${email}/liked-clothes?${queryParams}`)
       return response.data
     })
   } catch (error) {
@@ -168,23 +168,43 @@ export const getUserFollowing = getUserFollowingEnhanced
 export { getFollowRequests, acceptFollowRequest, rejectFollowRequest, cancelFollowRequest }
 
 /**
- * 특정 사용자의 가상 피팅 목록 조회 (추후 구현)
+ * 특정 사용자의 가상 피팅 목록 조회
  * @param {string} email - 사용자 이메일
  * @param {Object} params - 조회 파라미터
- * @returns {Promise<Array>} - 가상 피팅 목록
+ * @returns {Promise<Object>} - 가상 피팅 목록
  */
 export const getUserVirtualFittings = async (email, params = {}) => {
-  // 임시로 빈 배열 반환 (백엔드 구현 후 수정)
-  return []
+  try {
+    const queryParams = new URLSearchParams({
+      page: params.page || 1,
+      per_page: params.per_page || 20,
+    })
+
+    const response = await apiClient.get(`/${email}/virtual-fittings?${queryParams}`)
+    return response.data
+  } catch (error) {
+    console.error("가상 피팅 조회 오류:", error)
+    throw error
+  }
 }
 
 /**
- * 특정 사용자의 커스텀 의류 목록 조회 (추후 구현)
+ * 특정 사용자의 커스텀 의류 목록 조회
  * @param {string} email - 사용자 이메일
  * @param {Object} params - 조회 파라미터
  * @returns {Promise<Array>} - 커스텀 의류 목록
  */
 export const getUserCustomClothes = async (email, params = {}) => {
-  // 임시로 빈 배열 반환 (백엔드 구현 후 수정)
-  return []
+  try {
+    const queryParams = new URLSearchParams({
+      skip: params.skip || 0,
+      limit: params.limit || 100,
+    })
+
+    const response = await apiClient.get(`/${email}/custom-clothes?${queryParams}`)
+    return response.data
+  } catch (error) {
+    console.error("커스텀 의류 조회 오류:", error)
+    throw error
+  }
 }

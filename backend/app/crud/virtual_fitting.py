@@ -49,6 +49,16 @@ class VirtualFittingCRUD:
         return results, total
     
     @staticmethod
+    def get_user_virtual_fittings(
+        db: Session, 
+        user_id: int, 
+        skip: int = 0, 
+        limit: int = 20
+    ) -> tuple[List[VirtualFittings], int]:
+        """사용자의 가상 피팅 목록 조회 (별칭)"""
+        return VirtualFittingCRUD.get_user_fitting_results(db, user_id, skip, limit)
+    
+    @staticmethod
     def get_fitting_process_by_id(
         db: Session, 
         process_id: int, 

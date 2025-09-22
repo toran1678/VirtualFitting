@@ -335,7 +335,13 @@ const FollowPage = () => {
 
   // 뒤로가기
   const handleGoBack = () => {
-    navigate(-1)
+    // 현재 사용자의 팔로우 페이지인 경우 마이페이지로 이동
+    if (isCurrentUser) {
+      navigate("/mypage")
+    } else {
+      // 다른 사용자의 팔로우 페이지인 경우 해당 사용자의 프로필로 이동
+      navigate(`/profile/${email}`)
+    }
   }
 
   // 로딩 중 표시

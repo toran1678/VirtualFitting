@@ -205,7 +205,17 @@ const FeedDetailPage = () => {
 
   // 뒤로가기
   const handleGoBack = () => {
-    navigate(-1)
+    // 피드 작성자의 프로필로 이동하거나 메인 페이지로 이동
+    if (feed?.user?.email) {
+      if (currentUser?.email === feed.user.email) {
+        navigate("/mypage")
+      } else {
+        navigate(`/profile/${feed.user.email}`)
+      }
+    } else {
+      // 피드 정보가 없는 경우 메인 페이지로 이동
+      navigate("/")
+    }
   }
 
   // 피드 수정 페이지로 이동

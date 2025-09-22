@@ -932,7 +932,12 @@ const VirtualFittingPage = () => {
                   </div>
                 ) : (
                   <div className={styles.categoryWarning}>
-                    <span>⚠️ 카테고리를 선택해주세요</span>
+                    <button 
+                      className={styles.categorySelectBtn}
+                      onClick={() => setShowCategorySelector(true)}
+                    >
+                      카테고리 선택하기
+                    </button>
                   </div>
                 )}
               </div>
@@ -965,8 +970,8 @@ const VirtualFittingPage = () => {
                     setShowCategorySelector(false)
                   }}
                 >
-                  <svg className={styles.categoryIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M8 2v20l4-4 4 4V2z"/>
+                  <svg className={styles.categoryIcon} width="24" height="24" strokeWidth="1.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor">
+                    <path d="M12 19H16.4363C16.7532 19 17.0154 18.7536 17.0352 18.4374L17.9602 3.63743C17.9817 3.29201 17.7074 3 17.3613 3H6.63426C6.28981 3 6.01608 3.28936 6.03518 3.63328L6.96852 20.4333C6.98618 20.7512 7.24915 21 7.56759 21H11.4C11.7314 21 12 20.7314 12 20.4V8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                   <span>하체</span>
                   <small>바지, 스커트, 반바지 등</small>
@@ -978,8 +983,10 @@ const VirtualFittingPage = () => {
                     setShowCategorySelector(false)
                   }}
                 >
-                  <svg className={styles.categoryIcon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 2L2 7v10c0 5.55 3.84 10 9 11 5.16-1 9-5.45 9-11V7l-10-5z"/>
+                  <svg className={styles.categoryIcon} width="24" height="24" viewBox="0 0 24 24" strokeWidth="1.5" fill="none" xmlns="http://www.w3.org/2000/svg" color="currentColor">
+                    <path d="M18 21H6C6 21 7.66042 16.1746 7.5 13C7.3995 11.0112 5.97606 9.92113 6.5 8C6.72976 7.15753 7.5 6 7.5 6C7.5 6 9 7 12 7C15 7 16.5 6 16.5 6C16.5 6 17.2702 7.15753 17.5 8C18.0239 9.92113 16.6005 11.0112 16.5 13C16.3396 16.1746 18 21 18 21Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M7.49988 6.00002V3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M16.5 6.00002V3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                   <span>드레스</span>
                   <small>원피스, 드레스, 점프수트 등</small>
