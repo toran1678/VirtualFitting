@@ -107,11 +107,8 @@ const UserProfilePage = () => {
           return
         }
 
-        console.log("프로필 데이터 로드 시작:", email)
-
         // 프로필 정보 가져오기
         const profileData = await getUserProfileByEmail(email)
-        console.log("프로필 데이터 로드 완료:", profileData)
 
         setUserData(profileData)
 
@@ -163,13 +160,10 @@ const UserProfilePage = () => {
   // 사용자 데이터 로드 후 초기 통계 로드
   useEffect(() => {
     const loadInitialStats = async () => {
-      if (!email || !userData) {
-        console.log("❌ 초기 통계 로드 조건 불만족:", { email, userData: !!userData })
-        return
-      }
+    if (!email || !userData) {
+      return
+    }
 
-      console.log("🚀 초기 통계 로드 시작:", { email, userDataEmail: userData.email })
-      
       try {
         // 모든 통계를 병렬로 가져오기
         const [feedsData, virtualFittingsData, customClothesData, likedClothesData] = await Promise.allSettled([
@@ -179,16 +173,6 @@ const UserProfilePage = () => {
           getUserLikedClothes(email, { skip: 0, limit: 1000 }) // 충분히 큰 값으로 설정
         ])
 
-        console.log("🔍 API 응답 상태:", {
-          feedsData: feedsData.status,
-          virtualFittingsData: virtualFittingsData.status,
-          customClothesData: customClothesData.status,
-          likedClothesData: likedClothesData.status
-        })
-
-        console.log("🔍 커스텀 의류 데이터:", customClothesData)
-        console.log("🔍 좋아요 의류 데이터:", likedClothesData)
-
         // 통계 업데이트
         setStats({
           feeds: feedsData.status === 'fulfilled' ? (feedsData.value.total || 0) : 0,
@@ -197,15 +181,9 @@ const UserProfilePage = () => {
           likedClothes: likedClothesData.status === 'fulfilled' ? likedClothesData.value.length : 0,
         })
 
-        console.log("✅ 초기 통계 로드 완료:", {
-          feeds: feedsData.status === 'fulfilled' ? (feedsData.value.total || 0) : 0,
-          virtualFittings: virtualFittingsData.status === 'fulfilled' ? (virtualFittingsData.value.total || 0) : 0,
-          customClothes: customClothesData.status === 'fulfilled' ? customClothesData.value.length : 0,
-          likedClothes: likedClothesData.status === 'fulfilled' ? likedClothesData.value.length : 0,
-        })
 
       } catch (error) {
-        console.error("❌ 초기 통계 로드 실패:", error)
+        console.error("초기 통계 로드 실패:", error)
       }
     }
 
@@ -214,49 +192,31 @@ const UserProfilePage = () => {
     }
   }, [userData?.email, email, userData]) // userData도 의존성에 포함
 
-  // 탭 데이터 로드를 위한 별도 useEffect
+  // 탭 데이터 로드를 위한 별도 useEffect - 무한 루프 방지
   useEffect(() => {
     const tabParam = searchParams.get("tab")
     const currentActiveTab = paramToTabMap[tabParam] || "피드"
 
     // 공개 계정이 아니거나 팔로우 중인 경우에만 데이터 로드
-    if (!userData || !userData.is_private || userData.is_following) {
-      // 탭 데이터 로드 함수 - useEffect 내부에서 정의하여 의존성 문제 해결
-      const loadTabData = (tab) => {
+    if (userData && (!userData.is_private || userData.is_following)) {
+      // 탭 데이터 로드 함수 - 내부에서 정의하여 의존성 문제 해결
+      const loadTabData = async (tab) => {
         if (!email || !userData) {
-          console.log("❌ loadTabData: email 또는 userData가 없음", { email, userData })
           return
         }
-
-        // 이미 데이터가 있고 로딩 중이 아니면 로드하지 않음
-        if (tabData[tab] && tabData[tab].length > 0 && !tabLoadingStates[tab]) {
-          console.log(`✅ ${tab} 탭 데이터 이미 존재, 로드 스킵`, { 
-            dataLength: tabData[tab].length,
-            loading: tabLoadingStates[tab]
-          })
-          return
-        }
-
-        // 로딩 중이면 로드하지 않음
-        if (tabLoadingStates[tab]) {
-          console.log(`⏳ ${tab} 탭 로딩 중, 로드 스킵`)
-          return
-        }
-
-        console.log(`🚀 ${tab} 탭 데이터 로드 시작`, { email, userData: userData.email })
 
         switch (tab) {
           case "피드":
-            loadUserFeeds()
+            await loadUserFeeds()
             break
           case "가상 피팅":
-            loadUserVirtualFittings()
+            await loadUserVirtualFittings()
             break
           case "커스텀 의류":
-            loadUserCustomClothes()
+            await loadUserCustomClothes()
             break
           case "좋아요 의류":
-            loadUserLikedClothes()
+            await loadUserLikedClothes()
             break
           default:
             break
@@ -265,18 +225,20 @@ const UserProfilePage = () => {
 
       loadTabData(currentActiveTab)
     }
-  }, [userData, searchParams, paramToTabMap, email, tabData, tabLoadingStates])
+  }, [userData?.email, searchParams, email]) // 의존성 배열 최소화
 
   // 사용자 피드 로드
   const loadUserFeeds = async () => {
+    // 이미 로딩 중이면 중복 호출 방지
+    if (tabLoadingStates["피드"]) {
+      return
+    }
+    
     setTabLoading("피드", true)
     try {
-      console.log("피드 API 호출 시작:", email)
       const data = await getUserFeeds(email, { page: 1, size: 20 })
-      console.log("피드 API 응답:", data)
 
       if (!data || !data.feeds) {
-        console.log("피드 데이터가 없음")
         setTabData((prev) => ({ ...prev, 피드: [] }))
         setStats((prev) => ({ ...prev, feeds: 0 }))
         return
@@ -296,16 +258,10 @@ const UserProfilePage = () => {
         comments: feed.comment_count || 0,
       }))
 
-      console.log("포맷된 피드 데이터:", formattedData)
-
       setTabData((prev) => ({ ...prev, 피드: formattedData }))
       setStats((prev) => ({ ...prev, feeds: data.total || formattedData.length }))
     } catch (error) {
       console.error("피드 로드 실패:", error)
-
-      if (error.response?.status === 403) {
-        console.log("비공개 계정 - 피드 접근 제한")
-      }
       setTabData((prev) => ({ ...prev, 피드: [] }))
       setStats((prev) => ({ ...prev, feeds: 0 }))
     } finally {
@@ -315,21 +271,17 @@ const UserProfilePage = () => {
 
   // 사용자 가상 피팅 로드
   const loadUserVirtualFittings = async () => {
+    // 이미 로딩 중이면 중복 호출 방지
+    if (tabLoadingStates["가상 피팅"]) {
+      return
+    }
+    
     setTabLoading("가상 피팅", true)
     try {
-      console.log("🔍 가상 피팅 API 호출 시작:", email)
-      console.log("🔍 API 함수 확인:", getUserVirtualFittings)
       const data = await getUserVirtualFittings(email, { page: 1, per_page: 20 })
-      console.log("✅ 가상 피팅 API 응답:", data)
-      console.log("🔍 응답 데이터 타입:", typeof data, "fittings 존재:", !!data.fittings)
-      console.log("🔍 fittings 배열 길이:", data.fittings?.length || 0)
 
       const formattedData = data.fittings?.map((fitting) => {
         const imageUrl = getImageUrl(fitting.fitting_image_url)
-        console.log("🖼️ 가상 피팅 이미지 URL:", {
-          original: fitting.fitting_image_url,
-          processed: imageUrl
-        })
         return {
           id: fitting.fitting_id,
           image: imageUrl,
@@ -345,9 +297,6 @@ const UserProfilePage = () => {
     } catch (error) {
       console.error("가상 피팅 로드 실패:", error)
 
-      if (error.response?.status === 403) {
-        console.log("비공개 계정 - 가상 피팅 접근 제한")
-      }
       setTabData((prev) => ({ ...prev, "가상 피팅": [] }))
       setStats((prev) => ({ ...prev, virtualFittings: 0 }))
     } finally {
@@ -357,21 +306,17 @@ const UserProfilePage = () => {
 
   // 사용자 커스텀 의류 로드
   const loadUserCustomClothes = async () => {
+    // 이미 로딩 중이면 중복 호출 방지
+    if (tabLoadingStates["커스텀 의류"]) {
+      return
+    }
+    
     setTabLoading("커스텀 의류", true)
     try {
-      console.log("🔍 커스텀 의류 API 호출 시작:", email)
-      console.log("🔍 API 함수 확인:", getUserCustomClothes)
       const data = await getUserCustomClothes(email, { skip: 0, limit: 100 })
-      console.log("✅ 커스텀 의류 API 응답:", data)
-      console.log("🔍 응답 데이터 타입:", typeof data, "배열 길이:", Array.isArray(data) ? data.length : "배열 아님")
-      console.log("🔍 첫 번째 아이템:", data[0])
 
       const formattedData = data.map((item) => {
         const imageUrl = getImageUrl(item.image_url)
-        console.log("🖼️ 커스텀 의류 이미지 URL:", {
-          original: item.image_url,
-          processed: imageUrl
-        })
         return {
           id: item.id,
           image: imageUrl,
@@ -390,9 +335,6 @@ const UserProfilePage = () => {
     } catch (error) {
       console.error("커스텀 의류 로드 실패:", error)
 
-      if (error.response?.status === 403) {
-        console.log("비공개 계정 - 커스텀 의류 접근 제한")
-      }
       setTabData((prev) => ({ ...prev, "커스텀 의류": [] }))
       setStats((prev) => ({ ...prev, customClothes: 0 }))
     } finally {
@@ -402,11 +344,14 @@ const UserProfilePage = () => {
 
   // 사용자 좋아요 의류 로드
   const loadUserLikedClothes = async () => {
+    // 이미 로딩 중이면 중복 호출 방지
+    if (tabLoadingStates["좋아요 의류"]) {
+      return
+    }
+    
     setTabLoading("좋아요 의류", true)
     try {
-      console.log("좋아요 의류 API 호출 시작:", email)
       const data = await getUserLikedClothes(email, { skip: 0, limit: 100 })
-      console.log("좋아요 의류 API 응답:", data)
 
       const formattedData = data.map((item) => ({
         id: item.clothing_id,
@@ -424,9 +369,6 @@ const UserProfilePage = () => {
     } catch (error) {
       console.error("좋아요 의류 로드 실패:", error)
 
-      if (error.response?.status === 403) {
-        console.log("비공개 계정 - 좋아요 의류 접근 제한")
-      }
       setTabData((prev) => ({ ...prev, "좋아요 의류": [] }))
       setStats((prev) => ({ ...prev, likedClothes: 0 }))
     } finally {
@@ -502,45 +444,29 @@ const UserProfilePage = () => {
 
   // 탭 변경 핸들러 - 단순화
   const handleTabChange = (tab) => {
-    console.log(`🖱️ 탭 클릭: ${tab}`, { 
-      userData: !!userData, 
-      tabData: tabData[tab], 
-      loading: tabLoadingStates[tab] 
-    })
-    
     const tabParam = tabToParamMap[tab]
     if (tabParam) {
       setSearchParams({ tab: tabParam })
     }
     setActiveTab(tab)
 
-    // 탭 데이터가 없고 로딩 중이 아니면 로드
-    if (userData && (!tabData[tab] || tabData[tab].length === 0) && !tabLoadingStates[tab]) {
-      console.log(`📡 ${tab} 탭 데이터 로드 필요`)
-      
-      switch (tab) {
-        case "피드":
-          loadUserFeeds()
-          break
-        case "가상 피팅":
-          loadUserVirtualFittings()
-          break
-        case "커스텀 의류":
-          loadUserCustomClothes()
-          break
-        case "좋아요 의류":
-          loadUserLikedClothes()
-          break
-        default:
-          break
-      }
-    } else {
-      console.log(`⏭️ ${tab} 탭 데이터 로드 건너뜀`, {
-        hasUserData: !!userData,
-        hasTabData: !!tabData[tab],
-        tabDataLength: tabData[tab]?.length,
-        isLoading: tabLoadingStates[tab]
-      })
+    // 탭 변경 시 항상 데이터 로드 (useEffect에서 중복 로드 방지)
+    
+    switch (tab) {
+      case "피드":
+        loadUserFeeds()
+        break
+      case "가상 피팅":
+        loadUserVirtualFittings()
+        break
+      case "커스텀 의류":
+        loadUserCustomClothes()
+        break
+      case "좋아요 의류":
+        loadUserLikedClothes()
+        break
+      default:
+        break
     }
   }
 
@@ -649,10 +575,6 @@ const UserProfilePage = () => {
       followers_count: changeData.followersCount || prev.followers_count,
     }))
 
-    // 메시지가 있으면 표시
-    if (changeData.message) {
-      console.log("팔로우 상태 변경:", changeData.message)
-    }
   }
 
   // 팔로우 버튼 텍스트 결정
@@ -777,9 +699,8 @@ const UserProfilePage = () => {
                           <img
                             src={item.image || "/placeholder.svg"}
                             alt={item.title}
-                            onLoad={() => console.log("✅ 이미지 로드 성공:", item.image)}
+                            onLoad={() => {}}
                             onError={(e) => {
-                              console.log("❌ 이미지 로드 실패:", item.image)
                               handleImageError(e, item.title)
                             }}
                             style={{ display: "block" }}

@@ -1,68 +1,34 @@
 version: "3.8"
 
 services:
-  # MySQL 데이터베이스 서비스
-  mysql:
-    image: mysql:8.0
-    container_name: mysql_db_prod
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-capstone}
-      MYSQL_CHARSET: utf8mb4
-      MYSQL_COLLATION: utf8mb4_unicode_ci
-    ports:
-      - "${MYSQL_PORT:-3308}:3306"
-    volumes:
-      - mysql-data-prod:/var/lib/mysql
-    command: --default-authentication-plugin=mysql_native_password
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
-    restart: unless-stopped
-
-  # Redis 서비스
-  redis:
-    image: redis:7-alpine
-    container_name: redis_cache_prod
-    ports:
-      - "${REDIS_PORT:-6379}:6379"
-    volumes:
-      - redis-data-prod:/data
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      timeout: 10s
-      retries: 5
-    restart: unless-stopped
-
-  # FastAPI 백엔드 서비스
+  # FastAPI 백엔드 서비스 (프로덕션)
   backend:
     build: 
       context: ./backend
       dockerfile: Dockerfile
     container_name: fastapi_backend_prod
     ports:
-      - "${BACKEND_PORT:-8000}:8000"
+      - "8000:8000"
     env_file:
-      - .env
+      - env.production
     environment:
-      - MYSQL_HOST=mysql
+      - MYSQL_HOST=${MYSQL_HOST}
       - MYSQL_USER=root
-      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-123456}
-      - MYSQL_DATABASE=${MYSQL_DATABASE:-capstone}
-      - MYSQL_PORT=3306
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_PORT=${MYSQL_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
       - REDIS_DB=0
+      - ENVIRONMENT=production
     volumes:
       - ./backend/uploads:/app/uploads
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # 백엔드 워커 서비스 (가상 피팅 처리)
   backend-worker:
@@ -72,42 +38,55 @@ services:
     container_name: fastapi_worker_prod
     command: ["python", "scripts/start_worker.py"]
     env_file:
-      - .env
+      - env.production
     environment:
-      - MYSQL_HOST=mysql
+      - MYSQL_HOST=${MYSQL_HOST}
       - MYSQL_USER=root
-      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD:-123456}
-      - MYSQL_DATABASE=${MYSQL_DATABASE:-capstone}
-      - MYSQL_PORT=3306
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - MYSQL_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_PORT=${MYSQL_PORT}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
       - REDIS_DB=0
+      - ENVIRONMENT=production
     volumes:
       - ./backend/uploads:/app/uploads
     depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - backend
     restart: unless-stopped
 
-  # React 프론트엔드 서비스
+  # React 프론트엔드 서비스 (프로덕션)
   frontend:
     build: 
       context: ./frontend
       dockerfile: Dockerfile
       args:
-        - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8000}
+        - REACT_APP_API_URL=${REACT_APP_API_URL}
     container_name: react_frontend_prod
     ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+      - "3000:3000"
     environment:
-      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:8000}
+      - REACT_APP_API_URL=${REACT_APP_API_URL}
     depends_on:
       - backend
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
-# 데이터베이스 및 캐시 볼륨 정의
-volumes:
-  mysql-data-prod:
-  redis-data-prod:
+  # Nginx 리버스 프록시 (선택사항)
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - backend
+      - frontend
+    restart: unless-stopped

@@ -1,16 +1,18 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import Header from "../../components/Header/Header"
 import Footer from "../../components/Footer/Footer"
 import ImageUploader from "../../components/ImageUploader/ImageUploader"
 import { createFeed } from "../../api/feeds" // 새로 작성한 API 사용
+import { proxyImage } from "../../api/imageProxy"
 import styles from "./CreateFeedPage.module.css"
 
 const CreateFeedPage = () => {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user, isAuthenticated, loading: authLoading } = useAuth() // AuthContext 사용
 
   const [formData, setFormData] = useState({
@@ -19,7 +21,6 @@ const CreateFeedPage = () => {
   })
   const [images, setImages] = useState([])
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [autoSaveStatus, setAutoSaveStatus] = useState("saved") // 'saved', 'saving', 'error'
   const [error, setError] = useState(null)
 
   // 사용자 인증 상태 확인
@@ -30,6 +31,140 @@ const CreateFeedPage = () => {
       navigate("/login", { state: { from: "/create-feed" } })
     }
   }, [authLoading, isAuthenticated, navigate])
+
+  // 이미지 재시도 함수
+  const retryImageConversion = useCallback((imageId) => {
+    const imageToRetry = images.find(img => img.id === imageId)
+    if (!imageToRetry || !imageToRetry.sharedImageUrl) return
+
+    // 변환 중 상태로 설정
+    setImages(prevImages => 
+      prevImages.map(img => 
+        img.id === imageId 
+          ? { ...img, isConverting: true, conversionError: false, needsRetry: false }
+          : img
+      )
+    )
+
+    // 이미지 변환 재시도 (프록시 API 사용)
+    const convertImageToFile = async () => {
+      try {
+        
+        // 이미지 프록시 API를 통해 CORS 문제 해결
+        const proxyResult = await proxyImage(imageToRetry.sharedImageUrl)
+        // 프록시된 이미지 URL로 fetch
+        const response = await fetch(proxyResult.url)
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        }
+        
+        const blob = await response.blob()
+        const file = new File([blob], `retry-${Date.now()}.jpg`, {
+          type: blob.type || 'image/jpeg'
+        })
+        
+        // 변환 완료된 이미지로 업데이트
+        setImages(prevImages => 
+          prevImages.map(img => 
+            img.id === imageId 
+              ? { ...img, file: file, isConverting: false }
+              : img
+          )
+        )
+        
+      } catch (error) {
+        console.error("공유 이미지 재변환 실패:", error)
+        setImages(prevImages => 
+          prevImages.map(img => 
+            img.id === imageId 
+              ? { ...img, isConverting: false, conversionError: true, needsRetry: true }
+              : img
+          )
+        )
+      }
+    }
+    
+    convertImageToFile()
+  }, [images])
+
+  // 전역 재시도 함수 등록
+  useEffect(() => {
+    window.retryImageConversion = retryImageConversion
+    return () => {
+      delete window.retryImageConversion
+    }
+  }, [retryImageConversion])
+
+  // 마이페이지에서 공유받은 데이터 처리
+  useEffect(() => {
+    if (location.state?.sharedContent) {
+      const sharedContent = location.state.sharedContent
+      
+      // 폼 데이터 설정
+      setFormData({
+        title: sharedContent.title || "",
+        content: sharedContent.description || ""
+      })
+      
+      // 이미지 즉시 추가 (미리보기용)
+      if (sharedContent.image) {
+        const newImage = {
+          id: Date.now(),
+          file: null, // 나중에 변환
+          preview: sharedContent.image,
+          order: 1,
+          isConverting: true, // 변환 중 상태 표시
+          sharedImageUrl: sharedContent.image // 원본 URL 저장
+        }
+        
+        setImages([newImage])
+        
+        // 백그라운드에서 File 객체로 변환 (프록시 API 사용)
+        const convertImageToFile = async () => {
+          try {
+            
+            // 이미지 프록시 API를 통해 CORS 문제 해결
+            const proxyResult = await proxyImage(sharedContent.image)
+            // 프록시된 이미지 URL로 fetch
+            const response = await fetch(proxyResult.url)
+            
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+            }
+            
+            const blob = await response.blob()
+            const file = new File([blob], `${sharedContent.type}-${sharedContent.id}.jpg`, {
+              type: blob.type || 'image/jpeg'
+            })
+            
+            // 변환 완료된 이미지로 업데이트
+            setImages(prevImages => 
+              prevImages.map(img => 
+                img.id === newImage.id 
+                  ? { ...img, file: file, isConverting: false }
+                  : img
+              )
+            )
+            
+          } catch (error) {
+            console.error("공유 이미지 변환 실패:", error)
+            // 변환 실패 시 변환 중 상태 해제하고 재시도 옵션 제공
+            setImages(prevImages => 
+              prevImages.map(img => 
+                img.id === newImage.id 
+                  ? { ...img, isConverting: false, conversionError: true, needsRetry: true }
+                  : img
+              )
+            )
+          }
+        }
+        
+        convertImageToFile()
+      }
+      
+    }
+  }, [location.state])
 
   // 폼 검증
   const isFormValid = formData.title.trim() && formData.content.trim()
@@ -43,79 +178,8 @@ const CreateFeedPage = () => {
     setError(null) // 입력 시 에러 초기화
   }
 
-  // 임시저장 (로컬스토리지) - 이미지 포함
-  const saveToLocalStorage = useCallback(() => {
-    try {
-      setAutoSaveStatus("saving")
 
-      // 이미지 데이터 준비 (파일 객체는 저장할 수 없으므로 URL과 메타데이터만 저장)
-      const imageData = images.map((img) => ({
-        id: img.id,
-        preview: img.preview,
-        order: img.order,
-        // 파일 객체는 저장할 수 없으므로 제외
-        // 대신 파일명과 타입 같은 메타데이터만 저장
-        fileName: img.file?.name || "",
-        fileType: img.file?.type || "",
-        fileSize: img.file?.size || 0,
-      }))
 
-      const dataToSave = {
-        formData,
-        images: imageData,
-        timestamp: Date.now(),
-        userId: user?.user_id, // 사용자별 임시저장
-      }
-
-      localStorage.setItem(`draft_feed_${user?.user_id}`, JSON.stringify(dataToSave))
-      setTimeout(() => setAutoSaveStatus("saved"), 500)
-    } catch (error) {
-      console.error("임시저장 실패:", error)
-      setAutoSaveStatus("error")
-    }
-  }, [formData, images, user?.user_id])
-
-  // 임시저장된 데이터 불러오기 (이미지 포함)
-  useEffect(() => {
-    if (!user?.user_id) return
-
-    try {
-      const savedDraft = localStorage.getItem(`draft_feed_${user.user_id}`)
-      if (savedDraft) {
-        const { formData: savedFormData, images: savedImages, timestamp } = JSON.parse(savedDraft)
-
-        // 24시간 이내의 데이터만 복원
-        if (Date.now() - timestamp < 24 * 60 * 60 * 1000) {
-          setFormData(savedFormData)
-
-          // 이미지 데이터 복원 (미리보기 URL만 복원 가능)
-          if (savedImages && savedImages.length > 0) {
-            const restoredImages = savedImages.map((img) => ({
-              ...img,
-              // 파일 객체는 복원할 수 없으므로 null로 설정
-              file: null,
-              // 미리보기 URL은 그대로 사용
-              isRestored: true, // 복원된 이미지 표시
-            }))
-
-            setImages(restoredImages)
-          }
-        } else {
-          localStorage.removeItem(`draft_feed_${user.user_id}`)
-        }
-      }
-    } catch (error) {
-      console.error("임시저장 데이터 불러오기 실패:", error)
-    }
-  }, [user?.user_id])
-
-  // 자동 임시저장 (3초마다)
-  useEffect(() => {
-    if (user?.user_id && (formData.title || formData.content || images.length > 0)) {
-      const timer = setTimeout(saveToLocalStorage, 3000)
-      return () => clearTimeout(timer)
-    }
-  }, [formData, images, saveToLocalStorage, user?.user_id])
 
   // 뒤로가기
   const handleBack = () => {
@@ -128,11 +192,6 @@ const CreateFeedPage = () => {
     }
   }
 
-  // 임시저장 버튼
-  const handleSaveDraft = () => {
-    saveToLocalStorage()
-    alert("임시저장되었습니다.")
-  }
 
   // 폼 제출
   const handleSubmit = async (e) => {
@@ -143,10 +202,30 @@ const CreateFeedPage = () => {
       return
     }
 
-    // 복원된 이미지가 있는지 확인
-    const hasRestoredImages = images.some((img) => img.isRestored)
-    if (hasRestoredImages) {
-      if (!window.confirm("임시저장된 이미지는 파일 정보가 없어 업로드할 수 없습니다. 계속 진행하시겠습니까?")) {
+    // 이미지 상태별 확인
+    const hasConvertingImages = images.some((img) => img.isConverting)
+    const hasErrorImages = images.some((img) => img.conversionError)
+    const hasSharedImagesWithoutFile = images.some((img) => img.sharedImageUrl && !img.file && !img.isConverting)
+    
+    
+    // 공유받은 이미지가 아직 변환되지 않은 경우
+    if (hasSharedImagesWithoutFile) {
+      if (!window.confirm("공유받은 이미지가 아직 처리되지 않았습니다. 완료될 때까지 기다리시겠습니까?")) {
+        return
+      }
+    }
+    
+    if (hasConvertingImages) {
+      if (!window.confirm("이미지가 아직 처리 중입니다. 완료될 때까지 기다리시겠습니까?")) {
+        return
+      }
+    }
+    
+    if (hasErrorImages) {
+      const choice = window.confirm("처리에 실패한 이미지가 있습니다.\n\n확인: 해당 이미지를 제외하고 계속 진행\n취소: 이미지를 다시 선택하세요")
+      if (!choice) {
+        // 실패한 이미지들을 제거하고 사용자가 다시 선택할 수 있도록 함
+        setImages(prevImages => prevImages.filter(img => !img.conversionError))
         return
       }
     }
@@ -155,14 +234,18 @@ const CreateFeedPage = () => {
     setError(null)
 
     try {
-      // 복원된 이미지 제외하고 실제 파일이 있는 이미지만 필터링
-      const uploadableImages = images.filter((img) => img.file)
+      // 업로드 가능한 이미지 필터링
+      const uploadableImages = images.filter((img) => {
+        // 변환 오류가 있는 이미지는 제외
+        if (img.conversionError) return false
+        
+        // 파일이 있는 이미지만 포함
+        return !!img.file
+      })
+      
 
       // 백엔드 API 호출
       await createFeed(formData, uploadableImages)
-
-      // 임시저장 데이터 삭제
-      localStorage.removeItem(`draft_feed_${user.user_id}`)
 
       alert("피드가 성공적으로 작성되었습니다!")
       navigate("/feed") // 피드 목록 페이지로 이동
@@ -208,17 +291,6 @@ const CreateFeedPage = () => {
         </div>
       )}
 
-      {/* 임시저장 상태 */}
-      <div className={`${styles.autoSaveStatus} ${styles[autoSaveStatus]}`}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          {autoSaveStatus === "saved" && <path d="M20 6L9 17l-5-5" />}
-          {autoSaveStatus === "saving" && <circle cx="12" cy="12" r="10" />}
-          {autoSaveStatus === "error" && <path d="M12 8v4M12 16h.01" />}
-        </svg>
-        {autoSaveStatus === "saved" && "자동 저장됨"}
-        {autoSaveStatus === "saving" && "저장 중..."}
-        {autoSaveStatus === "error" && "저장 실패"}
-      </div>
 
       {/* 작성 팁 */}
       <div className={styles.sidebarSection}>
@@ -251,10 +323,6 @@ const CreateFeedPage = () => {
         </div>
       </div>
 
-      {/* 임시저장 버튼 */}
-      <button className={`${styles.actionButton} ${styles.secondaryButton}`} onClick={handleSaveDraft}>
-        임시저장
-      </button>
     </aside>
   )
 

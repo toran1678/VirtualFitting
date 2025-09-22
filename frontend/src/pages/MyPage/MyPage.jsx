@@ -10,7 +10,7 @@ import styles from "./MyPage.module.css"
 import { getProfileImageUrl, getFeedImageUrl } from "../../utils/imageUtils"
 import { getMyFeeds } from "../../api/feeds"
 import { getUserProfileByEmail } from "../../api/userProfiles"
-import { Heart, Clock } from "lucide-react"
+import { Heart, Clock, Camera, Share2 } from "lucide-react"
 import { getFittingHistory, getFittingResultImageUrl } from "../../api/virtual_fitting"
 import { getMyCustomClothes, getCustomClothingImageUrl } from "../../api/customClothingAPI"
 
@@ -228,19 +228,12 @@ const MyPage = () => {
     }
 
     try {
-      console.log("프로필 정보 로드 시작:", userEmail)
       const profileData = await getUserProfileByEmail(userEmail)
 
       if (profileData) {
         setFollowData({
           following: profileData.following_count || 0,
           followers: profileData.followers_count || 0,
-        })
-
-        console.log("프로필 정보 로드 완료:", {
-          email: userEmail,
-          following: profileData.following_count,
-          followers: profileData.followers_count,
         })
       }
     } catch (error) {
@@ -340,7 +333,6 @@ const MyPage = () => {
       }
 
       const user = getCurrentUser()
-      console.log("현재 사용자 정보:", user)
 
       setUserData(user)
       setLoading(false)
@@ -402,8 +394,6 @@ const MyPage = () => {
       case "좋아요 의류":
         if (item.productUrl) {
           window.open(item.productUrl, "_blank", "noopener,noreferrer")
-        } else {
-          console.log("상품 URL이 없습니다:", item)
         }
         break
       default:
@@ -422,6 +412,42 @@ const MyPage = () => {
     if (e.target === e.currentTarget) {
       handleCloseImageModal()
     }
+  }
+
+  // 가상 피팅 버튼 클릭 핸들러
+  const handleVirtualFittingClick = (e, customClothingItem) => {
+    e.stopPropagation() // 부모 클릭 이벤트 방지
+    
+    // 가상 피팅 페이지로 이동하면서 커스텀 의류 정보 전달
+    navigate('/virtual-fitting', {
+      state: {
+        customClothing: {
+          id: customClothingItem.id,
+          name: customClothingItem.title,
+          image: customClothingItem.image
+        }
+      }
+    })
+  }
+
+  // 공유하기 버튼 클릭 핸들러
+  const handleShareClick = (e, item, tabType) => {
+    e.stopPropagation() // 부모 클릭 이벤트 방지
+    
+    // 피드 작성 페이지로 이동하면서 이미지 정보 전달
+    navigate('/create-feed', {
+      state: {
+        sharedContent: {
+          type: tabType, // 'custom' 또는 'virtual-fitting'
+          id: item.id,
+          title: item.title,
+          image: item.image,
+          description: tabType === 'custom' 
+            ? `내가 디자인한 ${item.title}을(를) 공유합니다!` 
+            : `가상 피팅 결과를 공유합니다!`
+        }
+      }
+    })
   }
 
   const getStatusColor = (status) => {
@@ -628,14 +654,38 @@ const MyPage = () => {
                         )}
                         {activeTab === "가상 피팅" && (
                           <div className={styles.overlayInfo}>
-                            {/*<span className={styles.brand}>{item.brand}</span>*/}
-                            {/*<span className={styles.date}>{item.date}</span>*/}
+                            <div className={styles.virtualFittingActions}>
+                              <button 
+                                className={styles.shareButton}
+                                onClick={(e) => handleShareClick(e, item, 'virtual-fitting')}
+                                title="피드에 공유하기"
+                              >
+                                <Share2 size={16} />
+                                공유하기
+                              </button>
+                            </div>
                           </div>
                         )}
                         {activeTab === "커스텀 의류" && (
                           <div className={styles.overlayInfo}>
-                            {/*<span className={`${styles.status} ${getStatusColor(item.status)}`}>{item.status}</span>
-                            <span className={styles.date}>{item.date}</span>*/}
+                            <div className={styles.customClothingActions}>
+                              <button 
+                                className={styles.virtualFittingButton}
+                                onClick={(e) => handleVirtualFittingClick(e, item)}
+                                title="가상 피팅하기"
+                              >
+                                <Camera size={16} />
+                                가상 피팅
+                              </button>
+                              <button 
+                                className={styles.shareButton}
+                                onClick={(e) => handleShareClick(e, item, 'custom')}
+                                title="피드에 공유하기"
+                              >
+                                <Share2 size={16} />
+                                공유하기
+                              </button>
+                            </div>
                           </div>
                         )}
                         {activeTab === "좋아요 의류" && (

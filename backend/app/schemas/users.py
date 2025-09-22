@@ -127,6 +127,7 @@ class UserProfileResponse(BaseModel):
     followers_count: int = 0
     following_count: int = 0
     is_following: Optional[bool] = False  # 현재 로그인한 사용자가 이 사용자를 팔로우하고 있는지
+    has_pending_request: Optional[bool] = False  # 현재 로그인한 사용자가 이 사용자에게 팔로우 요청을 보냈는지
     
     model_config = {
         "from_attributes": True

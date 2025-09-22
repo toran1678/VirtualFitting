@@ -60,6 +60,26 @@ const VirtualFittingPage = () => {
   const [showDownloadHelper, setShowDownloadHelper] = useState(false)
   const [failedImageUrl, setFailedImageUrl] = useState("")
 
+  // 마이페이지에서 전달받은 커스텀 의류 정보 처리
+  useEffect(() => {
+    if (location.state?.customClothing) {
+      const customClothing = location.state.customClothing
+      
+      // 커스텀 의류 탭으로 전환
+      setActiveTab("custom")
+      
+      // 커스텀 의류 선택
+      setSelectedClothingImage(customClothing.image)
+      setSelectedClothingData({
+        id: customClothing.id,
+        name: customClothing.name,
+        image: customClothing.image,
+        category: "커스텀 의류" // 기본 카테고리
+      })
+      
+    }
+  }, [location.state])
+
   // 카테고리 매핑 함수
   const mapCategoryToNumber = (categoryName) => {
     if (!categoryName) return null
@@ -117,7 +137,6 @@ const VirtualFittingPage = () => {
   // 커스터마이징 의류 데이터 로드
   const loadCustomClothes = async () => {
     if (!isLoggedIn()) {
-      console.log("로그인이 필요합니다.")
       setCustomClothes([])
       return
     }
@@ -125,7 +144,6 @@ const VirtualFittingPage = () => {
     setCustomClothesLoading(true)
     try {
       const data = await getMyCustomClothes(1, 50)
-      console.log("커스터마이징 의류 API 응답:", data)
 
       const formattedData = data.custom_clothes.map((item) => ({
         id: item.custom_clothing_id,
@@ -135,7 +153,6 @@ const VirtualFittingPage = () => {
         created_at: item.created_at,
       }))
 
-      console.log("커스터마이징 의류 로드 완료:", formattedData)
       setCustomClothes(formattedData)
     } catch (error) {
       console.error("커스터마이징 의류 로드 실패:", error)
@@ -160,7 +177,6 @@ const VirtualFittingPage = () => {
 
   // 🔥 간단한 이미지 변환: 캔버스 사용하지 않고 URL만 정규화 (외부 이미지는 프록시)
   const simpleImageConvert = async (imageUrl, imageName) => {
-    console.log(`🔄 선택 이미지 처리: ${imageName}`)
     if (!imageUrl) throw new Error('유효하지 않은 이미지 URL')
     // 이미 base64인 경우 그대로 사용
     if (imageUrl.startsWith('data:')) return imageUrl
@@ -192,7 +208,6 @@ const VirtualFittingPage = () => {
   // 좋아요한 의류 데이터 로드
   const loadLikedClothes = async () => {
     if (!isLoggedIn()) {
-      console.log("로그인이 필요합니다.")
       setLikedClothing([])
       return
     }
@@ -209,7 +224,6 @@ const VirtualFittingPage = () => {
         brand: item.brand_name,
       }))
 
-      console.log("좋아요한 의류 로드 완료:", formattedData)
       setLikedClothing(formattedData)
     } catch (error) {
       console.error("좋아요한 의류 로드 실패:", error)
@@ -222,7 +236,6 @@ const VirtualFittingPage = () => {
   // 인물 이미지 데이터 로드
   const loadPersonImages = async () => {
     if (!isLoggedIn()) {
-      console.log("로그인이 필요합니다.")
       setPersonImages([])
       return
     }
@@ -230,7 +243,6 @@ const VirtualFittingPage = () => {
     setPersonImagesLoading(true)
     try {
       const data = await getPersonImages(1, 50)
-      console.log("인물 이미지 API 응답:", data)
 
       const validImages = filterValidPersonImages(data.images || [])
 
@@ -254,7 +266,6 @@ const VirtualFittingPage = () => {
   // 내 옷장 의류 데이터 로드
   const loadMyClosetClothes = async () => {
     if (!isLoggedIn()) {
-      console.log("로그인이 필요합니다.")
       setMyClosetClothes([])
       return
     }
@@ -262,7 +273,6 @@ const VirtualFittingPage = () => {
     setMyClosetLoading(true)
     try {
       const data = await getUserClothes({ page: 1, perPage: 50 })
-      console.log("내 옷장 API 응답:", data)
 
       const formattedData = data.clothes.map((item) => ({
         id: item.id,
@@ -275,7 +285,6 @@ const VirtualFittingPage = () => {
         style: item.style,
       }))
 
-      console.log("내 옷장 로드 완료:", formattedData)
       setMyClosetClothes(formattedData)
     } catch (error) {
       console.error("내 옷장 의류 로드 실패:", error)
@@ -319,8 +328,6 @@ const VirtualFittingPage = () => {
 
   // 🔥 의류 이미지 선택 함수 수정
   const handleClothingSelect = async (clothing) => {
-    console.log("의류 이미지 선택:", clothing.image)
-    console.log("이미지 타입:", isExternalImage(clothing.image) ? '외부 이미지' : '로컬 이미지')
     
     setIsConverting(true)
     
@@ -338,7 +345,6 @@ const VirtualFittingPage = () => {
         setShowCategorySelector(true)
       }
       
-      console.log("✅ 의류 이미지 변환 성공")
     } catch (error) {
       console.error("❌ 의류 이미지 변환 실패:", error)
       
@@ -358,15 +364,12 @@ const VirtualFittingPage = () => {
 
   // 🔥 인물 이미지 선택 함수도 동일하게 수정
   const handleUserImageSelect = async (userImage) => {
-    console.log("인물 이미지 선택:", userImage.image)
-    console.log("이미지 타입:", isExternalImage(userImage.image) ? '외부 이미지' : '로컬 이미지')
     
     setIsConverting(true)
     
     try {
       const base64Image = await simpleImageConvert(userImage.image, userImage.name)
       setSelectedPersonImage(base64Image)
-      console.log("✅ 인물 이미지 변환 성공")
     } catch (error) {
       console.error("❌ 인물 이미지 변환 실패:", error)
       
@@ -435,18 +438,11 @@ const VirtualFittingPage = () => {
     setIsProcessing(true)
     
     try {
-      console.log("=== 가상 피팅 시작 ===")
-      console.log("카테고리:", selectedCategory, getCategoryName(selectedCategory))
-
-      console.log("인물 이미지 변환 시작...")
+      // 인물 이미지 변환
       const personImageFile = await urlToFile(selectedPersonImage, 'person-image.jpg')
-      console.log("인물 이미지 변환 완료:", personImageFile.size, "bytes")
       
-      console.log("의류 이미지 변환 시작...")
+      // 의류 이미지 변환
       const clothingImageFile = await urlToFile(selectedClothingImage, 'clothing-image.jpg')
-      console.log("의류 이미지 변환 완료:", clothingImageFile.size, "bytes")
-
-      console.log("가상 피팅 API 호출 시작...")
 
       const result = await startVirtualFitting(
         personImageFile,
@@ -457,7 +453,6 @@ const VirtualFittingPage = () => {
         4
       )
 
-      console.log("가상 피팅 결과:", result)
       alert("가상 피팅이 시작되었습니다! 메인 페이지에서 결과를 확인하세요.")
       
       navigate('/virtual-fitting-main')

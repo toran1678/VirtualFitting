@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef, useCallback, useContext } from "react"
 import { useNavigate } from "react-router-dom"
 import Header from "../../components/Header/Header"
 import Footer from "../../components/Footer/Footer"
 import { isLoggedIn, getCurrentUser } from "../../api/auth"
 import { createCustomClothing } from "../../api/customClothingAPI"
+import { ThemeContext } from "../../context/ThemeContext"
 import styles from "./ClothingCustomizer.module.css"
 import {
   Palette, Type, ImageIcon, Layers, RotateCcw, Save, Download, Share2,
@@ -162,6 +163,7 @@ function dataURLtoFile(dataURL, filename = "custom.png") {
 
 const ClothingCustomizer = () => {
   const navigate = useNavigate()
+  const { darkMode } = useContext(ThemeContext)
   const fileInputRef = useRef(null)
   const previewContainerRef = useRef(null)
   const downloadCanvasRef = useRef(null)
@@ -1539,13 +1541,13 @@ const ClothingCustomizer = () => {
       {/* ===== 커스텀 이미지 저장 모달 ===== */}
       {confirmOpen && (
         <div
-          className={styles.modalOverlay}
+          className={`${styles.modalOverlay} ${darkMode ? 'dark-mode' : ''}`}
           onMouseDown={() => setConfirmOpen(false)}   
           role="dialog"
           aria-modal="true"
         >
           <div
-            className={styles.modal}
+            className={`${styles.modal} ${darkMode ? 'dark-mode' : ''}`}
             onMouseDown={(e) => e.stopPropagation()}  
           >
             <div className={styles.modalHeader}>
@@ -1584,13 +1586,13 @@ const ClothingCustomizer = () => {
       {/* ===== 스티커 선택 모달 ===== */}
       {stickerModalOpen && (
         <div
-          className={styles.modalOverlay}
+          className={`${styles.modalOverlay} ${darkMode ? 'dark-mode' : ''}`}
           onMouseDown={closeStickerModal}
           role="dialog"
           aria-modal="true"
         >
           <div
-            className={`${styles.modal} ${styles.pickerModal}`}
+            className={`${styles.modal} ${styles.pickerModal} ${darkMode ? 'dark-mode' : ''}`}
             onMouseDown={(e) => e.stopPropagation()}
           >
             <div className={styles.modalHeader}>

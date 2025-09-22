@@ -49,7 +49,6 @@ const VirtualFittingMainPage = () => {
     if (showRefreshing) setRefreshing(true)
     
     try {
-      console.log("데이터 로드 시작...")
       
       // 병렬로 데이터 로드
       const [queueData, savedData, processingData, queuedData, completedData, failedData] = await Promise.all([
@@ -61,11 +60,6 @@ const VirtualFittingMainPage = () => {
         getUserFittingProcesses('FAILED', 1, 10)
       ])
 
-      console.log("큐 정보:", queueData)
-      console.log("저장된 결과:", savedData)
-      console.log("처리 중 프로세스:", processingData)
-      console.log("대기 중 프로세스:", queuedData)
-      console.log("완료된 프로세스:", completedData)
 
       // 큐 정보 설정
       setQueueInfo({
@@ -102,7 +96,6 @@ const VirtualFittingMainPage = () => {
                        queueData.queued > 0 || queueData.processing > 0
       hasActiveProcesses.current = hasActive
 
-      console.log("활성 프로세스 여부:", hasActive)
       
     } catch (error) {
       console.error("데이터 로드 실패:", error)
@@ -126,10 +119,10 @@ const VirtualFittingMainPage = () => {
     // 새 인터벌 설정
     intervalRef.current = setInterval(() => {
       if (hasActiveProcesses.current) {
-        console.log("자동 새로고침 실행...")
+        // 자동 새로고침 실행
         loadData()
       } else {
-        console.log("활성 프로세스가 없어 자동 새로고침 중단")
+        // 활성 프로세스가 없어 자동 새로고침 중단
         if (intervalRef.current) {
           clearInterval(intervalRef.current)
           intervalRef.current = null
@@ -175,7 +168,6 @@ const VirtualFittingMainPage = () => {
     if (!selectedProcess) return
 
     try {
-      console.log(`결과 선택: 프로세스 ${selectedProcess.process_id}, 이미지 ${imageIndex}`)
       const result = await selectFittingResult(selectedProcess.process_id, imageIndex)
       alert('결과가 저장되었습니다!')
       setShowResultModal(false)
@@ -202,12 +194,10 @@ const VirtualFittingMainPage = () => {
     }
 
     try {
-      console.log(`프로세스 취소 시작: ${processId}`)
       
       // 프로세스 취소
       await cancelFittingProcess(processId)
       
-      console.log("프로세스 취소 완료, 데이터 새로고침 중...")
       
       // 즉시 데이터 새로고침 (큐 정보 포함)
       await loadData()
@@ -225,7 +215,6 @@ const VirtualFittingMainPage = () => {
 
   // 수동 새로고침
   const handleManualRefresh = async () => {
-    console.log("수동 새로고침 실행...")
     await loadData(true)
     setupAutoRefresh() // 자동 새로고침 재설정
   }

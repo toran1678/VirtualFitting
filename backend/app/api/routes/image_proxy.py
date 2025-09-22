@@ -33,7 +33,39 @@ async def proxy_fetch_image(payload: ProxyRequest, request: Request):
         relative_path = f"uploads/temp_images/proxy/{filename}"
         return {"relative_path": relative_path, "url": f"/{relative_path}"}
 
-    # 2) 외부 오리진은 비동기로 가져오기
+    # 2) 같은 서버의 API 엔드포인트인 경우 인증 정보와 함께 호출
+    if same_host and same_port and parsed.path.startswith("/api/"):
+        try:
+            # 요청의 쿠키와 헤더를 그대로 전달
+            headers = dict(request.headers)
+            # Host 헤더 제거 (같은 서버이므로)
+            headers.pop("host", None)
+            headers.pop("content-length", None)
+            
+            async with httpx.AsyncClient(follow_redirects=True, timeout=httpx.Timeout(15.0)) as client:
+                # 쿠키 정보도 함께 전달
+                cookies = dict(request.cookies)
+                resp = await client.get(src_url, headers=headers, cookies=cookies)
+            
+            if resp.status_code != 200:
+                raise HTTPException(status_code=502, detail=f"원격 이미지를 가져오지 못했습니다: {resp.status_code}")
+
+            ctype = (resp.headers.get("content-type") or "").lower()
+            ext = ".png" if "png" in ctype else ".webp" if "webp" in ctype else ".jpg"
+
+            save_dir = os.path.join("uploads", "temp_images", "proxy")
+            os.makedirs(save_dir, exist_ok=True)
+            filename = f"proxy_{uuid.uuid4().hex}{ext}"
+            file_path = os.path.join(save_dir, filename)
+            with open(file_path, "wb") as f:
+                f.write(resp.content)
+
+            relative_path = f"uploads/temp_images/proxy/{filename}"
+            return {"relative_path": relative_path, "url": f"/{relative_path}"}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"API 이미지 프록시 실패: {e}")
+
+    # 3) 외부 오리진은 비동기로 가져오기
     try:
         async with httpx.AsyncClient(follow_redirects=True, timeout=httpx.Timeout(15.0)) as client:
             resp = await client.get(src_url)

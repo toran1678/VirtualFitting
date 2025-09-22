@@ -208,3 +208,27 @@ export const getUserCustomClothes = async (email, params = {}) => {
     throw error
   }
 }
+
+/**
+ * 사용자 검색 (이름 또는 이메일로 검색)
+ * @param {Object} params - 검색 파라미터
+ * @returns {Promise<Object>} - 검색된 사용자 목록과 페이지네이션 정보
+ */
+export const searchUsers = async (params = {}) => {
+  try {
+    const { q = "", page = 1, size = 20 } = params
+    const queryParams = new URLSearchParams({
+      q: q,
+      page: page.toString(),
+      size: size.toString(),
+    })
+
+    return await retryApiCall(async () => {
+      const response = await apiClient.get(`/search?${queryParams}`)
+      return response.data
+    })
+  } catch (error) {
+    console.error("사용자 검색 실패:", error)
+    throw error
+  }
+}

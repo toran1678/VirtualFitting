@@ -8,6 +8,7 @@ import Footer from "../../components/Footer/Footer"
 import FollowList from "./components/FollowList"
 import FollowRequestList from "./components/FollowRequestList"
 import SentRequestList from "./components/SentRequestList"
+import UserSearchBar from "../../components/UserSearchBar/UserSearchBar"
 import {
   getUserFollowers,
   getUserFollowing,
@@ -311,10 +312,22 @@ const FollowPage = () => {
         )
       }
 
-      alert(result.is_following ? "팔로우했습니다." : "언팔로우했습니다.")
+      // 팔로우 요청을 보낸 경우와 실제 팔로우한 경우를 구분
+      if (result.has_pending_request) {
+        alert("팔로우 요청을 보냈습니다.")
+      } else {
+        alert(result.is_following ? "팔로우했습니다." : "언팔로우했습니다.")
+      }
     } catch (error) {
       console.error("팔로우 토글 실패:", error)
-      alert("팔로우 처리 중 오류가 발생했습니다.")
+      
+      // 백엔드에서 반환한 구체적인 오류 메시지 확인
+      let errorMessage = "팔로우 처리 중 오류가 발생했습니다."
+      if (error.response && error.response.data && error.response.data.detail) {
+        errorMessage = error.response.data.detail
+      }
+      
+      alert(errorMessage)
     } finally {
       setFollowActionInProgress((prev) => {
         const newSet = new Set(prev)
@@ -445,6 +458,14 @@ const FollowPage = () => {
           </div>
         ) : (
           <>
+            {/* 사용자 검색바 */}
+            <UserSearchBar
+              onUserClick={handleUserClick}
+              onFollowToggle={handleFollowToggle}
+              followActionInProgress={followActionInProgress}
+              currentUserEmail={currentUser?.email}
+            />
+
             {/* 탭 버튼 */}
             <div className={styles.tabButtons}>
               <button

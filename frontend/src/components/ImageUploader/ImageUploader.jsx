@@ -219,6 +219,49 @@ const ImagePreviewItem = ({ image, index, images, onImagesChange }) => {
         </div>
       )}
 
+      {/* 공유받은 이미지 성공 표시 */}
+      {image.sharedImageUrl && image.file && !image.isConverting && !image.conversionError && (
+        <div className={styles.sharedBadge} title="공유받은 이미지가 성공적으로 처리되었습니다.">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
+        </div>
+      )}
+
+      {/* 변환 중 상태 표시 */}
+      {image.isConverting && (
+        <div className={styles.convertingBadge} title="이미지를 처리하는 중입니다...">
+          <div className={styles.spinner}></div>
+          <span>처리 중...</span>
+        </div>
+      )}
+
+      {/* 변환 오류 상태 표시 */}
+      {image.conversionError && (
+        <div className={styles.errorOverlay}>
+          <div className={styles.errorContent}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
+            <span>처리 실패</span>
+            {image.needsRetry && (
+              <button 
+                className={styles.retryButton}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  // 재시도 로직은 부모 컴포넌트에서 처리
+                  if (window.retryImageConversion) {
+                    window.retryImageConversion(image.id)
+                  }
+                }}
+              >
+                재시도
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className={styles.imageActions}>
         <button className={`${styles.imageActionButton} ${styles.deleteButton}`} onClick={handleDelete}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

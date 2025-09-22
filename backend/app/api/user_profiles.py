@@ -6,7 +6,7 @@ from app.db.database import get_db
 from app.schemas.users import UserProfileResponse
 from app.schemas.feeds import FeedListResponse
 from app.schemas.liked_clothes import LikedClothesWithItemResponse
-from app.crud.users import get_user_profile_by_email
+from app.crud.users import get_user_profile_by_email, search_users
 from app.crud.user_data import get_user_feeds, get_user_liked_clothes
 from app.crud.virtual_fitting import VirtualFittingCRUD
 from app.crud.custom_clothing_items import CustomClothingItemsCRUD
@@ -18,6 +18,35 @@ router = APIRouter(
     prefix="/api/users/profile",
     tags=["user-profiles"]
 )
+
+@router.get("/search", response_model=dict)
+async def search_users_endpoint(
+    q: str = Query("", description="검색어 (이름 또는 이메일)"),
+    page: int = Query(1, ge=1, description="페이지 번호"),
+    size: int = Query(20, ge=1, le=100, description="페이지 크기"),
+    db: Session = Depends(get_db),
+    current_user: Optional[Users] = Depends(get_current_user_optional)
+):
+    """사용자 검색 API"""
+    try:
+        current_user_id = current_user.user_id if current_user else None
+        skip = (page - 1) * size
+        
+        users, total = search_users(db, q, current_user_id, skip, size)
+        
+        return {
+            "users": users,
+            "total": total,
+            "page": page,
+            "size": size,
+            "total_pages": (total + size - 1) // size
+        }
+    
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"사용자 검색 중 오류가 발생했습니다: {str(e)}"
+        )
 
 @router.get("/{email}", response_model=UserProfileResponse)
 async def get_user_profile_by_email_endpoint(
