@@ -8,47 +8,221 @@ import { isLoggedIn, getCurrentUser } from "../../api/auth"
 import { createCustomClothing } from "../../api/customClothingAPI"
 import styles from "./ClothingCustomizer.module.css"
 import {
-  Palette,
-  Type,
-  ImageIcon,
-  Layers,
-  RotateCcw,
-  Save,
-  Download,
-  Share2,
-  Undo,
-  Redo,
-  ZoomIn,
-  ZoomOut,
-  Move3D,
-  Eye,
-  EyeOff,
-  Plus,
-  Trash2,
-  ChevronUp,
-  ChevronDown,
+  Palette, Type, ImageIcon, Layers, RotateCcw, Save, Download, Share2,
+  Undo, Redo, ZoomIn, ZoomOut, Eye, EyeOff, Plus, Trash2,
+  ChevronUp, ChevronDown,
 } from "lucide-react"
-import teeShortImage from "./images/tee_short2.png"
-import teeLongImage from "./images/tee_long2.png"
-import hoodieImage from "./images/hoodie2.png"
+
+const BASE_ZOOM = 150; // 미리보기 기본 확대 배율
+// 텍스트 색상 팔레트
+const TEXT_SWATCHES = [
+  "#0f172a", "#6d28d9", "#16a34a", "#000000", "#ffffff",
+  "#60a5fa", "#f59e0b", "#facc15", "#fecdd3", "#9ca3af",
+  "#ef4444", "#a78bfa", "#14b8a6", "#22c55e", "#3b82f6",
+  "#fde68a", "#6b7280", "#dcfce7", "#bfdbfe", "#f3f4f6",
+];
+// 스티커 목록 
+const STICKERS = [
+  {
+    id: "face",
+    name: "표정",
+    cover: "/stickers/face/smile2.png",
+    items: [
+      "/stickers/face/smile1.png",
+      "/stickers/face/smile2.png",
+      "/stickers/face/smile3.png",
+      "/stickers/face/love1.png",
+      "/stickers/face/love2.png",
+      "/stickers/face/love3.png",
+      "/stickers/face/sleep1.png",
+      "/stickers/face/sleep2.png",
+      "/stickers/face/raise.png",
+      "/stickers/face/pleading.png",
+      "/stickers/face/yammy.png",
+      "/stickers/face/money.png",
+      "/stickers/face/grinning.png",
+      "/stickers/face/hot.png",
+      "/stickers/face/crying.png",
+    ],
+  },
+  {
+    id: "nature",
+    name: "자연",
+    cover: "/stickers/nature/cactus.png",
+    items: [
+      "/stickers/nature/blossom.png",
+      "/stickers/nature/cactus.png",
+      "/stickers/nature/deciduous_tree.png",
+      "/stickers/nature/evergreen_tree.png",
+      "/stickers/nature/four_leaf_clover.png",
+      "/stickers/nature/herb.png",
+      "/stickers/nature/leaf_fluttering_in_wind.png",
+      "/stickers/nature/lotus.png",
+      "/stickers/nature/maple_leaf.png",
+      "/stickers/nature/palm_tree.png",
+      "/stickers/nature/potted_plant.png",
+      "/stickers/nature/rose.png",
+      "/stickers/nature/rosette.png",
+      "/stickers/nature/sheaf_of_rice.png",
+      "/stickers/nature/sunflower.png",
+    ],
+  },
+  {
+    id: "heart",
+    name: "사랑",
+    cover: "/stickers/heart/pink_heart.png",
+    items: [
+      "/stickers/heart/red_heart.png",
+      "/stickers/heart/orange_heart.png",
+      "/stickers/heart/yellow_heart.png",
+      "/stickers/heart/green_heart.png",
+      "/stickers/heart/blue_heart.png",
+      "/stickers/heart/light_blue_heart.png",
+      "/stickers/heart/purple_heart.png",
+      "/stickers/heart/pink_heart.png",
+      "/stickers/heart/brown_heart.png",
+      "/stickers/heart/black_heart.png",
+      "/stickers/heart/grey_heart.png",
+      "/stickers/heart/white_heart.png",
+      "/stickers/heart/beating_heart.png",
+      "/stickers/heart/broken_heart.png",
+      "/stickers/heart/heart_exclamation.png",
+      "/stickers/heart/heart_on_fire.png",
+      "/stickers/heart/mending_heart.png",
+      "/stickers/heart/revolving_hearts.png",
+      "/stickers/heart/sparkling_heart.png",
+      "/stickers/heart/two_hearts.png",
+    ],
+  },
+  {
+    id: "animal",
+    name: "동물",
+    cover: "/stickers/animal/dog.png",
+    items: [
+      "/stickers/animal/bear.png",
+      "/stickers/animal/cat.png",
+      "/stickers/animal/cow.png",
+      "/stickers/animal/dog.png",
+      "/stickers/animal/fox.png",
+      "/stickers/animal/frog.png",
+      "/stickers/animal/hamster.png",
+      "/stickers/animal/lion.png",
+      "/stickers/animal/monkey.png",
+      "/stickers/animal/mouse.png",
+      "/stickers/animal/pig.png",
+      "/stickers/animal/rabbit.png",
+      "/stickers/animal/raccoon.png",
+      "/stickers/animal/tiger.png",
+      "/stickers/animal/wolf.png",
+    ],
+  },
+  {
+    id: "food",
+    name: "음식",
+    cover: "/stickers/food/rice_ball.png",
+    items: [
+      "/stickers/food/apple.png",
+      "/stickers/food/banana.png",
+      "/stickers/food/cherries.png",
+      "/stickers/food/grapes.png",
+      "/stickers/food/melon.png",
+      "/stickers/food/strawberry.png",
+      "/stickers/food/bagel.png",
+      "/stickers/food/birthday_cake.png",
+      "/stickers/food/cookie.png",
+      "/stickers/food/doughnut.png",
+      "/stickers/food/ice_cream.png",
+      "/stickers/food/pretzel.png",
+      "/stickers/food/rice_cracker.png",
+      "/stickers/food/bacon.png",
+      "/stickers/food/cheese_wedge.png",
+      "/stickers/food/hamburger.png",
+      "/stickers/food/meat_on_bone.png",
+      "/stickers/food/pizza.png",
+      "/stickers/food/rice_ball.png",
+      "/stickers/food/sandwich.png",
+      "/stickers/food/steaming_bowl.png",
+    ],
+  },
+]
+
+const withSofterBlack = (hex) =>
+  String(hex || "").toLowerCase() === "#000000" ? "#333333" : (hex || "#ffffff");
+
+// DataURL → File 변환 
+function dataURLtoFile(dataURL, filename = "custom.png") {
+  const arr = dataURL.split(",");
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+  while (n--) u8arr[n] = bstr.charCodeAt(n);
+  return new File([u8arr], filename, { type: mime });
+}
 
 const ClothingCustomizer = () => {
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
   const previewContainerRef = useRef(null)
   const downloadCanvasRef = useRef(null)
-
-  // 사용자
+  // *사용자, 초기 제품, 옵션 *
   const [userData, setUserData] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  // 제품 초기 상태 
+  const products = [
+    { id: 1, name: "반팔 티셔츠", image: "CustomImages/tee_short.png", category: "상의" },
+    { id: 2, name: "긴팔 티셔츠", image: "CustomImages/tee_long.png", category: "상의" },
+    { id: 3, name: "후드 티셔츠", image: "CustomImages/hoodie.png", category: "상의" },
+    { id: 4, name: "긴팔 셔츠", image: "CustomImages/shirt.png", category: "상의" },
+    { id: 5, name: "반바지", image: "CustomImages/short_pants.png", category: "하의" },
+    { id: 6, name: "슬랙스", image: "CustomImages/long_pants.png", category: "하의" },
+    { id: 7, name: "트레이닝 바지", image: "CustomImages/training_pants.png", category: "하의" },
+    { id: 8, name: "치마", image: "CustomImages/skirt.png", category: "하의" },
+  ]
+
+  // 카테고리 분류 
+  const categories = Array.from(new Set(products.map(p => p.category)));
+  const [selectedCategory, setSelectedCategory] = useState(categories[0] || "상의");
+
   const [selectedProduct, setSelectedProduct] = useState({
-    id: 1,
-    name: "베이직 티셔츠",
-    category: "top",
-    image: teeShortImage, 
+    id: 1, name: "반팔 티셔츠", category: "top", image: "CustomImages/tee_short.png",
   })
+
+  const productOptions = {
+    // 의류 색상 팔레트 및 폰트 
+    colors: [
+      { name: "화이트", value: "#ffffff" },
+      { name: "라이트 그레이", value: "#f3f4f6" },
+      { name: "실버", value: "#d1d5db" },
+      { name: "샌드", value: "#e5e7eb" },
+      { name: "그레이", value: "#6b7280" },
+      { name: "블랙", value: "#333333" },
+      { name: "베이지", value: "#f5f5dc" },
+      { name: "카멜", value: "#b45309" },
+      { name: "브라운", value: "#7c3f1d" },
+      { name: "라이트 레드", value: "#fee2e2" },
+      { name: "레드", value: "#dc2626" },
+      { name: "오렌지", value: "#f97316" },
+      { name: "핫핑크", value: "#ec4899" },
+      { name: "로즈", value: "#db2777" },
+      { name: "앰버", value: "#f59e0b" },
+      { name: "옐로우", value: "#eab308" },
+      { name: "민트", value: "#a7f3d0" },
+      { name: "그린", value: "#16a34a" },
+      { name: "포레스트", value: "#166534" },
+      { name: "틸", value: "#0d9488" },
+      { name: "스카이 블루", value: "#93c5fd" },
+      { name: "블루", value: "#3b82f6" },
+      { name: "네이비", value: "#1e3a8a" },
+      { name: "라일락", value: "#c4b5fd" },
+      { name: "퍼플", value: "#9333ea" },
+    ],
+    fonts: [
+      "Arial", "Helvetica", "Times New Roman", "Georgia", "Verdana", "Trebuchet MS", "Tahoma", "Courier New", "Comic Sans MS", "Impact", "Malgun Gothic", "Apple SD Gothic Neo", "Nanum Gothic", "Nanum Myeongjo",
+      "Noto Sans KR", "Noto Serif KR", "Spoqa Han Sans Neo", "Pretendard", "Roboto", "Open Sans", "Inter", "Lato", "Montserrat", "Poppins", "IBM Plex Sans", "Source Sans 3", "Nunito", "Quicksand",
+      "Merriweather", "Playfair Display", "Oswald", "Fira Sans",
+    ],
+  }
 
   const [customization, setCustomization] = useState({
     color: "#ffffff",
@@ -56,75 +230,60 @@ const ClothingCustomizer = () => {
     material: "cotton",
   })
 
-  // 레이어 시스템
+  // 레이어 및 선택 
   const [layers, setLayers] = useState([])
   const [selectedLayerId, setSelectedLayerId] = useState(null)
   const [layerIdCounter, setLayerIdCounter] = useState(1)
-
+  const selectedTextLayer = layers.find(l => l.id === selectedLayerId && l.type === "text");
   // 드래그/뷰 제어
   const [isDragging, setIsDragging] = useState(null)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-  const [isPanMode, setIsPanMode] = useState(false)
-  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 })
-  const [panStartPos, setPanStartPos] = useState({ x: 0, y: 0 })
-
-  const [activeTab, setActiveTab] = useState("color")
+  const [resizing, setResizing] = useState(null); // 리사이즈 설정(텍스트,로고 크기)
   const [zoom, setZoom] = useState(100) // 확대, 축소 줌 상태
+  // 탭/히스토리/로딩
+  const [activeTab, setActiveTab] = useState("color")
   const [history, setHistory] = useState([])
   const [historyIndex, setHistoryIndex] = useState(-1)
   const [isLoading, setIsLoading] = useState(false)
+  // 저장 확인 모달
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [confirmImage, setConfirmImage] = useState(null);
+  const [confirmName, setConfirmName] = useState("");
+  const [confirmSaving, setConfirmSaving] = useState(false);
+  // 스티커 모달 상태
+  const [stickerModalOpen, setStickerModalOpen] = useState(false)
+  const [stickerActiveCat, setStickerActiveCat] = useState(null)
 
-  const [resizing, setResizing] = useState(null); // 리사이즈 설정(텍스트,로고 크기)
-  const BASE_ZOOM = 150; // 미리보기 기본 설정(크기) 
-  const withSofterBlack = (hex) =>
-  String(hex || "").toLowerCase() === "#000000" ? "#333333" : (hex || "#ffffff");
+  // ** 인증 및 초기화 **
+  useEffect(() => {
+    const init = async () => {
+      if (!isLoggedIn()) {
+        alert("로그인이 필요합니다.")
+        navigate("/login")
+        return
+      }
+      const user = getCurrentUser()
+      setUserData(user)
+      setLoading(false)
+      const initial = { customization, layers: [] }
+      setHistory([initial])
+      setHistoryIndex(0)
+    }
+    init()
+  }, [navigate, customization])
 
-  // 텍스트 색상
-  const TEXT_SWATCHES = [
-  "#0f172a", "#6d28d9", "#16a34a", "#000000", "#ffffff",
-  "#60a5fa", "#f59e0b", "#facc15", "#fecdd3", "#9ca3af",
-  "#ef4444", "#a78bfa", "#14b8a6", "#22c55e", "#3b82f6",
-  "#fde68a", "#6b7280", "#dcfce7", "#bfdbfe", "#f3f4f6",
-];
-
-  // 선택된 텍스트 레이어 헬퍼
-  const selectedTextLayer = layers.find(l => l.id === selectedLayerId && l.type === "text");
-
-  // 옵션
-  const productOptions = {
-    colors: [
-      { name: "화이트", value: "#ffffff" },
-      { name: "블랙", value: "#333333" },
-      { name: "네이비", value: "#1e3a8a" },
-      { name: "그레이", value: "#6b7280" },
-      { name: "레드", value: "#dc2626" },
-      { name: "그린", value: "#16a34a" },
-      { name: "옐로우", value: "#eab308" },
-      { name: "퍼플", value: "#9333ea" },
-      { name: "핑크", value: "#ec4899" },
-      { name: "오렌지", value: "#f97316" },
-    ],
-    fonts: ["Arial", "Helvetica", "Times New Roman", "Georgia", "Verdana", 
-      "Comic Sans MS", "Impact", "Trebuchet MS", "Roboto", "Open Sans"],
-  }
-
-  // 제품 목록 + 추가 예정
-  const products = [
-    { id: 1, name: "반팔 티셔츠", image: teeShortImage, category: "상의" },
-    { id: 2, name: "긴팔 티셔츠", image: teeLongImage, category: "상의" },
-    { id: 3, name: "후드 티셔츠", image: hoodieImage, category: "상의" }
-  ]
-
-  // ---------- 레이어 유틸 ----------
+  // ** 레이어 추가/삭제/이동/수정 **
   const addTextLayer = useCallback(() => {
     const newLayer = {
       id: layerIdCounter,
       type: "text",
       content: "새 텍스트",
       position: { x: 50, y: 30 + layers.length * 10 },
-      style: { color: "#000000", fontSize: 16, fontFamily: "Arial",
-              fontWeight: "normal", fontStyle: "normal", underline: false,
-              strike: false, letterSpacing: 0, rotation: 0},
+      style: {
+        color: "#000000", fontSize: 16, fontFamily: "Arial",
+        fontWeight: "normal", fontStyle: "normal", underline: false,
+        strike: false, letterSpacing: 0, rotation: 0
+      },
       visible: true,
     }
     setLayers((prev) => [...prev, newLayer])
@@ -148,6 +307,39 @@ const ClothingCustomizer = () => {
     },
     [layerIdCounter],
   )
+  // 스티커 추가
+  const addStickerLayer = useCallback((src) => {
+    const newLayer = {
+      id: layerIdCounter,
+      type: "sticker",
+      content: src,
+      position: { x: 50, y: 50 },
+      style: { size: 110 },
+      visible: true,
+    }
+    setLayers(prev => [...prev, newLayer])
+    setLayerIdCounter(prev => prev + 1)
+    setSelectedLayerId(newLayer.id)
+  }, [layerIdCounter])
+
+  const openStickerModal = useCallback(() => {
+    setStickerModalOpen(true);
+    setStickerActiveCat(null);
+  }, []);
+
+  const closeStickerModal = useCallback(() => setStickerModalOpen(false), []);
+  const enterStickerCategory = useCallback((catId) => setStickerActiveCat(catId), []);
+  const backStickerCategories = useCallback(() => setStickerActiveCat(null), []);
+
+  const pickSticker = useCallback((src) => {
+    addStickerLayer(src);
+    setStickerModalOpen(false);
+  }, [addStickerLayer]);
+
+  useEffect(() => {
+    document.body.style.overflow = stickerModalOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [stickerModalOpen]);
 
   const deleteLayer = useCallback(
     (layerId) => {
@@ -164,7 +356,7 @@ const ClothingCustomizer = () => {
       const j = direction === "up" ? i + 1 : i - 1
       if (j < 0 || j >= prev.length) return prev
       const next = [...prev]
-      ;[next[i], next[j]] = [next[j], next[i]]
+        ;[next[i], next[j]] = [next[j], next[i]]
       return next
     })
   }, [])
@@ -173,6 +365,7 @@ const ClothingCustomizer = () => {
     setLayers((prev) => prev.map((l) => (l.id === layerId ? { ...l, ...updates } : l)))
   }, [])
 
+  // ** 히스토리 (되돌리기, 앞으로가기) ** 
   const saveToHistory = useCallback(() => {
     const snapshot = { customization, layers }
     setHistory((prev) => {
@@ -182,182 +375,6 @@ const ClothingCustomizer = () => {
       return trimmed
     })
   }, [customization, layers, historyIndex])
-
-  // ---------- 드래그 ----------
-  const handleDragStart = useCallback(
-    (e, layerId) => {
-      e.preventDefault()
-      e.stopPropagation()
-      if (!previewContainerRef.current) return
-
-      if (e.shiftKey || isPanMode) {
-        const rect = previewContainerRef.current.getBoundingClientRect()
-        setPanStartPos({ x: e.clientX - rect.left - panOffset.x, y: e.clientY - rect.top - panOffset.y })
-        setIsDragging("pan")
-        return
-      }
-
-      const rect = previewContainerRef.current.getBoundingClientRect()
-      const startX = e.clientX - rect.left
-      const startY = e.clientY - rect.top
-      const layer = layers.find((l) => l.id === layerId)
-      if (!layer) return
-
-      setIsDragging(layerId)
-      setSelectedLayerId(layerId)
-
-      const currentX = (layer.position.x / 100) * rect.width
-      const currentY = (layer.position.y / 100) * rect.height
-      setDragOffset({ x: startX - currentX, y: startY - currentY })
-    },
-    [layers, isPanMode, panOffset],
-  )
-
-  const handleDragMove = useCallback(
-    (e) => {
-      if (!isDragging || !previewContainerRef.current) return
-      const rect = previewContainerRef.current.getBoundingClientRect()
-
-      if (isDragging === "pan") {
-        setPanOffset({ x: e.clientX - rect.left - panStartPos.x, y: e.clientY - rect.top - panStartPos.y })
-        return
-      }
-
-      const currentX = e.clientX - rect.left - dragOffset.x
-      const currentY = e.clientY - rect.top - dragOffset.y
-      const percentX = Math.max(0, Math.min(100, (currentX / rect.width) * 100))
-      const percentY = Math.max(0, Math.min(100, (currentY / rect.height) * 100))
-      updateLayer(isDragging, { position: { x: percentX, y: percentY } })
-    },
-    [isDragging, dragOffset, panStartPos, updateLayer],
-  )
-
-  const handleDragEnd = useCallback(() => {
-    if (isDragging && isDragging !== "pan") saveToHistory()
-    setIsDragging(null)
-    setDragOffset({ x: 0, y: 0 })
-  }, [isDragging, saveToHistory])
-
-  useEffect(() => {
-    if (!isDragging) return
-    const mm = (e) => handleDragMove(e)
-    const mu = () => handleDragEnd()
-    document.addEventListener("mousemove", mm)
-    document.addEventListener("mouseup", mu)
-    return () => {
-      document.removeEventListener("mousemove", mm)
-      document.removeEventListener("mouseup", mu)
-    }
-  }, [isDragging, handleDragMove, handleDragEnd])
-  
-  // 리사이즈 
-  const startResize = useCallback((e, layer, corner) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setResizing({
-      id: layer.id,
-      type: layer.type,
-      corner,
-      startX: e.clientX,
-      startY: e.clientY,
-      startSize: layer.type === "logo" ? (layer.style.size || 100) : null,
-      startFont: layer.type === "text" ? (layer.style.fontSize || 16) : null,
-    });
-  }, []);
-
-  useEffect(() => {
-  if (!resizing) return;
-
-  const onMove = (e) => {
-    // 줌 상태 보정(줌이 클수록 덜 민감)
-    const scale = (zoom || 100) / 100;
-    const dx = (e.clientX - resizing.startX) / scale;
-    const dy = (e.clientY - resizing.startY) / scale;
-
-    const signX = resizing.corner.includes("w") ? -1 : 1;
-    const signY = resizing.corner.includes("n") ? -1 : 1;
-    const delta = (signX * dx + signY * dy) / 2; // 대각선 기준 변화량
-
-    if (resizing.type === "logo") {
-      const next = Math.max(20, Math.round(resizing.startSize + delta));
-      setLayers(prev =>
-        prev.map(l => l.id === resizing.id ? { ...l, style: { ...l.style, size: next } } : l)
-      );
-    } else { // text
-      const next = Math.max(8, Math.round(resizing.startFont + delta * 0.6));
-      setLayers(prev =>
-        prev.map(l => l.id === resizing.id ? { ...l, style: { ...l.style, fontSize: next } } : l)
-      );
-    }
-  };
-
-  const onUp = () => { setResizing(null); saveToHistory(); };
-  document.addEventListener("mousemove", onMove);
-  document.addEventListener("mouseup", onUp);
-  return () => {
-    document.removeEventListener("mousemove", onMove);
-    document.removeEventListener("mouseup", onUp);
-  };
-}, [resizing, setLayers, saveToHistory, zoom]);
-
-  // 레이어가 아닌 곳을 클릭했을 때 선택 해제
-  const handlePreviewMouseDown = useCallback((e) => {
-    if (e.button !== 0) return; // 좌클릭만
-    const layerHitSelector = `.${styles.textOverlay}, .${styles.layerBox}, .${styles.logoOverlay}, .${styles.handle}`;
-    const t = e.target;
-    if (!(t instanceof Element)) return;
-
-    // 클릭 대상이 레이어(텍스트/로고/핸들) 내부가 아니면 선택 해제
-    if (!t.closest(layerHitSelector)) {
-      setSelectedLayerId(null);
-    }
-  }, [setSelectedLayerId]);
-
-  // ⌨️ Delete(또는 Backspace)로 선택 레이어 삭제
-  useEffect(() => {
-    const onKeyDown = (e) => {
-      if (selectedLayerId == null) return;
-
-      // 입력 중일 땐(텍스트 입력칸·색상·파일 등) 삭제 동작 막음
-      const ae = document.activeElement;
-      const tag = ae?.tagName?.toLowerCase();
-      const isTyping =
-        tag === "input" || tag === "textarea" || ae?.isContentEditable;
-      if (isTyping) return;
-
-      if (e.key === "Delete" || e.key === "Backspace") {
-        e.preventDefault();
-        deleteLayer(selectedLayerId);
-        // 상태 반영 뒤 히스토리 스냅샷 저장 (렌더 후 실행)
-        setTimeout(() => saveToHistory(), 0);
-      } else if (e.key === "Escape") {
-        // Esc로 선택 해제(선택)
-        setSelectedLayerId(null);
-      }
-    };
-
-  document.addEventListener("keydown", onKeyDown);
-  return () => document.removeEventListener("keydown", onKeyDown);
-}, [selectedLayerId, deleteLayer, saveToHistory, setSelectedLayerId]);
-
-
-  // ---------- 인증 & 초기화 ----------
-  useEffect(() => {
-    const init = async () => {
-      if (!isLoggedIn()) {
-        alert("로그인이 필요합니다.")
-        navigate("/login")
-        return
-      }
-      const user = getCurrentUser()
-      setUserData(user)
-      setLoading(false)
-      const initial = { customization, layers: [] }
-      setHistory([initial])
-      setHistoryIndex(0)
-    }
-    init()
-  }, [navigate, customization])
 
   const undo = useCallback(() => {
     if (historyIndex > 0) {
@@ -377,6 +394,7 @@ const ClothingCustomizer = () => {
     }
   }, [history, historyIndex])
 
+  // ** 제품 선택/ 파일 업로드 **
   const handleProductSelect = useCallback((product) => {
     setSelectedProduct(product)
     const reset = { color: "#ffffff", size: "M", material: "cotton" }
@@ -387,7 +405,6 @@ const ClothingCustomizer = () => {
     setHistoryIndex(0)
   }, [])
 
-  // ---------- 파일 업로드 ----------
   const handleLogoUpload = useCallback(
     (e) => {
       const file = e.target.files[0]
@@ -408,81 +425,211 @@ const ClothingCustomizer = () => {
     [addLogoLayer],
   )
 
-  // ---------- 캔버스 다운로드 (투명 의류 이미지 기준) ----------
-  const handleDownload = useCallback(async () => {
-  try {
-    setIsLoading(true);
+  // ** 드래그/리사이즈 **
+  const handleDragStart = useCallback(
+    (e, layerId) => {
+      e.preventDefault()
+      e.stopPropagation()
+      if (!previewContainerRef.current) return
 
-    // 1) 미리보기 컨테이너 실제 크기(줌/스케일 무시: layout 크기)를 기준으로
-    const baseW = Math.max(1, Math.round(previewContainerRef.current?.offsetWidth || 400));
-    const baseH = Math.max(1, Math.round(previewContainerRef.current?.offsetHeight || 400));
+      const rect = previewContainerRef.current.getBoundingClientRect()
+      const startX = e.clientX - rect.left
+      const startY = e.clientY - rect.top
+      const layer = layers.find((l) => l.id === layerId)
+      if (!layer) return
 
-    // 고해상도 스케일(원하면 3~4로 조절)
-    const scale = 3;
+      setIsDragging(layerId)
+      setSelectedLayerId(layerId)
+
+      const currentX = (layer.position.x / 100) * rect.width
+      const currentY = (layer.position.y / 100) * rect.height
+      setDragOffset({ x: startX - currentX, y: startY - currentY })
+    },
+    [layers],
+  )
+
+  const handleDragMove = useCallback(
+    (e) => {
+      if (!isDragging || !previewContainerRef.current) return
+      const rect = previewContainerRef.current.getBoundingClientRect()
+      const currentX = e.clientX - rect.left - dragOffset.x
+      const currentY = e.clientY - rect.top - dragOffset.y
+      const percentX = Math.max(0, Math.min(100, (currentX / rect.width) * 100))
+      const percentY = Math.max(0, Math.min(100, (currentY / rect.height) * 100))
+      updateLayer(isDragging, { position: { x: percentX, y: percentY } })
+    },
+    [isDragging, dragOffset, updateLayer],
+  )
+
+  const handleDragEnd = useCallback(() => {
+    if (isDragging) saveToHistory()
+    setIsDragging(null)
+    setDragOffset({ x: 0, y: 0 })
+  }, [isDragging, saveToHistory])
+
+  useEffect(() => {
+    if (!isDragging) return
+    const mm = (e) => handleDragMove(e)
+    const mu = () => handleDragEnd()
+    document.addEventListener("mousemove", mm)
+    document.addEventListener("mouseup", mu)
+    return () => {
+      document.removeEventListener("mousemove", mm)
+      document.removeEventListener("mouseup", mu)
+    }
+  }, [isDragging, handleDragMove, handleDragEnd])
+
+  // 리사이즈 시작
+  const startResize = useCallback((e, layer, corner) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const isSizeType = layer.type === "logo" || layer.type === "sticker";
+
+    setResizing({
+      id: layer.id,
+      type: layer.type,
+      corner,
+      startX: e.clientX,
+      startY: e.clientY,
+      startSize: isSizeType ? (layer.style?.size ?? 100) : null,
+      startFont: layer.type === "text" ? (layer.style.fontSize || 16) : null,
+    });
+  }, []);
+  // 리사이즈 진행
+  useEffect(() => {
+    if (!resizing) return;
+    const onMove = (e) => {
+      // 줌 보정
+      const scale = (zoom || 100) / 100;
+      const dx = (e.clientX - resizing.startX) / scale;
+      const dy = (e.clientY - resizing.startY) / scale;
+      const signX = resizing.corner.includes("w") ? -1 : 1;
+      const signY = resizing.corner.includes("n") ? -1 : 1;
+      const delta = (signX * dx + signY * dy) / 2;
+
+      if (resizing.type === "text") {
+        const next = Math.max(8, Math.round((resizing.startFont ?? 16) + delta * 0.6));
+        setLayers(prev =>
+          prev.map(l => l.id === resizing.id ? { ...l, style: { ...l.style, fontSize: next } } : l)
+        );
+      } else if (resizing.type === "logo" || resizing.type === "sticker") { // ✅ 스티커도 동일 처리
+        const next = Math.max(20, Math.round((resizing.startSize ?? 100) + delta));
+        setLayers(prev =>
+          prev.map(l => l.id === resizing.id ? { ...l, style: { ...l.style, size: next } } : l)
+        );
+      }
+    };
+    const onUp = () => { setResizing(null); saveToHistory(); };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+    return () => {
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+  }, [resizing, setLayers, saveToHistory, zoom]);
+
+  // * 레이어 선택 해제 함수 (빈 곳 클릭시)
+  const handlePreviewMouseDown = useCallback((e) => {
+    if (e.button !== 0) return;
+    const layerHitSelector = `.${styles.textOverlay}, .${styles.layerBox}, .${styles.logoOverlay}, .${styles.handle}`;
+    const t = e.target;
+    if (!(t instanceof Element)) return;
+    if (!t.closest(layerHitSelector)) {
+      setSelectedLayerId(null);
+    }
+  }, [setSelectedLayerId]);
+
+  // Delete(또는 Backspace)로 선택 레이어 삭제
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (selectedLayerId == null) return;
+      const ae = document.activeElement;
+      const tag = ae?.tagName?.toLowerCase();
+      const isTyping =
+        tag === "input" || tag === "textarea" || ae?.isContentEditable;
+      if (isTyping) return;
+
+      if (e.key === "Delete" || e.key === "Backspace") {
+        e.preventDefault();
+        deleteLayer(selectedLayerId);
+        setTimeout(() => saveToHistory(), 0);
+      } else if (e.key === "Escape") {
+        setSelectedLayerId(null);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [selectedLayerId, deleteLayer, saveToHistory, setSelectedLayerId]);
+
+  // *렌더링: 미리보기 그대로 합성(DataURL) / 로컬 다운로드
+  // 미리보기와 동일한 배치로 최종 이미지 합성 → DataURL 반환
+  const renderCompositeAsDataURL = useCallback(async () => {
+    const root = previewContainerRef.current;
+    if (!root) throw new Error("previewContainerRef is null");
+
+    // 확대/축소 영향 없는 '논리 크기' 기준
+    const baseW = Math.max(1, Math.round(root.offsetWidth));
+    const baseH = Math.max(1, Math.round(root.offsetHeight));
+
+    // 해상도 스케일(원하면 3으로 올려도 됨)
+    const scale = 2;
 
     const canvas = document.createElement("canvas");
     canvas.width = baseW * scale;
     canvas.height = baseH * scale;
     const ctx = canvas.getContext("2d");
     ctx.scale(scale, scale);
-    
-    try { await document.fonts?.ready } catch {}
-     // 2) 의류 이미지 로드 
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = "high";
+
+    // 웹폰트가 있다면 로딩 대기(두께/폭 차이 방지)
+    try { await document.fonts?.ready } catch { }
+
+    // 의류 이미지 로드
     const garmentImg = await new Promise((resolve, reject) => {
       const img = new Image();
-      // 번들(import) 이미지면 crossOrigin 불필요, 외부 URL이면 필요할 수 있음
       img.onload = () => resolve(img);
       img.onerror = reject;
       img.src = selectedProduct.image;
     });
-    // 3) 미리보기와 동일한 contain 로직으로 그릴 사각형 계산
+
+    // contain + center 사각형 계산(미리보기와 동일)
     const imgAR = garmentImg.naturalWidth / garmentImg.naturalHeight;
     const baseAR = baseW / baseH;
     let dW, dH, dx, dy;
     if (imgAR > baseAR) {
-      // 이미지가 더 가로로 길다 → 너비 맞추고 세로 레터박스
-      dW = baseW;
-      dH = baseW / imgAR;
-      dx = 0;
-      dy = (baseH - dH) / 2;
+      dW = baseW; dH = baseW / imgAR; dx = 0; dy = (baseH - dH) / 2;
     } else {
-      // 이미지가 세로로 길다/정사각 → 높이 맞추고 가로 레터박스
-      dH = baseH;
-      dW = baseH * imgAR;
-      dx = (baseW - dW) / 2;
-      dy = 0;
+      dH = baseH; dW = baseH * imgAR; dx = (baseW - dW) / 2; dy = 0;
     }
-    // 4) 의류 그리기 (미리보기와 같은 위치/크기)
+
+    // 의류 그리기
     ctx.drawImage(garmentImg, dx, dy, dW, dH);
-    // 5) 색상 틴트: 의류 알파에만, 곱연산
+
+    // 색상 틴트(곱연산)
+    const withSofterBlack = (hex) => String(hex || "").toLowerCase() === "#000000" ? "#333333" : (hex || "#ffffff");
     const tintColor = withSofterBlack(customization.color || "#ffffff");
     if (tintColor.toLowerCase() !== "#ffffff") {
       const tint = document.createElement("canvas");
-      tint.width = baseW;
-      tint.height = baseH;
+      tint.width = baseW; tint.height = baseH;
       const tctx = tint.getContext("2d");
-
-      // 색은 의류가 차지하는 영역(rect)만 채움
       tctx.fillStyle = tintColor;
       tctx.fillRect(dx, dy, dW, dH);
-
-      // 의류 알파로 마스킹 (미리보기의 mask-image와 동일 효과)
       tctx.globalCompositeOperation = "destination-in";
       tctx.drawImage(garmentImg, dx, dy, dW, dH);
-
-      // 메인 캔버스에 multiply 합성
       ctx.globalCompositeOperation = "multiply";
       ctx.drawImage(tint, 0, 0);
       ctx.globalCompositeOperation = "source-over";
     }
-    // 6) 텍스트/로고 레이어: 미리보기와 동일한 기준(컨테이너 %)로 배치
+
+    // 레이어(텍스트/로고)
     for (const layer of layers) {
       if (!layer.visible) continue;
-      const x = (layer.position.x / 100) * baseW;
-      const y = (layer.position.y / 100) * baseH;
+      const x = Math.round((layer.position.x / 100) * baseW);
+      const y = Math.round((layer.position.y / 100) * baseH);
 
       if (layer.type === "text") {
-        const text = layer.content ?? "";
         const st = layer.style || {};
         const fontPx = Math.round(st.fontSize || 16);
         const weight = st.fontWeight || "normal";
@@ -491,7 +638,6 @@ const ClothingCustomizer = () => {
         const letter = Math.round(st.letterSpacing || 0);
         const rot = (st.rotation || 0) * Math.PI / 180;
 
-        // 웹폰트가 있다면 앞서 document.fonts.ready를 기다렸는지 확인
         ctx.save();
         ctx.translate(x, y);
         ctx.rotate(rot);
@@ -499,11 +645,10 @@ const ClothingCustomizer = () => {
         ctx.textBaseline = "middle";
         ctx.font = `${italic}${weight} ${fontPx}px ${st.fontFamily || "Arial"}`;
 
-        // letter-spacing 반영: 글자 단위로 측정/그리기
+        const text = layer.content ?? "";
         const measures = [...text].map(ch => ctx.measureText(ch).width);
         const totalW = measures.reduce((a, b) => a + b, 0) + Math.max(0, text.length - 1) * letter;
         let cursor = -totalW / 2;
-
         for (let i = 0; i < text.length; i++) {
           const ch = text[i];
           ctx.fillText(ch, Math.round(cursor), 0);
@@ -511,37 +656,180 @@ const ClothingCustomizer = () => {
         }
 
         // 밑줄/취소선
-        if (st.underline || st.strike){
-          const thickness = Math.max(1, Math.round(fontPx/15));
+        if (st.underline || st.strike) {
+          const thickness = Math.max(1, Math.round(fontPx / 15));
           ctx.strokeStyle = color;
           ctx.lineWidth = thickness;
-          const startX = Math.round(-totalW/2);
-          const endX   = Math.round( totalW/2);
-
-          if (st.underline){
+          const startX = Math.round(-totalW / 2);
+          const endX = Math.round(totalW / 2);
+          if (st.underline) {
             const uy = Math.round(fontPx * 0.35);
             ctx.beginPath(); ctx.moveTo(startX, uy); ctx.lineTo(endX, uy); ctx.stroke();
           }
-          if (st.strike){
+          if (st.strike) {
             const sy = Math.round(-fontPx * 0.05);
             ctx.beginPath(); ctx.moveTo(startX, sy); ctx.lineTo(endX, sy); ctx.stroke();
           }
         }
         ctx.restore();
-        } else if (layer.type === "logo") {
+      }
+
+      if (layer.type === "logo" || layer.type === "sticker") {
         const logoImg = await new Promise((resolve, reject) => {
           const img = new Image();
           img.onload = () => resolve(img);
           img.onerror = reject;
           img.src = layer.content;
         });
-        // 원본 비율 유지 (미리보기 동일하게)
-        const w = Math.round(layer.style.size || 100)
+        const w = Math.round(layer.style.size || 100);
         const ar = (logoImg.naturalWidth || 1) / (logoImg.naturalHeight || 1);
-        const h = Math.round(w / ar)   
-        ctx.drawImage(logoImg, Math.round(x - w / 2), Math.round(y - h / 2), w, h)
+        const h = Math.round(w / ar);
+        ctx.save();
+        ctx.translate(x, y);
+        const rot = ((layer.style?.rotation || 0) * Math.PI) / 180; // 로고 회전도 쓰면 반영
+        ctx.rotate(rot);
+        ctx.drawImage(logoImg, Math.round(-w / 2), Math.round(-h / 2), w, h);
+        ctx.restore();
       }
     }
+
+    return canvas.toDataURL("image/png", 1.0);
+  }, [customization, layers, selectedProduct, previewContainerRef]);
+
+  // * png 다운로드(외부 로컬 저장)
+  const handleDownload = useCallback(async () => {
+    try {
+      setIsLoading(true);
+
+      // 1) 미리보기 컨테이너 실제 크기(줌/스케일 무시: layout 크기)를 기준으로
+      const baseW = Math.max(1, Math.round(previewContainerRef.current?.offsetWidth || 400));
+      const baseH = Math.max(1, Math.round(previewContainerRef.current?.offsetHeight || 400));
+
+      // 고해상도 스케일(원하면 3~4로 조절)
+      const scale = 3;
+
+      const canvas = document.createElement("canvas");
+      canvas.width = baseW * scale;
+      canvas.height = baseH * scale;
+      const ctx = canvas.getContext("2d");
+      ctx.scale(scale, scale);
+
+      try { await document.fonts?.ready } catch { }
+      // 2) 의류 이미지 로드 
+      const garmentImg = await new Promise((resolve, reject) => {
+        const img = new Image();
+        // 번들(import) 이미지면 crossOrigin 불필요, 외부 URL이면 필요할 수 있음
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = selectedProduct.image;
+      });
+      // 3) 미리보기와 동일한 contain 로직으로 그릴 사각형 계산
+      const imgAR = garmentImg.naturalWidth / garmentImg.naturalHeight;
+      const baseAR = baseW / baseH;
+      let dW, dH, dx, dy;
+      if (imgAR > baseAR) {
+        // 이미지가 더 가로로 길다 → 너비 맞추고 세로 레터박스
+        dW = baseW;
+        dH = baseW / imgAR;
+        dx = 0;
+        dy = (baseH - dH) / 2;
+      } else {
+        // 이미지가 세로로 길다/정사각 → 높이 맞추고 가로 레터박스
+        dH = baseH;
+        dW = baseH * imgAR;
+        dx = (baseW - dW) / 2;
+        dy = 0;
+      }
+      // 4) 의류 그리기 (미리보기와 같은 위치/크기)
+      ctx.drawImage(garmentImg, dx, dy, dW, dH);
+      // 5) 색상 틴트: 의류 알파에만, 곱연산
+      const tintColor = withSofterBlack(customization.color || "#ffffff");
+      if (tintColor.toLowerCase() !== "#ffffff") {
+        const tint = document.createElement("canvas");
+        tint.width = baseW;
+        tint.height = baseH;
+        const tctx = tint.getContext("2d");
+
+        // 색은 의류가 차지하는 영역(rect)만 채움
+        tctx.fillStyle = tintColor;
+        tctx.fillRect(dx, dy, dW, dH);
+
+        // 의류 알파로 마스킹 (미리보기의 mask-image와 동일 효과)
+        tctx.globalCompositeOperation = "destination-in";
+        tctx.drawImage(garmentImg, dx, dy, dW, dH);
+
+        // 메인 캔버스에 multiply 합성
+        ctx.globalCompositeOperation = "multiply";
+        ctx.drawImage(tint, 0, 0);
+        ctx.globalCompositeOperation = "source-over";
+      }
+      // 6) 텍스트/로고 스티커 레이어: 미리보기와 동일한 기준(컨테이너 %)로 배치
+      for (const layer of layers) {
+        if (!layer.visible) continue;
+        const x = (layer.position.x / 100) * baseW;
+        const y = (layer.position.y / 100) * baseH;
+
+        if (layer.type === "text") {
+          const text = layer.content ?? "";
+          const st = layer.style || {};
+          const fontPx = Math.round(st.fontSize || 16);
+          const weight = st.fontWeight || "normal";
+          const italic = st.fontStyle === "italic" ? "italic " : "";
+          const color = st.color || "#000000";
+          const letter = Math.round(st.letterSpacing || 0);
+          const rot = (st.rotation || 0) * Math.PI / 180;
+
+          // 웹폰트가 있다면 앞서 document.fonts.ready를 기다렸는지 확인
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(rot);
+          ctx.fillStyle = color;
+          ctx.textBaseline = "middle";
+          ctx.font = `${italic}${weight} ${fontPx}px ${st.fontFamily || "Arial"}`;
+
+          // letter-spacing 반영: 글자 단위로 측정/그리기
+          const measures = [...text].map(ch => ctx.measureText(ch).width);
+          const totalW = measures.reduce((a, b) => a + b, 0) + Math.max(0, text.length - 1) * letter;
+          let cursor = -totalW / 2;
+
+          for (let i = 0; i < text.length; i++) {
+            const ch = text[i];
+            ctx.fillText(ch, Math.round(cursor), 0);
+            cursor += measures[i] + letter;
+          }
+
+          // 밑줄/취소선
+          if (st.underline || st.strike) {
+            const thickness = Math.max(1, Math.round(fontPx / 15));
+            ctx.strokeStyle = color;
+            ctx.lineWidth = thickness;
+            const startX = Math.round(-totalW / 2);
+            const endX = Math.round(totalW / 2);
+
+            if (st.underline) {
+              const uy = Math.round(fontPx * 0.35);
+              ctx.beginPath(); ctx.moveTo(startX, uy); ctx.lineTo(endX, uy); ctx.stroke();
+            }
+            if (st.strike) {
+              const sy = Math.round(-fontPx * 0.05);
+              ctx.beginPath(); ctx.moveTo(startX, sy); ctx.lineTo(endX, sy); ctx.stroke();
+            }
+          }
+          ctx.restore();
+        } else if (layer.type === "logo" || layer.type === "sticker") {
+          const logoImg = await new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = layer.content;
+          });
+          // 원본 비율 유지 (미리보기 동일하게)
+          const w = Math.round(layer.style.size || 100)
+          const ar = (logoImg.naturalWidth || 1) / (logoImg.naturalHeight || 1);
+          const h = Math.round(w / ar)
+          ctx.drawImage(logoImg, Math.round(x - w / 2), Math.round(y - h / 2), w, h)
+        }
+      }
       // 7) 저장
       const url = canvas.toDataURL("image/png", 1.0);
       const a = document.createElement("a");
@@ -559,173 +847,71 @@ const ClothingCustomizer = () => {
     }
   }, [customization, layers, selectedProduct, previewContainerRef]);
 
-  // 저장/공유/초기화
-  const handleSave = useCallback(async () => {
-    if (!isLoggedIn()) {
-      alert("로그인이 필요합니다.")
-      navigate("/login")
-      return
+  // * 모달 최종 저장 
+  const handleConfirmSubmit = useCallback(async () => {
+    if (!confirmName.trim()) {
+      window.alert("커스텀 이름을 입력해 주세요.");
+      return;
     }
-
-    // 커스터마이징 이름 입력 받기
-    const customName = prompt("커스터마이징 의류의 이름을 입력해주세요:", `내가 디자인한 ${selectedProduct.name}`)
-    if (!customName || customName.trim() === "") {
-      alert("커스터마이징 이름을 입력해주세요.")
-      return
-    }
-
-    setIsLoading(true)
     try {
-      // 캔버스에서 이미지 생성
-      const canvas = document.createElement("canvas")
-      const ctx = canvas.getContext("2d")
-      
-      // 고해상도로 설정
-      const scale = 3
-      const baseW = 400
-      const baseH = 500
-      canvas.width = baseW * scale
-      canvas.height = baseH * scale
-      ctx.scale(scale, scale)
-
-      // 의류 이미지 로드
-      const garmentImg = await new Promise((resolve, reject) => {
-        const img = new Image()
-        img.onload = () => resolve(img)
-        img.onerror = reject
-        img.src = selectedProduct.image
-      })
-
-      // 의류 그리기
-      const imgAR = garmentImg.naturalWidth / garmentImg.naturalHeight
-      const baseAR = baseW / baseH
-      let dW, dH, dx, dy
-      if (imgAR > baseAR) {
-        dW = baseW
-        dH = baseW / imgAR
-        dx = 0
-        dy = (baseH - dH) / 2
-      } else {
-        dH = baseH
-        dW = baseH * imgAR
-        dx = (baseW - dW) / 2
-        dy = 0
-      }
-      ctx.drawImage(garmentImg, dx, dy, dW, dH)
-
-      // 색상 틴트 적용
-      const tintColor = withSofterBlack(customization.color || "#ffffff")
-      if (tintColor.toLowerCase() !== "#ffffff") {
-        const tint = document.createElement("canvas")
-        tint.width = baseW
-        tint.height = baseH
-        const tctx = tint.getContext("2d")
-        tctx.fillStyle = tintColor
-        tctx.fillRect(dx, dy, dW, dH)
-        tctx.globalCompositeOperation = "destination-in"
-        tctx.drawImage(garmentImg, dx, dy, dW, dH)
-        ctx.globalCompositeOperation = "multiply"
-        ctx.drawImage(tint, 0, 0)
-        ctx.globalCompositeOperation = "source-over"
-      }
-
-      // 레이어 그리기
-      for (const layer of layers) {
-        if (!layer.visible) continue
-        const x = (layer.position.x / 100) * baseW
-        const y = (layer.position.y / 100) * baseH
-
-        if (layer.type === "text") {
-          const text = layer.content ?? ""
-          const st = layer.style || {}
-          const fontPx = Math.round(st.fontSize || 16)
-          const weight = st.fontWeight || "normal"
-          const italic = st.fontStyle === "italic" ? "italic " : ""
-          const color = st.color || "#000000"
-          const letter = Math.round(st.letterSpacing || 0)
-          const rot = (st.rotation || 0) * Math.PI / 180
-
-          ctx.save()
-          ctx.translate(x, y)
-          ctx.rotate(rot)
-          ctx.fillStyle = color
-          ctx.textBaseline = "middle"
-          ctx.font = `${italic}${weight} ${fontPx}px ${st.fontFamily || "Arial"}`
-
-          const measures = [...text].map(ch => ctx.measureText(ch).width)
-          const totalW = measures.reduce((a, b) => a + b, 0) + Math.max(0, text.length - 1) * letter
-          let cursor = -totalW / 2
-
-          for (let i = 0; i < text.length; i++) {
-            const ch = text[i]
-            ctx.fillText(ch, Math.round(cursor), 0)
-            cursor += measures[i] + letter
-          }
-
-          if (st.underline || st.strike) {
-            const thickness = Math.max(1, Math.round(fontPx/15))
-            ctx.strokeStyle = color
-            ctx.lineWidth = thickness
-            const startX = Math.round(-totalW/2)
-            const endX = Math.round(totalW/2)
-
-            if (st.underline) {
-              const uy = Math.round(fontPx * 0.35)
-              ctx.beginPath()
-              ctx.moveTo(startX, uy)
-              ctx.lineTo(endX, uy)
-              ctx.stroke()
-            }
-            if (st.strike) {
-              const sy = Math.round(-fontPx * 0.05)
-              ctx.beginPath()
-              ctx.moveTo(startX, sy)
-              ctx.lineTo(endX, sy)
-              ctx.stroke()
-            }
-          }
-          ctx.restore()
-        } else if (layer.type === "logo") {
-          const logoImg = await new Promise((resolve, reject) => {
-            const img = new Image()
-            img.onload = () => resolve(img)
-            img.onerror = reject
-            img.src = layer.content
-          })
-          const w = Math.round(layer.style.size || 100)
-          const ar = (logoImg.naturalWidth || 1) / (logoImg.naturalHeight || 1)
-          const h = Math.round(w / ar)
-          ctx.drawImage(logoImg, Math.round(x - w / 2), Math.round(y - h / 2), w, h)
-        }
-      }
-
-      // 캔버스를 Blob으로 변환
-      const blob = await new Promise(resolve => {
-        canvas.toBlob(resolve, 'image/png', 1.0)
-      })
-
-      // File 객체 생성
-      const file = new File([blob], `${customName}.png`, { type: 'image/png' })
-
-      // 서버에 저장
-      const result = await createCustomClothing(customName.trim(), file)
-      
-      alert("커스터마이징 의류가 저장되었습니다!")
-      console.log("저장된 커스터마이징 의류:", result)
-      
-    } catch (error) {
-      console.error("저장 실패:", error)
-      alert(`저장 중 오류가 발생했습니다: ${error.message}`)
+      setConfirmSaving(true);
+      const file = dataURLtoFile(confirmImage, `custom-${Date.now()}.png`);
+      await createCustomClothing(confirmName.trim(), file);
+      window.alert("저장되었습니다!");
+      setConfirmOpen(false);
+      navigate("/mypage");
+    } catch (e) {
+      console.error(e);
+      window.alert("저장 중 오류가 발생했습니다.");
     } finally {
-      setIsLoading(false)
+      setConfirmSaving(false);
     }
-  }, [customization, layers, selectedProduct, navigate])
+  }, [confirmName, confirmImage, navigate]);
 
+  useEffect(() => {
+    // 모달 열릴 때 바디 스크롤 잠금
+    if (confirmOpen) document.body.style.overflow = "hidden";
+    else document.body.style.overflow = "";
+    return () => (document.body.style.overflow = "");
+  }, [confirmOpen]);
+
+  useEffect(() => {
+    if (!confirmOpen) return;
+    const onKey = (e) => {
+      if (e.key === "Escape") setConfirmOpen(false);
+      if (e.key === "Enter") handleConfirmSubmit();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [confirmOpen, handleConfirmSubmit]);
+
+  // * 저장 버튼 
+  const handleSave = useCallback(async () => {
+    try {
+      if (!isLoggedIn()) {
+        window.alert("로그인이 필요합니다.");
+        navigate("/login");
+        return;
+      }
+      setIsLoading(true);
+      const dataURL = await renderCompositeAsDataURL(); // 미리보기 그대로 합성
+      setConfirmImage(dataURL);
+      setConfirmName(`내가 디자인한 ${selectedProduct.name}`);
+      setConfirmOpen(true); // ✅ 모달 열기 
+    } catch (e) {
+      console.error(e);
+      window.alert("미리보기 이미지를 준비하는 중 오류가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoggedIn, navigate, renderCompositeAsDataURL, selectedProduct.name]);
+
+  // * 공유, 초기화
   const handleShare = useCallback(async () => {
     if (navigator.share) {
       try {
         await navigator.share({ title: `내가 디자인한 ${selectedProduct.name}`, text: "내 디자인 보기", url: window.location.href })
-      } catch {}
+      } catch { }
     } else {
       navigator.clipboard.writeText(window.location.href)
       alert("링크가 복사되었습니다.")
@@ -733,7 +919,7 @@ const ClothingCustomizer = () => {
   }, [selectedProduct.name])
 
   const handleReset = useCallback(() => {
-     if (!window.confirm("모든 커스터마이징을 초기화할까요?")) return
+    if (!window.confirm("모든 커스터마이징을 초기화할까요?")) return
     const reset = { color: "#ffffff", size: "M", pattern: null, material: "cotton" }
     setCustomization(reset)
     setLayers([])
@@ -742,7 +928,7 @@ const ClothingCustomizer = () => {
     setHistoryIndex(0)
   }, [])
 
-  // UI 코드 
+  // === UI=== //
   if (loading) {
     return (
       <div className={styles.customizer}>
@@ -783,25 +969,38 @@ const ClothingCustomizer = () => {
               </div>
             </section>
 
-            {/* 제품 선택 */}
             <section className={styles.productSection}>
-              <h2 className={styles.sectionTitle}>제품 선택</h2>
+              <div className={styles.sectionHeader}>
+                <h2 className={styles.sectionTitle}>제품 선택</h2>
+                <div className={styles.categoryChips}>
+                  {categories.map((cat) => (
+                    <button
+                      key={cat}
+                      className={`${styles.chip} ${selectedCategory === cat ? styles.active : ""}`}
+                      onClick={() => setSelectedCategory(cat)}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
               <div className={styles.productGrid}>
-                {products.map((product) => (
-                  <div
-                    key={product.id}
-                    className={`${styles.productItem} ${selectedProduct.id === product.id ? styles.selected : ""}`}
-                    onClick={() => handleProductSelect(product)}
-                  >
-                    <div className={styles.productImage}>
-                      {/* 투명 배경 이미지는 배경이 그대로 비쳐 보임 */}
-                      <img src={product.image || "/placeholder.svg"} alt={product.name} />
+                {products
+                  .filter((p) => p.category === selectedCategory)
+                  .map((product) => (
+                    <div
+                      key={product.id}
+                      className={`${styles.productItem} ${selectedProduct.id === product.id ? styles.selected : ""}`}
+                      onClick={() => handleProductSelect(product)}
+                    >
+                      <div className={styles.productImage}>
+                        <img src={product.image || "/placeholder.svg"} alt={product.name} />
+                      </div>
+                      <div className={styles.productInfo}>
+                        <h3 className={styles.productName}>{product.name}</h3>
+                      </div>
                     </div>
-                    <div className={styles.productInfo}>
-                      <h3 className={styles.productName}>{product.name}</h3>
-                    </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </section>
 
@@ -823,61 +1022,54 @@ const ClothingCustomizer = () => {
 
                     <div className={styles.historyControls}>
                       <button onClick={undo}
-                              className={styles.zoomButton}
-                              disabled={historyIndex <= 0}
-                              title="뒤로 가기(실행 취소)">
-                          <Undo size={16} />
+                        className={styles.zoomButton}
+                        disabled={historyIndex <= 0}
+                        title="뒤로 가기(실행 취소)">
+                        <Undo size={16} />
                       </button>
                       <button onClick={redo}
-                              className={styles.zoomButton}
-                              disabled={historyIndex >= history.length - 1}
-                              title="앞으로 가기(다시 실행)">
-                          <Redo size={16} />
+                        className={styles.zoomButton}
+                        disabled={historyIndex >= history.length - 1}
+                        title="앞으로 가기(다시 실행)">
+                        <Redo size={16} />
                       </button>
-                      </div>
-
-                    <button
-                      onClick={() => setIsPanMode(!isPanMode)}
-                      className={`${styles.overlayToggle} ${isPanMode ? styles.active : ""}`}
-                      title="팬 모드 (Shift+드래그)"
-                    >
-                      <Move3D size={16} />팬 모드
-                    </button>
+                    </div>
                   </div>
                 </div>
 
                 <div className={styles.previewCanvas}>
                   <div
                     className={styles.previewContainer}
-                    style={{transform: `scale(${(zoom / 100) * (BASE_ZOOM / 100)}) translate(${panOffset.x}px, ${panOffset.y}px)`, 
-                    transformOrigin: "center center", cursor: isPanMode ? "grab" : "default" }}
+                    style={{
+                      transform: `scale(${(zoom / 100) * (BASE_ZOOM / 100)})`,
+                      transformOrigin: "center center",
+                      cursor: "default",
+                    }}
                   >
-                    {/* ✅ 여기서부터 '옷만' 보이게 */}
                     <div ref={previewContainerRef} className={styles.clothingContainer} onMouseDown={handlePreviewMouseDown}>
-                      {/* 의류 사진 + 색상 틴트 + 마스크를 한 컨테이너에서 처리 */}
-                    <div
-                      className={styles.garmentSurface}
-                      style={{
-                        // 1) 의류 알파를 마스크로 사용
-                        WebkitMaskImage: `url(${selectedProduct.image})`,
-                        maskImage: `url(${selectedProduct.image})`,
-                        WebkitMaskSize: "contain",
-                        maskSize: "contain",
-                        WebkitMaskPosition: "center",
-                        maskPosition: "center",
-                        WebkitMaskRepeat: "no-repeat",
-                        maskRepeat: "no-repeat",
+                      <div
+                        className={styles.garmentSurface}
+                        style={{
+                          // 1) 의류 알파를 마스크로 사용
+                          WebkitMaskImage: `url(${selectedProduct.image})`,
+                          maskImage: `url(${selectedProduct.image})`,
+                          WebkitMaskSize: "contain",
+                          maskSize: "contain",
+                          WebkitMaskPosition: "center",
+                          maskPosition: "center",
+                          WebkitMaskRepeat: "no-repeat",
+                          maskRepeat: "no-repeat",
 
-                        // 2) 배경: 의류 사진 + (선택) 색상, 곱연산 블렌딩
-                        backgroundImage: `url(${selectedProduct.image})`,
-                        backgroundSize: "contain",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                        backgroundColor: customization.color,    
-                        backgroundBlendMode: "multiply",
-                      }}
-                    >
-                    </div>
+                          // 2) 배경: 의류 사진 + (선택) 색상, 곱연산 블렌딩
+                          backgroundImage: `url(${selectedProduct.image})`,
+                          backgroundSize: "contain",
+                          backgroundPosition: "center",
+                          backgroundRepeat: "no-repeat",
+                          backgroundColor: customization.color,
+                          backgroundBlendMode: "multiply",
+                        }}
+                      >
+                      </div>
 
                       {/* 숨김 캔버스 (필요 시 사용) */}
                       <canvas ref={downloadCanvasRef} style={{ display: "none" }} width={400} height={500} />
@@ -910,63 +1102,79 @@ const ClothingCustomizer = () => {
                             >
                               {layer.content}
                               {selectedLayerId === layer.id && (
-                               <div className={styles.resizeHandles}>
-                                 {["nw","ne","sw","se"].map(c => (
-                                  <span
-                                     key={c}
-                                     className={`${styles.handle} ${styles[c]}`}
-                                     onMouseDown={(e) => startResize(e, layer, c)}
-                                  />
-                                ))}
-                              </div>
-                            )}  
+                                <div className={styles.resizeHandles}>
+                                  {["nw", "ne", "sw", "se"].map(c => (
+                                    <span
+                                      key={c}
+                                      className={`${styles.handle} ${styles[c]}`}
+                                      onMouseDown={(e) => startResize(e, layer, c)}
+                                    />
+                                  ))}
+                                </div>
+                              )}
                             </div>
                           )
                         }
-                       if (layer.type === "logo") {
-                        return (
-                          <div
-                            key={layer.id}
-                            className={styles.layerBox}
-                            style={{ left: `${layer.position.x}%`, top: `${layer.position.y}%` }}
-                            onMouseDown={(e) => handleDragStart(e, layer.id)}
-                          >
-                            <img
-                              src={layer.content || "/placeholder.svg"}
-                              alt="logo"
-                              className={styles.logoOverlay}
-                              style={{ width: `${layer.style.size}px` }}
-                              draggable={false}
-                            />
-                            {/* ✅ 선택됐을 때만 리사이즈 핸들 표시 */}
-                            {selectedLayerId === layer.id && (
-                              <div className={styles.resizeHandles}>
-                                {["nw", "ne", "sw", "se"].map((c) => (
-                                  <span
-                                    key={c}
-                                    className={`${styles.handle} ${styles[c]}`}
-                                    onMouseDown={(e) => startResize(e, layer, c)}
-                                  />
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )
-                      }
-                      return null
+                        if (layer.type === "logo") {
+                          return (
+                            <div
+                              key={layer.id}
+                              className={styles.layerBox}
+                              style={{ left: `${layer.position.x}%`, top: `${layer.position.y}%` }}
+                              onMouseDown={(e) => handleDragStart(e, layer.id)}
+                            >
+                              <img
+                                src={layer.content || "/placeholder.svg"}
+                                alt="logo"
+                                className={styles.logoOverlay}
+                                style={{ width: `${layer.style.size}px` }}
+                                draggable={false}
+                              />
+                              {/* 선택됐을 때만 리사이즈 핸들 표시 */}
+                              {selectedLayerId === layer.id && (
+                                <div className={styles.resizeHandles}>
+                                  {["nw", "ne", "sw", "se"].map((c) => (
+                                    <span
+                                      key={c}
+                                      className={`${styles.handle} ${styles[c]}`}
+                                      onMouseDown={(e) => startResize(e, layer, c)}
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        }
+                        if (layer.type === "sticker") {
+                          return (
+                            <div
+                              key={layer.id}
+                              className={styles.layerBox}
+                              style={{ left: `${layer.position.x}%`, top: `${layer.position.y}%` }}
+                              onMouseDown={(e) => handleDragStart(e, layer.id)}
+                            >
+                              <img
+                                src={layer.content}
+                                alt="sticker"
+                                className={styles.logoOverlay}
+                                style={{ width: `${layer.style.size}px` }}
+                                draggable={false}
+                              />
+                              {selectedLayerId === layer.id && (
+                                <div className={styles.resizeHandles}>
+                                  {["nw", "ne", "sw", "se"].map(c => (
+                                    <span key={c} className={`${styles.handle} ${styles[c]}`} onMouseDown={(e) => startResize(e, layer, c)} />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )
+                        }
+                        return null
                       })}
-
-                      {/* 드래그 가이드 */}
-                      {isDragging && isDragging !== "pan" && <div className={styles.dragGuide}>드래그하여 위치를 조정하세요</div>}
                     </div>
                   </div>
-
-                  <div className={styles.rotationHint}>
-                    <Move3D size={16} />
-                    <span>Shift+드래그: 팬 | 요소 클릭: 이동</span>
-                  </div>
                 </div>
-
                 <div className={styles.productInfoCard}>
                   <h3 className={styles.productTitle}>{selectedProduct.name}</h3>
                   <p className={styles.productDescription}>의류 커스터마이징</p>
@@ -979,7 +1187,8 @@ const ClothingCustomizer = () => {
                   {[
                     { id: "color", label: "색상", icon: Palette },
                     { id: "text", label: "텍스트", icon: Type },
-                    { id: "logo", label: "이미지 업로드", icon: ImageIcon },
+                    { id: "sticker", label: "스티커", icon: ImageIcon },
+                    { id: "logo", label: "이미지", icon: ImageIcon },
                     { id: "layers", label: "레이어", icon: Layers },
                   ].map(({ id, label, icon: Icon }) => (
                     <button key={id} onClick={() => setActiveTab(id)} className={`${styles.tabButton} ${activeTab === id ? styles.active : ""}`}>
@@ -988,7 +1197,7 @@ const ClothingCustomizer = () => {
                     </button>
                   ))}
                 </div>
-
+                {/* 색상 탭 */}
                 <div className={styles.tabContent}>
                   {activeTab === "color" && (
                     <div className={styles.colorTab}>
@@ -1011,18 +1220,16 @@ const ClothingCustomizer = () => {
                       </div>
                     </div>
                   )}
+                  {/* 텍스트 탭 */}
                   {activeTab === "text" && (
                     <div className={styles.textTab}>
-                      {/* 새 텍스트 추가 */}
                       <div className={styles.optionGroup}>
                         <button onClick={addTextLayer} className={styles.addButton}>
                           <Plus size={16} />새 텍스트 추가
                         </button>
                       </div>
-                      {/* 선택된 텍스트가 있을 때만 세부 옵션 표시 */}
                       {selectedTextLayer && (
                         <>
-                          {/* 내용 */}
                           <div className={styles.optionGroup}>
                             <label className={styles.inputLabel}>
                               텍스트 내용
@@ -1036,8 +1243,6 @@ const ClothingCustomizer = () => {
                               />
                             </label>
                           </div>
-
-                          {/* 폰트 선택 (기존 유지) */}
                           <div className={styles.optionGroup}>
                             <label className={styles.inputLabel}>
                               서체 선택
@@ -1059,8 +1264,6 @@ const ClothingCustomizer = () => {
                               </select>
                             </label>
                           </div>
-
-                          {/* 서체 스타일: 굵게/기울임/밑줄/취소선 */}
                           <div className={styles.optionGroup}>
                             <div className={styles.textToolbar}>
                               <button
@@ -1116,8 +1319,7 @@ const ClothingCustomizer = () => {
                                 S
                               </button>
                             </div>
-                          </div>                        
-                          {/* 글씨 색상 팔레트 + 사용자 색상 */}
+                          </div>
                           <div className={styles.optionGroup}>
                             <h4 className={styles.optionTitle}>글씨 색상</h4>
                             <div className={styles.swatchGrid}>
@@ -1133,8 +1335,6 @@ const ClothingCustomizer = () => {
                                   title={hex}
                                 />
                               ))}
-
-                              {/* 사용자 색상 */}
                               <label
                                 className={`${styles.swatch} ${styles.custom} ${/#[0-9a-f]{6}/i.test(selectedTextLayer.style.color || "") && !TEXT_SWATCHES.includes(selectedTextLayer.style.color) ? styles.selected : ""}`}
                                 title="사용자 색상 선택"
@@ -1151,8 +1351,6 @@ const ClothingCustomizer = () => {
                               </label>
                             </div>
                           </div>
-
-                          {/* 크기(기존) + 문자 간격 + 회전 */}
                           <div className={styles.optionGroup}>
                             <label className={styles.inputLabel}>
                               텍스트 크기: {selectedTextLayer.style.fontSize || 16}px
@@ -1171,7 +1369,6 @@ const ClothingCustomizer = () => {
                               />
                             </label>
                           </div>
-
                           <div className={styles.optionGroup}>
                             <label className={styles.inputLabel}>
                               문자 간격: {selectedTextLayer.style.letterSpacing || 0}px
@@ -1190,7 +1387,6 @@ const ClothingCustomizer = () => {
                               />
                             </label>
                           </div>
-
                           <div className={styles.optionGroup}>
                             <label className={styles.inputLabel}>
                               회전: {selectedTextLayer.style.rotation || 0}°
@@ -1201,7 +1397,7 @@ const ClothingCustomizer = () => {
                                 value={selectedTextLayer.style.rotation || 0}
                                 onChange={(e) =>
                                   updateLayer(selectedTextLayer.id, {
-                                    style: {...selectedTextLayer.style, rotation: parseInt(e.target.value, 10) },
+                                    style: { ...selectedTextLayer.style, rotation: parseInt(e.target.value, 10) },
                                   })
                                 }
                                 onMouseUp={saveToHistory}
@@ -1213,18 +1409,49 @@ const ClothingCustomizer = () => {
                       )}
                     </div>
                   )}
-
-
+                  {/* 스티커 탭 */}
+                  {activeTab === "sticker" && (
+                    <div className={styles.stickersTab}>
+                      <div className={styles.optionGroup}>
+                        <button className={styles.addButton} onClick={openStickerModal}>
+                          <Plus size={16} /> 스티커 추가
+                        </button>
+                        <p className={styles.inputHint}>카테고리를 고른 뒤 스티커를 클릭하면 레이어로 추가됩니다.</p>
+                      </div>
+                      {selectedLayerId && layers.find(l => l.id === selectedLayerId && l.type === "sticker") && (
+                        <div className={styles.optionGroup}>
+                          <label className={styles.inputLabel}>
+                            스티커 크기: {layers.find(l => l.id === selectedLayerId)?.style?.size ?? 100}px
+                            <input
+                              type="range"
+                              min="35"
+                              max="600"
+                              step="1"
+                              value={layers.find(l => l.id === selectedLayerId)?.style?.size ?? 100}
+                              onChange={(e) => {
+                                const next = parseInt(e.target.value, 10);
+                                updateLayer(selectedLayerId, {
+                                  style: { ...(layers.find(l => l.id === selectedLayerId)?.style || {}), size: next },
+                                });
+                              }}
+                              onMouseUp={saveToHistory}
+                              className={styles.rangeInput}
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {/* 로고(이미지 업로드) 탭 */}
                   {activeTab === "logo" && (
                     <div className={styles.logoTab}>
                       <div className={styles.optionGroup}>
                         <label className={styles.inputLabel}>
                           이미지 업로드
                           <input ref={fileInputRef} type="file" accept="image/*" onChange={handleLogoUpload} className={styles.fileInput} />
-                          <span className={styles.inputHint}>JPG, PNG, WEBP 파일 지원 (최대 5MB)</span>
+                          <p className={styles.inputHint}>JPG, PNG, WEBP 파일 지원 (최대 5MB)</p>
                         </label>
                       </div>
-
                       {selectedLayerId && layers.find((l) => l.id === selectedLayerId && l.type === "logo") && (
                         <div className={styles.optionGroup}>
                           <label className={styles.inputLabel}>
@@ -1247,7 +1474,7 @@ const ClothingCustomizer = () => {
                       )}
                     </div>
                   )}
-
+                  {/* 레이어 탭 */}
                   {activeTab === "layers" && (
                     <div className={styles.layersTab}>
                       <div className={styles.optionGroup}>
@@ -1261,7 +1488,7 @@ const ClothingCustomizer = () => {
                             >
                               <div className={styles.layerInfo}>
                                 <span className={styles.layerType}>{l.type === "text" ? <Type size={16} /> : <ImageIcon size={16} />}</span>
-                                <span className={styles.layerName}>{l.type === "text" ? l.content || "텍스트" : "로고"}</span>
+                                <span className={styles.layerName}>{l.type === "text" ? (l.content || "텍스트") : (l.type === "sticker" ? "스티커" : "이미지")} </span>
                               </div>
                               <div className={styles.layerControls}>
                                 <button onClick={(e) => { e.stopPropagation(); updateLayer(l.id, { visible: !l.visible }) }} className={styles.layerButton} title={l.visible ? "숨기기" : "보이기"}>
@@ -1282,7 +1509,7 @@ const ClothingCustomizer = () => {
                           {layers.length === 0 && (
                             <div className={styles.emptyLayers}>
                               <p>레이어가 없습니다.</p>
-                              <p>텍스트나 로고를 추가해보세요!</p>
+                              <p>텍스트나 이미지를 추가해보세요!</p>
                             </div>
                           )}
                         </div>
@@ -1290,7 +1517,7 @@ const ClothingCustomizer = () => {
                     </div>
                   )}
                 </div>
-
+                  
                 <div className={styles.actionButtons}>
                   <button onClick={handleDownload} className={styles.downloadButton}>
                     <Download size={20} />
@@ -1309,7 +1536,119 @@ const ClothingCustomizer = () => {
           </div>
         </div>
       </main>
+      {/* ===== 커스텀 이미지 저장 모달 ===== */}
+      {confirmOpen && (
+        <div
+          className={styles.modalOverlay}
+          onMouseDown={() => setConfirmOpen(false)}   
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className={styles.modal}
+            onMouseDown={(e) => e.stopPropagation()}  
+          >
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>완성된 의류 미리보기</h3>
+              <button className={styles.modalClose} onClick={() => setConfirmOpen(false)} aria-label="닫기">✕</button>
+            </div>
 
+            <div className={styles.modalBody}>
+              <div className={styles.modalPreview}>
+                <img src={confirmImage} alt="미리보기" />
+              </div>
+
+              <label className={styles.modalLabel}>
+                커스텀 이름
+                <input
+                  type="text"
+                  className={styles.modalInput} t
+                  value={confirmName}
+                  onChange={(e) => setConfirmName(e.target.value)}
+                  placeholder="예) 나만의 반팔 티"
+                />
+              </label>
+            </div>
+
+            <div className={styles.modalActions}>
+              <button className={styles.secondaryButton} onClick={() => setConfirmOpen(false)} disabled={confirmSaving}>
+                돌아가기
+              </button>
+              <button className={styles.primaryButton} onClick={handleConfirmSubmit} disabled={confirmSaving}>
+                {confirmSaving ? "저장 중..." : "저장하고 마이페이지로"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* ===== 스티커 선택 모달 ===== */}
+      {stickerModalOpen && (
+        <div
+          className={styles.modalOverlay}
+          onMouseDown={closeStickerModal}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className={`${styles.modal} ${styles.pickerModal}`}
+            onMouseDown={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h3 className={styles.modalTitle}>
+                {stickerActiveCat
+                  ? (STICKERS.find(c => c.id === stickerActiveCat)?.name || "스티커")
+                  : "스티커 선택"}
+              </h3>
+              <button className={styles.modalClose} onClick={closeStickerModal} aria-label="닫기">✕</button>
+            </div>
+
+            <div className={styles.modalBody}>
+              {/* 카테고리 목록 */}
+              {!stickerActiveCat && (
+                <div className={styles.categoryGrid}>
+                  {STICKERS.map((cat) => (
+                    <button
+                      key={cat.id}
+                      className={styles.categoryCard}
+                      onClick={() => enterStickerCategory(cat.id)}
+                      title={cat.name}
+                    >
+                      <div className={styles.categoryThumb}>
+                        <img src={cat.cover || cat.items[0]} alt={cat.name} />
+                      </div>
+                      <div className={styles.categoryName}>{cat.name}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              {/* 카테고리 안의 스티커들 */}
+              {stickerActiveCat && (
+                <div className={styles.stickerGrid}>
+                  {STICKERS.find((c) => c.id === stickerActiveCat)?.items.map((src, i) => (
+                    <button
+                      key={`${stickerActiveCat}-${i}`}
+                      className={styles.stickerCard}
+                      onClick={() => pickSticker(src)}
+                      title="스티커 추가"
+                    >
+                      <div className={styles.stickerThumb}>
+                        <img src={src} alt={`sticker-${i + 1}`} />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className={styles.modalActions}>
+              {stickerActiveCat ? (
+                <button className={styles.secondaryButton} onClick={backStickerCategories}>카테고리로</button>
+              ) : (
+                <button className={styles.secondaryButton} onClick={closeStickerModal}>닫기</button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <Footer />
     </div>
   )
