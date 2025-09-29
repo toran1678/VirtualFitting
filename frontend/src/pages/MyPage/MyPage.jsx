@@ -690,7 +690,12 @@ const MyPage = () => {
                         )}
                         {activeTab === "좋아요 의류" && (
                           <div className={styles.overlayButtons}>
-                            <button className={styles.virtualFittingBtn} onClick={(e) => handleTryOn(e, item.id)}>
+                            <button 
+                              className={styles.virtualFittingButton} 
+                              onClick={(e) => handleTryOn(e, item.id)}
+                              title="가상 피팅하기"
+                            >
+                              <Camera size={16} />
                               가상 피팅
                             </button>
                             <button

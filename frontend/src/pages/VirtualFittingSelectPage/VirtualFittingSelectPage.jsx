@@ -21,7 +21,7 @@ const VirtualFittingSelectPage = () => {
   const [title, setTitle] = useState("")
   const [modelImageUrl, setModelImageUrl] = useState("")
   const [clothImageUrl, setClothImageUrl] = useState("")
-  const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000"
+  const API_BASE_URL = process.env.REACT_APP_API_URL || ""
 
   const toFullUrl = (path) => {
     if (!path) return ""

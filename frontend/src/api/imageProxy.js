@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000"
+const API_BASE_URL = process.env.REACT_APP_API_URL || ""
 
 export const proxyImage = async (imageUrl) => {
   const res = await fetch(`${API_BASE_URL}/api/image-proxy/fetch`, {

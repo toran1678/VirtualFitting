@@ -1,7 +1,7 @@
 // 이미지 URL 생성 유틸리티 함수들
 
 // 백엔드 서버 URL (환경에 따라 변경)
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000"
+const API_BASE_URL = process.env.REACT_APP_API_URL || ""
 
 // 이미지 로드 재시도 설정
 const MAX_RETRY_COUNT = 2

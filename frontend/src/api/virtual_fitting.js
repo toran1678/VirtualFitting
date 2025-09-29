@@ -4,7 +4,7 @@
  * ===================================================================
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000"
+const API_BASE_URL = process.env.REACT_APP_API_URL || ""
 
 // 가상 피팅 시작
 export const startVirtualFitting = async (modelImage, clothImage, category = 0, modelType = "dc", scale = 2.0, samples = 4) => {
@@ -56,7 +56,7 @@ export const getFittingStatus = async (processId) => {
 // 사용자의 프로세스 목록 조회 (백엔드에 이미 구현됨)
 export const getUserFittingProcesses = async (status = null, page = 1, perPage = 20) => {
   try {
-    let url = `${API_BASE_URL}/api/virtual-fitting-redis/processes?page=${page}&per_page=${perPage}`
+  let url = `${API_BASE_URL}/api/virtual-fitting-redis/processes?page=${page}&per_page=${perPage}`
     if (status) {
       url += `&status=${status}`
     }

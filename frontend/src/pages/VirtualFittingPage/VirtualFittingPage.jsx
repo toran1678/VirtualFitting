@@ -33,7 +33,7 @@ const VirtualFittingPage = () => {
   const { darkMode } = useContext(ThemeContext)
   const navigate = useNavigate()
   const location = useLocation()
-   const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000"
+  const API_BASE_URL = process.env.REACT_APP_API_URL || ""
   
   const [selectedPersonImage, setSelectedPersonImage] = useState(null)
   const [selectedClothingImage, setSelectedClothingImage] = useState(null)

@@ -26,7 +26,7 @@ import axios from "axios"
 import { retryApiCall } from "./apiUtils"
 
 // API 기본 설정
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000"
+const API_BASE_URL = process.env.REACT_APP_API_URL || ""
 
 // axios 인스턴스 생성 - 새 prefix 사용
 const followAPI = axios.create({

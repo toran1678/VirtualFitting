@@ -1,7 +1,7 @@
 import axios from "axios"
 
 // API 기본 설정
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:8000"
+const API_BASE_URL = process.env.REACT_APP_API_URL || ""
 
 // axios 인스턴스 생성 (기존 auth.js와 동일한 설정)
 const api = axios.create({

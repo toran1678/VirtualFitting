@@ -55,6 +55,7 @@ app.add_middleware(SessionMiddleware, secret_key="your_secret_key")
 
 # CORS 설정
 origins = [
+    "http://localhost:4000",
     "http://localhost",
     "http://localhost:3000",    # React 프론트엔드
     "http://localhost:5173",    # Vite 사용 시
@@ -64,8 +65,8 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,  # 허용할 도메인 목록
-    #allow_origins=["*"],  # 모든 도메인에서 요청을 허용
+    #allow_origins=origins,  # 허용할 도메인 목록
+    allow_origins=["*"],  # 모든 도메인에서 요청을 허용
     allow_credentials=True,
     allow_methods=["*"],  # 모든 HTTP 메서드 허용
     allow_headers=["*"],  # 모든 헤더 허용

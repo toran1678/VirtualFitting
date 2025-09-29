@@ -6,6 +6,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Python 의존성 설치
@@ -21,5 +22,5 @@ RUN mkdir -p uploads/profile_pictures uploads/feeds uploads/custom_clothing uplo
 # 포트 노출
 EXPOSE 8000
 
-# 기본 명령어 (메인 앱 실행)
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# 기본 명령어 (메인 앱 실행 - 프로덕션)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
