@@ -315,7 +315,7 @@ class VirtualFittingServiceRedis:
             cwd=str(self.ootd_model_path),
             capture_output=True,
             text=True,
-            timeout=1800,  # 30분 타임아웃
+            timeout=3600,  # 60분 타임아웃
             shell=False,
             env=env
         )
