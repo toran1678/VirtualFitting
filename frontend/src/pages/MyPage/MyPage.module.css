@@ -1142,6 +1142,33 @@
   transform: translateY(0);
 }
 
+/* 배경 커스텀 버튼 스타일 */
+.backgroundCustomButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+}
+
+.backgroundCustomButton:hover {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+}
+
+.backgroundCustomButton:active {
+  transform: translateY(0);
+}
+
 /* 공유하기 버튼 스타일 */
 .shareButton {
   display: flex;
@@ -1180,6 +1207,17 @@
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
 }
 
+/* 다크모드 배경 커스텀 버튼 */
+.dark-mode .backgroundCustomButton {
+  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4);
+}
+
+.dark-mode .backgroundCustomButton:hover {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.5);
+}
+
 /* 다크모드 공유하기 버튼 */
 .dark-mode .shareButton {
   background: linear-gradient(135deg, #10b981, #059669);
@@ -1200,6 +1238,17 @@
   }
   
   .virtualFittingButton svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .backgroundCustomButton {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    gap: 0.3rem;
+  }
+  
+  .backgroundCustomButton svg {
     width: 14px;
     height: 14px;
   }

@@ -11,6 +11,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- 기존 테이블 삭제 (역순으로 삭제)
 DROP TABLE IF EXISTS `feed_comments`;
 DROP TABLE IF EXISTS `feeds`;
+DROP TABLE IF EXISTS `background_customs`;
 DROP TABLE IF EXISTS `virtual_fittings`;
 DROP TABLE IF EXISTS `good_wish_lists`;
 DROP TABLE IF EXISTS `custom_clothing_items`;
@@ -120,7 +121,25 @@ CREATE TABLE `virtual_fittings` (
     INDEX `idx_virtual_fittings_clothing_id` (`clothing_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='가상 피팅 결과 테이블';
 
--- 8. 피드 테이블 (Feeds)
+-- 8. 배경 커스텀 테이블 (Background Customs)
+CREATE TABLE `background_customs` (
+    `custom_fitting_id` INT AUTO_INCREMENT PRIMARY KEY,
+    `user_id` INT NOT NULL COMMENT '사용자 ID',
+    `fitting_id` INT NOT NULL COMMENT '가상피팅 결과 ID',
+    `custom_image_url` VARCHAR(255) NOT NULL COMMENT '배경 커스텀된 이미지 URL',
+    `background_image_url` VARCHAR(255) NULL COMMENT '사용자가 선택한 배경 이미지 URL',
+    `title` VARCHAR(200) NULL COMMENT '커스텀 결과 제목',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 시간',
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 시간',
+    
+    FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE,
+    FOREIGN KEY (`fitting_id`) REFERENCES `virtual_fittings`(`fitting_id`) ON DELETE CASCADE,
+    INDEX `idx_background_customs_user_id` (`user_id`),
+    INDEX `idx_background_customs_fitting_id` (`fitting_id`),
+    INDEX `idx_background_customs_created_at` (`created_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='배경 커스텀 결과 테이블';
+
+-- 9. 피드 테이블 (Feeds)
 CREATE TABLE `feeds` (
     `feed_id` INT AUTO_INCREMENT PRIMARY KEY,
     `nickname` VARCHAR(20) NOT NULL COMMENT '작성자 닉네임',
@@ -250,6 +269,8 @@ UNION ALL
 SELECT 'Good Wish Lists', COUNT(*) FROM good_wish_lists
 UNION ALL
 SELECT 'Virtual Fittings', COUNT(*) FROM virtual_fittings
+UNION ALL
+SELECT 'Background Customs', COUNT(*) FROM background_customs
 UNION ALL
 SELECT 'Feeds', COUNT(*) FROM feeds
 UNION ALL
