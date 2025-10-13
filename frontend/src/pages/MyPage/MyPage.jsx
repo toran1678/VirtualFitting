@@ -10,7 +10,7 @@ import styles from "./MyPage.module.css"
 import { getProfileImageUrl, getFeedImageUrl } from "../../utils/imageUtils"
 import { getMyFeeds } from "../../api/feeds"
 import { getUserProfileByEmail } from "../../api/userProfiles"
-import { Heart, Clock, Camera, Share2 } from "lucide-react"
+import { Heart, Clock, Camera, Share2, Palette } from "lucide-react"
 import { getFittingHistory, getFittingResultImageUrl } from "../../api/virtual_fitting"
 import { getMyCustomClothes, getCustomClothingImageUrl } from "../../api/customClothingAPI"
 
@@ -450,6 +450,14 @@ const MyPage = () => {
     })
   }
 
+  // 배경 커스텀 버튼 클릭 핸들러
+  const handleBackgroundCustomClick = (e, item) => {
+    e.stopPropagation() // 부모 클릭 이벤트 방지
+    
+    // 배경 커스텀 페이지로 이동
+    navigate(`/background-custom/${item.id}`)
+  }
+
   const getStatusColor = (status) => {
     switch (status) {
       case "완료":
@@ -655,6 +663,14 @@ const MyPage = () => {
                         {activeTab === "가상 피팅" && (
                           <div className={styles.overlayInfo}>
                             <div className={styles.virtualFittingActions}>
+                              <button 
+                                className={styles.backgroundCustomButton}
+                                onClick={(e) => handleBackgroundCustomClick(e, item)}
+                                title="배경 커스텀하기"
+                              >
+                                <Palette size={16} />
+                                배경 커스텀
+                              </button>
                               <button 
                                 className={styles.shareButton}
                                 onClick={(e) => handleShareClick(e, item, 'virtual-fitting')}

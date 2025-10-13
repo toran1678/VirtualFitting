@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { ThemeContext } from "../../context/ThemeContext"
 import Header from "../../components/Header/Header"
 import Footer from "../../components/Footer/Footer"
-import { Play, ImageIcon, RefreshCw, X, Eye, Download } from 'lucide-react'
+import { Play, ImageIcon, RefreshCw, X, Eye, Download, Palette, Zap } from 'lucide-react'
 import { isLoggedIn } from "../../api/auth"
 import { 
   getFittingHistory, 
@@ -318,6 +318,14 @@ const VirtualFittingMainPage = () => {
     }
   }
 
+  // 배경 커스텀 버튼 클릭 핸들러
+  const handleBackgroundCustomClick = (e, result) => {
+    e.stopPropagation() // 부모 클릭 이벤트 방지
+    
+    // 배경 커스텀 페이지로 이동
+    navigate(`/background-custom/${result.fitting_id}`)
+  }
+
   // 이미지 미리보기 함수
   const handlePreviewImage = (imageUrl) => {
     setPreviewImage(imageUrl)
@@ -379,6 +387,14 @@ const VirtualFittingMainPage = () => {
             >
               <RefreshCw className={`${styles.btnIcon} ${refreshing ? styles.spinning : ''}`} />
               새로고침
+            </button>
+            
+            <button 
+              className={styles.leffaBtn}
+              onClick={() => navigate('/leffa-test')}
+            >
+              <Zap className={styles.btnIcon} />
+              모델 테스트
             </button>
           </div>
 
@@ -512,6 +528,13 @@ const VirtualFittingMainPage = () => {
                         title="미리보기"
                       >
                         <Eye className={styles.btnIcon} />
+                      </button>
+                      <button 
+                        className={styles.overlayBtn}
+                        onClick={(e) => handleBackgroundCustomClick(e, result)}
+                        title="배경 커스텀"
+                      >
+                        <Palette className={styles.btnIcon} />
                       </button>
                       <button 
                         className={styles.overlayBtn}

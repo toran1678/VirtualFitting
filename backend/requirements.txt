@@ -20,6 +20,10 @@ redis
 requests
 beautifulsoup4
 
+# 이미지 처리 
+rembg==2.0.50
+segment-anything==1.0
+
 # Password encryption
 passlib
 bcrypt==4.0.1
