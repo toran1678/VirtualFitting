@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom"
 import { ThemeContext } from "../../context/ThemeContext"
 import Header from "../../components/Header/Header"
 import Footer from "../../components/Footer/Footer"
-import { Play, ImageIcon, RefreshCw, X, Zap, Shirt, Sparkles, Plus } from 'lucide-react'
+import { Play, ImageIcon, RefreshCw, X, Zap, Shirt, Sparkles, Plus, Settings, Target, Clock } from 'lucide-react'
 import { isLoggedIn } from "../../api/auth"
 import { 
   getMyLikedClothes
@@ -40,6 +40,16 @@ const FastFittingPage = () => {
   const [loading, setLoading] = useState(false)
   const [processing, setProcessing] = useState(false)
   
+  // 모델 선택 및 Leffa 옵션
+  const [selectedModel, setSelectedModel] = useState("change-clothes") // "change-clothes" or "leffa"
+  const [leffaOptions, setLeffaOptions] = useState({
+    modelType: "viton_hd", // "viton_hd" or "dress_code"
+    steps: 30,
+    scale: 2.5,
+    seed: 42,
+    repaint: false
+  })
+  
   // 데이터 상태
   const [likedClothes, setLikedClothes] = useState([])
   const [customClothes, setCustomClothes] = useState([])
@@ -57,6 +67,12 @@ const FastFittingPage = () => {
   const [uploadedImage, setUploadedImage] = useState(null)
   const [selectedCategory, setSelectedCategory] = useState("상의")
   const [uploadedPersonImage, setUploadedPersonImage] = useState(null)
+  
+  // Leffa 결과 표시 상태
+  const [leffaResults, setLeffaResults] = useState([])
+  const [showLeffaResults, setShowLeffaResults] = useState(false)
+  const [leffaResultName, setLeffaResultName] = useState("")
+  const [savingLeffaResult, setSavingLeffaResult] = useState(false)
 
   // 탭 데이터
   const tabs = ["좋아요한 의류", "내 옷장", "커스터마이징 의류"]
@@ -327,6 +343,300 @@ const FastFittingPage = () => {
     }
   }
 
+  // Leffa 결과 DB 저장
+  const saveLeffaResultToDB = async () => {
+    if (!leffaResultName.trim()) {
+      alert("결과 이름을 입력해주세요.")
+      return
+    }
+
+    setSavingLeffaResult(true)
+    try {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || ""
+      
+      // 결과 이미지 URL들을 백엔드로 전송
+      const response = await fetch(`${API_BASE_URL}/api/virtual-fitting-redis/save-result`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          result_name: leffaResultName,
+          image_urls: leffaResults.map(r => r.imageUrl),
+          model_type: "leffa",
+          fitting_type: fittingType
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error("결과 저장에 실패했습니다.")
+      }
+
+      alert("✅ 결과가 저장되었습니다!")
+      setShowLeffaResults(false)
+      setLeffaResults([])
+      setLeffaResultName("")
+      
+      // 가상 피팅 메인 페이지로 이동
+      navigate("/virtual-fitting-main")
+    } catch (error) {
+      console.error("결과 저장 오류:", error)
+      alert(error.message || "결과 저장에 실패했습니다.")
+    } finally {
+      setSavingLeffaResult(false)
+    }
+  }
+
+  // Leffa 프론트엔드 직접 처리
+  const handleLeffaFitting = async () => {
+    try {
+      // @gradio/client 동적 import
+      const { Client } = await import("@gradio/client")
+      
+      console.log("Leffa 가상 피팅 시작...")
+      console.log("선택된 인물 이미지:", selectedPersonImage)
+      console.log("선택된 의류:", selectedClothes)
+      console.log("Leffa 옵션:", leffaOptions)
+      console.log("  - Model Type:", leffaOptions.modelType)
+      console.log("  - Steps:", leffaOptions.steps)
+      console.log("  - Scale:", leffaOptions.scale)
+      console.log("  - Seed:", leffaOptions.seed)
+      console.log("  - Repaint:", leffaOptions.repaint)
+      
+      // 이미지 프록시를 통해 Blob 가져오기
+      const fetchImageViaProxy = async (imageUrl) => {
+        const API_BASE_URL = process.env.REACT_APP_API_URL || ""
+        
+        // 프록시 API 호출
+        const proxyResponse = await fetch(`${API_BASE_URL}/api/image-proxy/fetch`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          credentials: "include",
+          body: JSON.stringify({ url: imageUrl })
+        })
+        
+        if (!proxyResponse.ok) {
+          throw new Error(`이미지 프록시 실패: ${proxyResponse.status}`)
+        }
+        
+        const proxyData = await proxyResponse.json()
+        const proxiedUrl = `${API_BASE_URL}${proxyData.url}`
+        
+        console.log("프록시된 이미지 URL:", proxiedUrl)
+        
+        // 프록시된 이미지를 Blob으로 변환
+        const blobResponse = await fetch(proxiedUrl, {
+          credentials: "include"
+        })
+        
+        if (!blobResponse.ok) {
+          throw new Error(`프록시 이미지 로드 실패: ${blobResponse.status}`)
+        }
+        
+        return await blobResponse.blob()
+      }
+      
+      // 인물 이미지 준비
+      let personImageBlob
+      if (selectedPersonImage.type === 'uploaded' && selectedPersonImage.file) {
+        personImageBlob = selectedPersonImage.file
+        console.log("인물 이미지: 직접 업로드된 파일 사용")
+      } else {
+        // DB에서 선택한 이미지 - image 속성 또는 person_image_url로 URL 생성
+        const imageUrl = selectedPersonImage.image || 
+                        (selectedPersonImage.person_image_url ? getPersonImageUrl(selectedPersonImage.person_image_url) : null) ||
+                        (selectedPersonImage.image_url ? getPersonImageUrl(selectedPersonImage.image_url) : null)
+        
+        console.log("인물 이미지 URL:", imageUrl)
+        
+        if (!imageUrl) {
+          console.error("인물 이미지 객체:", selectedPersonImage)
+          throw new Error("인물 이미지 URL을 찾을 수 없습니다.")
+        }
+        
+        // 프록시를 통해 이미지 가져오기 (CORS 해결)
+        personImageBlob = await fetchImageViaProxy(imageUrl)
+        console.log("인물 이미지 Blob 생성 완료:", personImageBlob.size, "bytes")
+      }
+      
+      // 의류 이미지 준비 함수
+      const prepareClothingBlob = async (clothing) => {
+        if (!clothing) return null
+        
+        console.log("의류 이미지 준비:", clothing)
+        
+        if (clothing.type === 'uploaded' && clothing.file) {
+          console.log("의류 이미지: 직접 업로드된 파일 사용")
+          return clothing.file
+        } else {
+          // DB에서 선택한 이미지 - image 속성 우선 사용 (이미 URL 생성됨)
+          let imageUrl = clothing.image
+          
+          // image가 없으면 소스별로 URL 생성
+          if (!imageUrl) {
+            if (clothing.source === 'liked' && clothing.product_image_url) {
+              imageUrl = clothing.product_image_url
+            } else if (clothing.source === 'custom' && clothing.custom_image_url) {
+              imageUrl = getCustomClothingImageUrl(clothing.custom_image_url)
+            } else if (clothing.source === 'closet' && clothing.clothing_image_url) {
+              imageUrl = getClothingImageUrl(clothing.clothing_image_url)
+            }
+          }
+          
+          console.log("의류 이미지 URL:", imageUrl)
+          console.log("의류 소스:", clothing.source)
+          
+          if (!imageUrl) {
+            console.error("의류 객체:", clothing)
+            throw new Error("의류 이미지 URL을 찾을 수 없습니다.")
+          }
+          
+          // 프록시를 통해 이미지 가져오기 (CORS 해결)
+          const blob = await fetchImageViaProxy(imageUrl)
+          console.log("의류 이미지 Blob 생성 완료:", blob.size, "bytes")
+          return blob
+        }
+      }
+      
+      // 카테고리 매핑
+      const mapCategory = (fittingType) => {
+        if (fittingType === "상의") return "upper_body"
+        if (fittingType === "하의") return "lower_body"
+        if (fittingType === "드레스") return "dresses"
+        return "upper_body"
+      }
+      
+      console.log("Gradio Client 연결 중...")
+      const client = await Client.connect("franciszzj/Leffa")
+      console.log("연결 완료!")
+      
+      // 결과를 저장할 배열
+      const results = []
+      
+      // 상의+하의는 두 번 처리
+      if (fittingType === "상의+하의") {
+        // 상의 처리
+        if (selectedClothes.upper) {
+          console.log("상의 가상 피팅 시작...")
+          const upperBlob = await prepareClothingBlob(selectedClothes.upper)
+          
+          const upperResult = await client.predict("/leffa_predict_vt", {
+            src_image_path: personImageBlob,
+            ref_image_path: upperBlob,
+            ref_acceleration: false,
+            step: leffaOptions.steps,
+            scale: leffaOptions.scale,
+            seed: leffaOptions.seed,
+            vt_model_type: leffaOptions.modelType,
+            vt_garment_type: "upper_body",
+            vt_repaint: leffaOptions.repaint
+          })
+          
+          console.log("상의 결과:", upperResult)
+          if (upperResult?.data?.[0]) {
+            results.push({ type: '상의', data: upperResult.data[0] })
+          }
+        }
+        
+        // 하의 처리
+        if (selectedClothes.lower) {
+          console.log("하의 가상 피팅 시작...")
+          const lowerBlob = await prepareClothingBlob(selectedClothes.lower)
+          
+          const lowerResult = await client.predict("/leffa_predict_vt", {
+            src_image_path: personImageBlob,
+            ref_image_path: lowerBlob,
+            ref_acceleration: false,
+            step: leffaOptions.steps,
+            scale: leffaOptions.scale,
+            seed: leffaOptions.seed,
+            vt_model_type: leffaOptions.modelType,
+            vt_garment_type: "lower_body",
+            vt_repaint: leffaOptions.repaint
+          })
+          
+          console.log("하의 결과:", lowerResult)
+          if (lowerResult?.data?.[0]) {
+            results.push({ type: '하의', data: lowerResult.data[0] })
+          }
+        }
+      } else {
+        // 단일 피팅 (상의, 하의, 드레스)
+        const clothing = selectedClothes.upper || selectedClothes.lower
+        if (!clothing) {
+          throw new Error("의류를 선택해주세요.")
+        }
+        
+        console.log(`${fittingType} 가상 피팅 시작...`)
+        const clothingBlob = await prepareClothingBlob(clothing)
+        
+        const mappedCategory = mapCategory(fittingType)
+        console.log(`  - 피팅 타입: ${fittingType}`)
+        console.log(`  - 매핑된 카테고리: ${mappedCategory}`)
+        
+        const result = await client.predict("/leffa_predict_vt", {
+          src_image_path: personImageBlob,
+          ref_image_path: clothingBlob,
+          ref_acceleration: false,
+          step: leffaOptions.steps,
+          scale: leffaOptions.scale,
+          seed: leffaOptions.seed,
+          vt_model_type: leffaOptions.modelType,
+          vt_garment_type: mappedCategory,
+          vt_repaint: leffaOptions.repaint
+        })
+        
+        console.log("결과:", result)
+        if (result?.data?.[0]) {
+          results.push({ type: fittingType, data: result.data[0] })
+        }
+      }
+      
+      // 결과 처리
+      if (results.length === 0) {
+        throw new Error("가상 피팅 결과를 받지 못했습니다.")
+      }
+      
+      // 결과 이미지 URL 추출
+      const imageUrls = results.map(r => {
+        const imageData = r.data
+        if (typeof imageData === 'string') {
+          return imageData.startsWith('http') ? imageData : `https://huggingface.co/spaces/franciszzj/Leffa/resolve/main${imageData}`
+        } else if (imageData?.url) {
+          return imageData.url
+        } else if (imageData?.path) {
+          return `https://huggingface.co/spaces/franciszzj/Leffa/resolve/main${imageData.path}`
+        }
+        return null
+      }).filter(url => url)
+      
+      if (imageUrls.length === 0) {
+        throw new Error("결과 이미지 URL을 추출할 수 없습니다.")
+      }
+      
+      console.log("결과 이미지 URLs:", imageUrls)
+      
+      // 결과를 상태에 저장하고 모달 표시
+      setLeffaResults(results.map((r, idx) => ({
+        type: r.type,
+        imageUrl: imageUrls[idx]
+      })))
+      setShowLeffaResults(true)
+      
+      // TODO: 나중에 백엔드 API로 결과 저장
+      // imageUrls를 백엔드로 전송하여 DB에 저장
+      
+    } catch (error) {
+      console.error("Leffa 가상 피팅 오류:", error)
+      throw error
+    } finally {
+      setProcessing(false)
+    }
+  }
+
   // 가상 피팅 실행
   const handleVirtualFitting = async () => {
     if (!selectedPersonImage) {
@@ -358,7 +668,13 @@ const FastFittingPage = () => {
 
     setProcessing(true)
     try {
-      // 백엔드 API 호출
+      // Leffa 모델 선택 시 프론트엔드에서 직접 처리
+      if (selectedModel === "leffa") {
+        await handleLeffaFitting()
+        return
+      }
+      
+      // Change Clothes AI는 백엔드 API 호출
       const API_BASE_URL = process.env.REACT_APP_API_URL || ""
       
       // FormData 생성 (직접 첨부한 이미지 처리)
@@ -404,6 +720,7 @@ const FastFittingPage = () => {
       
       formData.append("fitting_type", fittingType)
       formData.append("garment_description", "Fast virtual fitting")
+      formData.append("model_type", "change-clothes")
       
       const response = await fetch(`${API_BASE_URL}/api/fast-fitting/start`, {
         method: "POST",
@@ -426,11 +743,32 @@ const FastFittingPage = () => {
       console.error("가상 피팅 오류:", error)
       const errorMessage = error.message || "가상 피팅에 실패했습니다."
       
-      // GPU 할당량 오류인 경우 특별한 안내
+      // 에러 타입별 맞춤 안내
       if (errorMessage.includes("GPU quota") || errorMessage.includes("할당량")) {
-        alert("⚠️ " + errorMessage + "\n\n💡 Hugging Face의 무료 GPU 할당량이 소진되었습니다.\n약 1시간 후에 다시 시도하거나, 유료 플랜을 고려해보세요.")
+        alert(
+          "⚠️ GPU 할당량 초과\n\n" + 
+          errorMessage + 
+          "\n\n💡 Hugging Face의 무료 GPU 할당량이 소진되었습니다.\n" +
+          "약 1시간 후에 다시 시도하거나, 다른 모델을 사용해주세요."
+        )
+      } else if (errorMessage.includes("사용 불가능") || errorMessage.includes("응답하지 않습니다")) {
+        alert(
+          "⚠️ Leffa AI 모델 사용 불가\n\n" +
+          errorMessage +
+          "\n\n💡 가능한 해결 방법:\n" +
+          "1. 잠시 후 다시 시도 (Space가 시작되는 데 몇 분 소요)\n" +
+          "2. 'Change Clothes AI' 모델로 변경\n" +
+          "3. 페이지 새로고침 후 재시도"
+        )
+      } else if (errorMessage.includes("Space가 현재 실행 중이지 않습니다")) {
+        alert(
+          "⚠️ Space 대기 중\n\n" +
+          errorMessage +
+          "\n\n💡 Hugging Face Space가 시작되는 중입니다.\n" +
+          "몇 분 후 다시 시도하거나 'Change Clothes AI' 모델을 사용해주세요."
+        )
       } else {
-        alert("가상 피팅에 실패했습니다: " + errorMessage)
+        alert("❌ 가상 피팅 실패\n\n" + errorMessage)
       }
     } finally {
       setProcessing(false)
@@ -579,6 +917,141 @@ const FastFittingPage = () => {
           </h1>
           <p>허깅페이스 AI로 빠르게 가상 피팅을 체험해보세요</p>
         </div>
+
+        {/* 모델 선택 */}
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2>
+              <Sparkles className={styles.sectionIcon} />
+              AI 모델 선택
+            </h2>
+          </div>
+          
+          <div className={styles.modelSelection}>
+            <div 
+              className={`${styles.modelCard} ${selectedModel === 'change-clothes' ? styles.selected : ''}`}
+              onClick={() => setSelectedModel('change-clothes')}
+            >
+              <div className={styles.modelCardHeader}>
+                <Zap className={styles.modelIcon} />
+                <h3>Change Clothes AI</h3>
+              </div>
+              <p className={styles.modelDescription}>빠른 처리 속도, 간단한 옵션, 가상 피팅 제한 있음</p>
+              <div className={styles.modelFeatures}>
+                <span className={styles.featureBadge}>
+                  <Zap size={14} /> 빠름
+                </span>
+                <span className={styles.featureBadge}>
+                  <Target size={14} /> 간편
+                </span>
+              </div>
+            </div>
+            
+            <div 
+              className={`${styles.modelCard} ${selectedModel === 'leffa' ? styles.selected : ''}`}
+              onClick={() => setSelectedModel('leffa')}
+            >
+              <div className={styles.modelCardHeader}>
+                <Sparkles className={styles.modelIcon} />
+                <h3>Leffa AI</h3>
+              </div>
+              <p className={styles.modelDescription}>고품질 결과, 세밀한 조정</p>
+              <div className={styles.modelFeatures}>
+                <span className={styles.featureBadge}>
+                  <Sparkles size={14} /> 고품질
+                </span>
+                <span className={styles.featureBadge}>
+                  <Settings size={14} /> 고급 옵션
+                </span>
+                <span className={styles.featureBadge}>
+                  <Clock size={14} /> 처리 시간 다소 소요
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          {/* Leffa 선택 시 고급 옵션 표시 */}
+          {selectedModel === 'leffa' && (
+            <div className={styles.leffaOptions}>
+              <h3 className={styles.optionsTitle}>
+                <Settings size={20} style={{display: 'inline', marginRight: '8px'}} />
+                Leffa 고급 옵션
+              </h3>
+              
+              <div className={styles.optionRow}>
+                <label>Model Type:</label>
+                <div className={styles.radioGroup}>
+                  <label className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      name="modelType"
+                      value="viton_hd"
+                      checked={leffaOptions.modelType === 'viton_hd'}
+                      onChange={(e) => setLeffaOptions({...leffaOptions, modelType: e.target.value})}
+                    />
+                    VITON-HD
+                  </label>
+                  <label className={styles.radioLabel}>
+                    <input
+                      type="radio"
+                      name="modelType"
+                      value="dress_code"
+                      checked={leffaOptions.modelType === 'dress_code'}
+                      onChange={(e) => setLeffaOptions({...leffaOptions, modelType: e.target.value})}
+                    />
+                    DressCode
+                  </label>
+                </div>
+              </div>
+              
+              <div className={styles.optionRow}>
+                <label>Inference Steps: {leffaOptions.steps}</label>
+                <input
+                  type="range"
+                  min="10"
+                  max="50"
+                  value={leffaOptions.steps}
+                  onChange={(e) => setLeffaOptions({...leffaOptions, steps: parseInt(e.target.value)})}
+                  className={styles.slider}
+                />
+              </div>
+              
+              <div className={styles.optionRow}>
+                <label>Guidance Scale: {leffaOptions.scale}</label>
+                <input
+                  type="range"
+                  min="1"
+                  max="5"
+                  step="0.1"
+                  value={leffaOptions.scale}
+                  onChange={(e) => setLeffaOptions({...leffaOptions, scale: parseFloat(e.target.value)})}
+                  className={styles.slider}
+                />
+              </div>
+              
+              <div className={styles.optionRow}>
+                <label>Random Seed:</label>
+                <input
+                  type="number"
+                  value={leffaOptions.seed}
+                  onChange={(e) => setLeffaOptions({...leffaOptions, seed: parseInt(e.target.value)})}
+                  className={styles.numberInput}
+                />
+              </div>
+              
+              <div className={styles.optionRow}>
+                <label className={styles.checkboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={leffaOptions.repaint}
+                    onChange={(e) => setLeffaOptions({...leffaOptions, repaint: e.target.checked})}
+                  />
+                  Repaint Mode
+                </label>
+              </div>
+            </div>
+          )}
+        </section>
 
         {/* 인물 이미지 선택 */}
         <section className={styles.section}>
@@ -998,6 +1471,94 @@ const FastFittingPage = () => {
                 disabled={!uploadedImage || !selectedCategory}
               >
                 선택하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Leffa 결과 표시 모달 */}
+      {showLeffaResults && (
+        <div className={styles.resultModalOverlay} onClick={() => setShowLeffaResults(false)}>
+          <div className={styles.resultModalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.resultModalHeader}>
+              <div className={styles.resultModalTitle}>
+                <Sparkles size={24} className={styles.titleIcon} />
+                <h2>가상 피팅 결과</h2>
+              </div>
+              <button 
+                className={styles.resultCloseBtn}
+                onClick={() => setShowLeffaResults(false)}
+              >
+                <X size={24} />
+              </button>
+            </div>
+            
+            <div className={styles.resultModalBody}>
+              <div className={styles.resultsGrid}>
+                {leffaResults.map((result, idx) => (
+                  <div key={idx} className={styles.resultItem}>
+                    <div className={styles.resultImageWrapper}>
+                      <img 
+                        src={result.imageUrl} 
+                        alt={`${result.type} 결과`}
+                        className={styles.resultImage}
+                      />
+                      <div className={styles.resultBadge}>
+                        <Shirt size={16} />
+                        <span>{result.type}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <div className={styles.saveSection}>
+                <div className={styles.saveSectionHeader}>
+                  <ImageIcon size={20} />
+                  <h3>결과 저장하기</h3>
+                </div>
+                <input
+                  type="text"
+                  className={styles.resultNameInput}
+                  placeholder="예: 여름 코디, 데이트 룩 등"
+                  value={leffaResultName}
+                  onChange={(e) => setLeffaResultName(e.target.value)}
+                  maxLength={50}
+                />
+                <p className={styles.saveNote}>
+                  저장된 결과는 가상 피팅 메인 페이지에서 확인할 수 있습니다.
+                </p>
+              </div>
+            </div>
+            
+            <div className={styles.resultModalFooter}>
+              <button 
+                className={styles.resultCancelBtn}
+                onClick={() => {
+                  setShowLeffaResults(false)
+                  setLeffaResultName("")
+                }}
+              >
+                <X size={18} />
+                닫기
+              </button>
+              <button 
+                className={styles.resultSaveBtn}
+                onClick={saveLeffaResultToDB}
+                disabled={savingLeffaResult || !leffaResultName.trim()}
+              >
+                {savingLeffaResult ? (
+                  <>
+                    <RefreshCw size={18} className={styles.spinning} />
+                    저장 중...
+                  </>
+                ) : (
+                  <>
+                    <ImageIcon size={18} />
+                    저장하기
+                  </>
+                )}
               </button>
             </div>
           </div>

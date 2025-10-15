@@ -149,6 +149,13 @@ async def start_fast_fitting(
     lower_category: Optional[str] = Form(None),
     fitting_type: str = Form(...),  # "상의", "하의", "드레스", "상의+하의"
     garment_description: str = Form("Fast virtual fitting"),
+    # 모델 선택 및 Leffa 옵션
+    model_type: str = Form("change-clothes"),  # "change-clothes" or "leffa"
+    leffa_model_type: Optional[str] = Form("viton_hd"),  # "viton_hd" or "dress_code"
+    leffa_steps: Optional[int] = Form(30),
+    leffa_scale: Optional[float] = Form(2.5),
+    leffa_seed: Optional[int] = Form(42),
+    leffa_repaint: Optional[bool] = Form(False),
     db: Session = Depends(get_db),
     current_user: Users = Depends(get_current_user)
 ):
@@ -233,6 +240,15 @@ async def start_fast_fitting(
         if fitting_type == "상의+하의" and (not upper_cloth_path or not lower_cloth_path):
             raise HTTPException(status_code=400, detail="상의와 하의 이미지를 모두 제공해야 합니다.")
         
+        # Leffa 옵션 구성
+        leffa_options = {
+            "model_type": leffa_model_type,
+            "steps": leffa_steps,
+            "scale": leffa_scale,
+            "seed": leffa_seed,
+            "repaint": leffa_repaint
+        } if model_type == "leffa" else None
+        
         # 빠른 가상 피팅 시작 (Redis 큐 사용)
         process_id = await fast_fitting_service.start_fast_fitting(
             db=db,
@@ -241,7 +257,9 @@ async def start_fast_fitting(
             upper_cloth_image_path=upper_cloth_path,
             lower_cloth_image_path=lower_cloth_path,
             fitting_type=fitting_type,
-            garment_description=garment_description
+            garment_description=garment_description,
+            model_type=model_type,
+            leffa_options=leffa_options
         )
         
         logger.info(f"빠른 가상 피팅 프로세스 생성 완료: process_id={process_id}")

@@ -49,8 +49,8 @@ safetensors==0.3.1
 huggingface-hub==0.25.2
 
 # 빠른 가상 피팅용 (Hugging Face Gradio API)
-gradio==4.44.1
-gradio-client==1.4.3
+gradio
+gradio-client
 
 # 비동기 HTTP 요청
 aiohttp

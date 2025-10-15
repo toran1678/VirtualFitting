@@ -36,21 +36,47 @@ class FastFittingService:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.temp_dir.mkdir(parents=True, exist_ok=True)
         
-        # Hugging Face Gradio Client
-        self.hf_client = None
+        # Hugging Face Gradio Clients
+        self.change_clothes_client = None  # Change Clothes AI
+        self.leffa_client = None           # Leffa AI
         
         logger.info(f"FastFittingService 초기화: project_root={self.project_root}")
     
-    def get_hf_client(self):
-        """Hugging Face Gradio Client 초기화"""
-        if self.hf_client is None:
+    def get_change_clothes_client(self):
+        """Change Clothes AI Gradio Client 초기화"""
+        if self.change_clothes_client is None:
             try:
-                self.hf_client = Client("jallenjia/Change-Clothes-AI")
-                logger.info("Hugging Face 클라이언트 초기화 성공")
+                self.change_clothes_client = Client("jallenjia/Change-Clothes-AI")
+                logger.info("Change Clothes AI 클라이언트 초기화 성공")
             except Exception as e:
-                logger.error(f"Hugging Face 클라이언트 초기화 실패: {e}")
+                logger.error(f"Change Clothes AI 클라이언트 초기화 실패: {e}")
                 raise
-        return self.hf_client
+        return self.change_clothes_client
+    
+    def get_leffa_client(self):
+        """Leffa AI Gradio Client 초기화"""
+        if self.leffa_client is None:
+            try:
+                logger.info("Leffa AI 클라이언트 초기화 중...")
+                
+                # Gradio Client는 /config 엔드포인트를 사용하므로 정상 작동
+                # /info 엔드포인트 오류는 무시 (Gradio가 자동 처리)
+                self.leffa_client = Client(
+                    "franciszzj/Leffa",
+                    verbose=False,  # 불필요한 로그 숨김
+                    download_files=False  # 파일 다운로드 최소화
+                )
+                
+                logger.info("✅ Leffa AI 클라이언트 초기화 성공!")
+                
+            except Exception as e:
+                logger.error(f"Leffa AI 클라이언트 초기화 실패: {e}")
+                raise Exception(
+                    "Leffa AI 모델 연결 실패. "
+                    "잠시 후 다시 시도하거나 Change Clothes AI 모델을 사용해주세요."
+                )
+        
+        return self.leffa_client
     
     def _prepare_local_image(self, image_path: str) -> str:
         """이미지 경로를 로컬 절대 경로로 변환 (URL인 경우 다운로드)"""
@@ -123,7 +149,9 @@ class FastFittingService:
         upper_cloth_image_path: Optional[str],
         lower_cloth_image_path: Optional[str],
         fitting_type: str,  # "상의", "하의", "드레스", "상의+하의"
-        garment_description: str = "Fast virtual fitting"
+        garment_description: str = "Fast virtual fitting",
+        model_type: str = "change-clothes",  # "change-clothes" or "leffa"
+        leffa_options: Optional[Dict[str, Any]] = None
     ) -> int:
         """빠른 가상 피팅 프로세스 시작 (Redis 큐 사용)"""
         
@@ -158,7 +186,9 @@ class FastFittingService:
             "upper_cloth_image_path": upper_cloth_image_path,
             "lower_cloth_image_path": lower_cloth_image_path,
             "fitting_type": fitting_type,
-            "garment_description": garment_description
+            "garment_description": garment_description,
+            "model_type": model_type,
+            "leffa_options": leffa_options
         }
         
         # Redis 큐에 작업 추가
@@ -187,6 +217,8 @@ class FastFittingService:
         lower_cloth_image_path = task_data.get("lower_cloth_image_path")
         fitting_type = task_data["fitting_type"]
         garment_description = task_data["garment_description"]
+        model_type = task_data.get("model_type", "change-clothes")
+        leffa_options = task_data.get("leffa_options")
         
         db = SessionLocal()
         
@@ -210,11 +242,13 @@ class FastFittingService:
             if fitting_type == "상의+하의":
                 # 1. 상의 피팅
                 logger.info("상의 피팅 시작")
-                upper_result = self._call_huggingface_api(
+                upper_result = self._call_api(
                     person_image_path=person_image_path,
                     garment_image_path=upper_cloth_image_path,
                     category="upper_body",
-                    description=garment_description
+                    model_type=model_type,
+                    garment_description=garment_description,
+                    leffa_options=leffa_options
                 )
                 
                 # 상의 결과 저장
@@ -222,11 +256,13 @@ class FastFittingService:
                 
                 # 2. 하의 피팅 (상의 결과 이미지를 입력으로 사용)
                 logger.info("하의 피팅 시작")
-                final_result = self._call_huggingface_api(
+                final_result = self._call_api(
                     person_image_path=upper_result[0],  # 상의 결과를 입력으로
                     garment_image_path=lower_cloth_image_path,
                     category="lower_body",
-                    description=garment_description
+                    model_type=model_type,
+                    garment_description=garment_description,
+                    leffa_options=leffa_options
                 )
                 
                 # 최종 결과 저장
@@ -246,11 +282,13 @@ class FastFittingService:
                     category = "lower_body"
                 
                 logger.info(f"{fitting_type} 피팅 시작, 카테고리: {category}")
-                result = self._call_huggingface_api(
+                result = self._call_api(
                     person_image_path=person_image_path,
                     garment_image_path=cloth_image_path,
                     category=category,
-                    description=garment_description
+                    model_type=model_type,
+                    garment_description=garment_description,
+                    leffa_options=leffa_options
                 )
                 
                 # 결과 저장
@@ -289,16 +327,31 @@ class FastFittingService:
         finally:
             db.close()
     
-    def _call_huggingface_api(
+    def _call_api(
+        self,
+        person_image_path: str,
+        garment_image_path: str,
+        category: str,
+        model_type: str,
+        garment_description: str = "",
+        leffa_options: Optional[Dict[str, Any]] = None
+    ):
+        """모델에 따라 적절한 API 호출"""
+        if model_type == "leffa":
+            return self._call_leffa_api(person_image_path, garment_image_path, category, leffa_options or {})
+        else:
+            return self._call_change_clothes_api(person_image_path, garment_image_path, category, garment_description)
+    
+    def _call_change_clothes_api(
         self,
         person_image_path: str,
         garment_image_path: str,
         category: str,  # "upper_body", "lower_body", "dresses"
         description: str
     ):
-        """Hugging Face API 호출"""
+        """Change Clothes AI API 호출"""
         try:
-            client = self.get_hf_client()
+            client = self.get_change_clothes_client()
             
             logger.info(f"Hugging Face API 호출: category={category}")
             logger.info(f"원본 person_image: {person_image_path}")
@@ -341,6 +394,90 @@ class FastFittingService:
                 raise Exception("Hugging Face GPU 할당량이 초과되었습니다. 잠시 후 다시 시도해주세요. (약 1시간 후 할당량이 리셋됩니다)")
             
             raise
+    
+    def _call_leffa_api(
+        self,
+        person_image_path: str,
+        garment_image_path: str,
+        category: str,  # "upper_body", "lower_body", "dresses"
+        leffa_options: Dict[str, Any]
+    ):
+        """Leffa AI API 호출"""
+        try:
+            client = self.get_leffa_client()
+            
+            logger.info(f"Leffa AI API 호출: category={category}, options={leffa_options}")
+            logger.info(f"원본 person_image: {person_image_path}")
+            logger.info(f"원본 garment_image: {garment_image_path}")
+            
+            # 이미지를 로컬 절대 경로로 준비
+            local_person_image = self._prepare_local_image(person_image_path)
+            local_garment_image = self._prepare_local_image(garment_image_path)
+            
+            logger.info(f"로컬 person_image: {local_person_image}")
+            logger.info(f"로컬 garment_image: {local_garment_image}")
+            
+            # Leffa API 호출
+            logger.info("Leffa API predict 호출 시작...")
+            
+            # API 문서에 따라 정확히 호출 (소문자 "false" 사용!)
+            result = client.predict(
+                src_image_path=handle_file(local_person_image),
+                ref_image_path=handle_file(local_garment_image),
+                ref_acceleration="false",  # 소문자!
+                step=int(leffa_options.get("steps", 30)),
+                scale=float(leffa_options.get("scale", 2.5)),
+                seed=int(leffa_options.get("seed", 42)),
+                vt_model_type=leffa_options.get("model_type", "viton_hd"),
+                vt_garment_type=category,
+                vt_repaint="false",  # 소문자!
+                api_name="/leffa_predict_vt"
+            )
+            
+            logger.info(f"Leffa AI API 호출 성공!")
+            logger.info(f"결과 타입: {type(result)}")
+            logger.info(f"결과 길이: {len(result) if isinstance(result, (list, tuple)) else 'N/A'}")
+            
+            # result는 tuple of 3 elements (Generated Image, Mask, DensePose)
+            # 각 요소는 dict 형식: {path: str, url: str, ...}
+            if isinstance(result, (list, tuple)) and len(result) >= 1:
+                first_result = result[0]
+                logger.info(f"첫 번째 결과 (Generated Image) 타입: {type(first_result)}")
+                
+                # dict 형식이면 path 추출
+                if isinstance(first_result, dict):
+                    result_path = first_result.get('path') or first_result.get('url')
+                    logger.info(f"이미지 경로 추출: {result_path}")
+                    # Change Clothes AI와 동일한 형식으로 반환 (path, mask)
+                    return (result_path, result[1].get('path') if len(result) > 1 and isinstance(result[1], dict) else None)
+                else:
+                    # 이미 경로 문자열이면 그대로 반환
+                    return result
+            
+            return result
+            
+        except Exception as e:
+            error_msg = str(e)
+            logger.error(f"Leffa AI API 호출 실패: {error_msg}", exc_info=True)
+            
+            # 구체적인 에러 메시지 생성
+            if "GPU quota" in error_msg or "quota" in error_msg.lower():
+                raise Exception("Leffa AI GPU 할당량이 초과되었습니다. 잠시 후 다시 시도해주세요. (약 1시간 후 할당량이 리셋됩니다)")
+            elif "Expecting value" in error_msg or "JSONDecodeError" in error_msg:
+                raise Exception(
+                    "Leffa AI 모델이 현재 사용 불가능합니다. "
+                    "Hugging Face Space가 로드되지 않았거나 응답하지 않습니다. "
+                    "잠시 후 다시 시도하거나 Change Clothes AI 모델을 사용해주세요."
+                )
+            elif "Space is not running" in error_msg or "503" in error_msg:
+                raise Exception(
+                    "Leffa AI Space가 현재 실행 중이지 않습니다. "
+                    "Space가 시작될 때까지 몇 분 정도 소요될 수 있습니다. "
+                    "잠시 후 다시 시도하거나 Change Clothes AI 모델을 사용해주세요."
+                )
+            
+            # 기타 에러
+            raise Exception(f"Leffa AI 처리 중 오류가 발생했습니다: {error_msg}")
     
     def _save_result_image(self, result_image_path: str, user_id: int, fitting_type: str) -> str:
         """결과 이미지를 저장하고 DB 저장용 경로 반환"""
