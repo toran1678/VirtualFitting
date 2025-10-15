@@ -516,15 +516,17 @@ const FastFittingPage = () => {
       // 결과를 저장할 배열
       const results = []
       
-      // 상의+하의는 두 번 처리
+      // 상의+하의는 순차적으로 처리 (상의 결과를 하의 입력으로 사용)
       if (fittingType === "상의+하의") {
+        let currentPersonBlob = personImageBlob
+        
         // 상의 처리
         if (selectedClothes.upper) {
           console.log("상의 가상 피팅 시작...")
           const upperBlob = await prepareClothingBlob(selectedClothes.upper)
           
           const upperResult = await client.predict("/leffa_predict_vt", {
-            src_image_path: personImageBlob,
+            src_image_path: currentPersonBlob,
             ref_image_path: upperBlob,
             ref_acceleration: false,
             step: leffaOptions.steps,
@@ -537,17 +539,36 @@ const FastFittingPage = () => {
           
           console.log("상의 결과:", upperResult)
           if (upperResult?.data?.[0]) {
-            results.push({ type: '상의', data: upperResult.data[0] })
+            // 상의 결과를 results에 추가하지 않음 (중간 결과이므로)
+            
+            // 상의 결과 이미지를 다음 피팅의 인물 이미지로 사용
+            const upperImageData = upperResult.data[0]
+            let upperImageUrl
+            
+            if (typeof upperImageData === 'string') {
+              upperImageUrl = upperImageData.startsWith('http') ? upperImageData : `https://huggingface.co/spaces/franciszzj/Leffa/resolve/main${upperImageData}`
+            } else if (upperImageData?.url) {
+              upperImageUrl = upperImageData.url
+            } else if (upperImageData?.path) {
+              upperImageUrl = `https://huggingface.co/spaces/franciszzj/Leffa/resolve/main${upperImageData.path}`
+            }
+            
+            if (upperImageUrl) {
+              console.log("상의 결과 이미지 URL:", upperImageUrl)
+              // 상의 결과 이미지를 Blob으로 변환하여 다음 피팅에 사용
+              currentPersonBlob = await fetchImageViaProxy(upperImageUrl)
+              console.log("상의 결과 이미지를 하의 피팅의 인물 이미지로 사용")
+            }
           }
         }
         
-        // 하의 처리
+        // 하의 처리 (상의 결과 이미지를 인물 이미지로 사용)
         if (selectedClothes.lower) {
-          console.log("하의 가상 피팅 시작...")
+          console.log("하의 가상 피팅 시작 (상의+하의 최종 결과)...")
           const lowerBlob = await prepareClothingBlob(selectedClothes.lower)
           
           const lowerResult = await client.predict("/leffa_predict_vt", {
-            src_image_path: personImageBlob,
+            src_image_path: currentPersonBlob, // 상의 결과 이미지 사용
             ref_image_path: lowerBlob,
             ref_acceleration: false,
             step: leffaOptions.steps,
@@ -558,9 +579,10 @@ const FastFittingPage = () => {
             vt_repaint: leffaOptions.repaint
           })
           
-          console.log("하의 결과:", lowerResult)
+          console.log("하의 결과 (최종):", lowerResult)
           if (lowerResult?.data?.[0]) {
-            results.push({ type: '하의', data: lowerResult.data[0] })
+            // 최종 결과만 추가 (상의+하의가 모두 적용된 이미지)
+            results.push({ type: '상의+하의', data: lowerResult.data[0] })
           }
         }
       } else {
