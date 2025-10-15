@@ -6,6 +6,7 @@ from typing import Dict, Any
 
 from app.core.task_queue import task_queue
 from app.utils.virtual_fitting_service import fitting_service_redis
+from app.utils.fast_fitting_service import fast_fitting_service
 
 # 로깅 설정
 logging.basicConfig(
@@ -49,6 +50,20 @@ class VirtualFittingWorker:
                     logger.error(f"작업 실패: {task_id}")
                 
                 return success
+            
+            elif task_type == "fast_fitting":
+                # 빠른 가상 피팅 작업 처리
+                success = fast_fitting_service.process_fast_fitting_task(task["data"])
+                
+                if success:
+                    task_queue.update_task_status(task_id, "COMPLETED")
+                    logger.info(f"빠른 가상 피팅 작업 완료: {task_id}")
+                else:
+                    task_queue.update_task_status(task_id, "FAILED", {"error": "처리 실패"})
+                    logger.error(f"빠른 가상 피팅 작업 실패: {task_id}")
+                
+                return success
+            
             else:
                 logger.warning(f"알 수 없는 작업 타입: {task_type}")
                 task_queue.update_task_status(task_id, "FAILED", {"error": "알 수 없는 작업 타입"})

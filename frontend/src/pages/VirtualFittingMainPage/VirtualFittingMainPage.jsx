@@ -5,14 +5,14 @@ import { useNavigate } from "react-router-dom"
 import { ThemeContext } from "../../context/ThemeContext"
 import Header from "../../components/Header/Header"
 import Footer from "../../components/Footer/Footer"
-import { Play, ImageIcon, RefreshCw, X, Eye, Download, Palette, Zap } from 'lucide-react'
+import { Play, ImageIcon, RefreshCw, X, Eye, Download, Palette, Zap, Trash2 } from 'lucide-react'
 import { isLoggedIn } from "../../api/auth"
 import { 
   getFittingHistory, 
   getQueueInfo,
-  selectFittingResult,
   getUserFittingProcesses,
   cancelFittingProcess,
+  deleteFittingResult,
   getProcessImageUrl,
   getFittingResultImageUrl
 } from "../../api/virtual_fitting"
@@ -30,8 +30,6 @@ const VirtualFittingMainPage = () => {
   const [refreshing, setRefreshing] = useState(false)
   
   // 모달 상태
-  const [showResultModal, setShowResultModal] = useState(false)
-  const [selectedProcess, setSelectedProcess] = useState(null)
   const [showPreviewModal, setShowPreviewModal] = useState(false)
   const [previewImage, setPreviewImage] = useState(null)
 
@@ -163,26 +161,6 @@ const VirtualFittingMainPage = () => {
     }
   }
 
-  // 결과 선택 및 저장
-  const handleSelectResult = async (imageIndex) => {
-    if (!selectedProcess) return
-
-    try {
-      const result = await selectFittingResult(selectedProcess.process_id, imageIndex)
-      alert('결과가 저장되었습니다!')
-      setShowResultModal(false)
-      setSelectedProcess(null)
-      
-      // 데이터 새로고침 (큐 정보도 함께 업데이트)
-      await loadData()
-      
-      // 자동 새로고침 재설정
-      setupAutoRefresh()
-    } catch (error) {
-      console.error("결과 선택 오류:", error)
-      alert('결과 저장에 실패했습니다: ' + error.message)
-    }
-  }
 
   // 프로세스 취소 (수정됨)
   const handleCancelProcess = async (processId, event) => {
@@ -326,6 +304,27 @@ const VirtualFittingMainPage = () => {
     navigate(`/background-custom/${result.fitting_id}`)
   }
 
+  // 가상 피팅 결과 삭제 핸들러
+  const handleDeleteFittingResult = async (fittingId, event) => {
+    event.stopPropagation() // 부모 클릭 이벤트 방지
+    
+    // eslint-disable-next-line no-restricted-globals
+    if (!confirm('정말로 이 가상 피팅 결과를 삭제하시겠습니까?')) {
+      return
+    }
+
+    try {
+      await deleteFittingResult(fittingId)
+      alert('가상 피팅 결과가 삭제되었습니다.')
+      
+      // 데이터 새로고침
+      await loadData()
+    } catch (error) {
+      console.error("가상 피팅 결과 삭제 오류:", error)
+      alert('가상 피팅 결과 삭제에 실패했습니다: ' + error.message)
+    }
+  }
+
   // 이미지 미리보기 함수
   const handlePreviewImage = (imageUrl) => {
     setPreviewImage(imageUrl)
@@ -379,6 +378,14 @@ const VirtualFittingMainPage = () => {
               <Play className={styles.btnIcon} />
               새로운 가상 피팅 시작
             </button>
+
+            <button 
+              className={styles.leffaBtn}
+              onClick={() => navigate('/fast-fitting')}
+            >
+              <Zap className={styles.btnIcon} />
+              빠른 가상 피팅
+            </button>
             
             <button 
               className={styles.secondaryBtn}
@@ -387,14 +394,6 @@ const VirtualFittingMainPage = () => {
             >
               <RefreshCw className={`${styles.btnIcon} ${refreshing ? styles.spinning : ''}`} />
               새로고침
-            </button>
-            
-            <button 
-              className={styles.leffaBtn}
-              onClick={() => navigate('/leffa-test')}
-            >
-              <Zap className={styles.btnIcon} />
-              모델 테스트
             </button>
           </div>
 
@@ -518,6 +517,16 @@ const VirtualFittingMainPage = () => {
                         e.target.src = "/placeholder.svg?height=200&width=150&text=이미지+로드+실패"
                       }}
                     />
+                    
+                    {/* 우측 상단 삭제 버튼 */}
+                    <button 
+                      className={styles.deleteBtnTopRight}
+                      onClick={(e) => handleDeleteFittingResult(result.fitting_id, e)}
+                      title="삭제"
+                    >
+                      <Trash2 className={styles.btnIcon} />
+                    </button>
+                    
                     <div className={styles.savedImageOverlay}>
                       <button 
                         className={styles.overlayBtn}
@@ -564,8 +573,6 @@ const VirtualFittingMainPage = () => {
         </section>
       </div>
 
-      {/* 결과 선택 모달 */}
-      {false && showResultModal && selectedProcess && (<div />)}
 
       {/* 이미지 미리보기 모달 */}
       {showPreviewModal && previewImage && (

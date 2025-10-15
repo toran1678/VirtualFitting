@@ -108,6 +108,17 @@ export const getPersonImages = async (page = 1, perPage = 20) => {
   }
 }
 
+// 사용자의 인물 이미지 목록 조회 (FastFittingPage용)
+export const getUserPersonImages = async () => {
+  try {
+    const response = await personImageAPI.get("/")
+    return response.data.images || []
+  } catch (error) {
+    console.error("사용자 인물 이미지 조회 오류:", error)
+    throw error
+  }
+}
+
 // 특정 인물 이미지 조회
 export const getPersonImage = async (imageId) => {
   try {

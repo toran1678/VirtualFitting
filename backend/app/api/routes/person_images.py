@@ -77,6 +77,7 @@ async def upload_person_image(
     current_user: Users = Depends(get_current_user)
 ):
     """인물 이미지 업로드"""
+    file_path = None
     try:
         # 파일 유효성 검사
         validate_image_file(file)
@@ -88,6 +89,10 @@ async def upload_person_image(
         
         # 파일 저장
         file_path = save_uploaded_file(file, current_user.user_id)
+        
+        # 파일이 실제로 저장되었는지 확인
+        if not os.path.exists(file_path):
+            raise Exception(f"파일 저장 실패: {file_path}")
         
         # 데이터베이스에 저장
         image_data = PersonImageCreate(description=description)
@@ -105,8 +110,20 @@ async def upload_person_image(
         )
         
     except HTTPException:
+        # DB 저장 실패 시 파일 삭제
+        if file_path and os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except:
+                pass
         raise
     except Exception as e:
+        # 오류 발생 시 파일 삭제
+        if file_path and os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except:
+                pass
         raise HTTPException(status_code=500, detail=f"이미지 업로드 중 오류가 발생했습니다: {str(e)}")
 
 @router.get("/", response_model=PersonImageListResponse)

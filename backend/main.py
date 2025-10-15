@@ -26,6 +26,7 @@ from app.api.routes import person_images_router
 from app.api.routes import user_clothes_router
 
 from app.api.routes import virtual_fitting_router
+from app.api.routes import fast_fitting_router
 from app.api.routes import image_proxy_router
 from app.api.routes import custom_clothing_items_router
 from app.api.routes import background_custom_router
@@ -80,6 +81,7 @@ os.makedirs("uploads/custom_clothing", exist_ok=True)
 os.makedirs("uploads/backgrounds", exist_ok=True)
 os.makedirs("uploads/custom_backgrounds", exist_ok=True)
 os.makedirs("uploads/background_custom", exist_ok=True)
+os.makedirs("uploads/fast_fitting_results", exist_ok=True)
 
 # 정적 파일 제공
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
@@ -101,6 +103,7 @@ app.include_router(user_profiles_router)
 app.include_router(follow_system_router)
 
 app.include_router(virtual_fitting_router)
+app.include_router(fast_fitting_router)
 app.include_router(image_proxy_router)
 app.include_router(
     custom_clothing_items_router,

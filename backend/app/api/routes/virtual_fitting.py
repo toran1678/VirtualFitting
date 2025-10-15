@@ -355,6 +355,27 @@ async def get_fitting_history_redis(
         total_pages=total_pages
     )
 
+@router.delete("/result/{fitting_id}")
+async def delete_fitting_result(
+    fitting_id: int,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user)
+):
+    """저장된 가상 피팅 결과 삭제"""
+    success = VirtualFittingCRUD.delete_fitting_result(
+        db=db,
+        fitting_id=fitting_id,
+        user_id=current_user.user_id
+    )
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="가상 피팅 결과를 찾을 수 없습니다.")
+    
+    return {
+        "success": True,
+        "message": "가상 피팅 결과가 삭제되었습니다."
+    }
+
 async def save_temp_image(file: UploadFile, prefix: str) -> str:
     """임시 이미지 파일 저장"""
     import uuid

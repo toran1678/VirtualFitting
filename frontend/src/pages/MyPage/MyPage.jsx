@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useNavigate, useLocation, useSearchParams } from "react-router-dom"
+import { useState, useEffect, useMemo } from "react"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import Header from "../../components/Header/Header"
 import Footer from "../../components/Footer/Footer"
 import { isLoggedIn, getCurrentUser } from "../../api/auth"
@@ -10,8 +10,8 @@ import styles from "./MyPage.module.css"
 import { getProfileImageUrl, getFeedImageUrl } from "../../utils/imageUtils"
 import { getMyFeeds } from "../../api/feeds"
 import { getUserProfileByEmail } from "../../api/userProfiles"
-import { Heart, Clock, Camera, Share2, Palette } from "lucide-react"
-import { getFittingHistory, getFittingResultImageUrl } from "../../api/virtual_fitting"
+import { Heart, Clock, Camera, Share2, Palette, Trash2 } from "lucide-react"
+import { getFittingHistory, getFittingResultImageUrl, deleteFittingResult } from "../../api/virtual_fitting"
 import { getMyCustomClothes, getCustomClothingImageUrl } from "../../api/customClothingAPI"
 
 const MyPage = () => {
@@ -23,23 +23,22 @@ const MyPage = () => {
   const [likingInProgress, setLikingInProgress] = useState(new Set())
   const navigate = useNavigate()
   const [feedsLoading, setFeedsLoading] = useState(false)
-  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
 
   // 탭과 URL 파라미터 매핑
-  const tabToParamMap = {
+  const tabToParamMap = useMemo(() => ({
     피드: "feed",
     "가상 피팅": "virtual-fitting",
     "커스텀 의류": "custom",
     "좋아요 의류": "like",
-  }
+  }), [])
 
-  const paramToTabMap = {
+  const paramToTabMap = useMemo(() => ({
     feed: "피드",
     "virtual-fitting": "가상 피팅",
     custom: "커스텀 의류",
     like: "좋아요 의류",
-  }
+  }), [])
 
   // 통계 데이터
   const [stats, setStats] = useState({
@@ -124,7 +123,7 @@ const MyPage = () => {
       const defaultParam = tabToParamMap["피드"]
       navigate(`/mypage?tab=${defaultParam}`, { replace: true })
     }
-  }, [searchParams, activeTab, navigate, paramToTabMap])
+  }, [searchParams, activeTab, navigate, paramToTabMap, tabToParamMap])
 
   // 콘텐츠 요약 함수
   const truncateContent = (content, maxLength = 80) => {
@@ -458,6 +457,27 @@ const MyPage = () => {
     navigate(`/background-custom/${item.id}`)
   }
 
+  // 가상 피팅 결과 삭제 핸들러
+  const handleDeleteVirtualFitting = async (e, item) => {
+    e.stopPropagation() // 부모 클릭 이벤트 방지
+    
+    // eslint-disable-next-line no-restricted-globals
+    if (!confirm('정말로 이 가상 피팅 결과를 삭제하시겠습니까?')) {
+      return
+    }
+
+    try {
+      await deleteFittingResult(item.id)
+      alert('가상 피팅 결과가 삭제되었습니다.')
+      
+      // 가상 피팅 데이터 다시 로드
+      await loadVirtualFittings()
+    } catch (error) {
+      console.error("가상 피팅 결과 삭제 오류:", error)
+      alert('가상 피팅 결과 삭제에 실패했습니다: ' + error.message)
+    }
+  }
+
   const getStatusColor = (status) => {
     switch (status) {
       case "완료":
@@ -639,6 +659,17 @@ const MyPage = () => {
                       <div className={styles.imagePlaceholder} style={{ display: "none" }}>
                         {item.title}
                       </div>
+
+                      {/* 우측 상단 삭제 버튼 (가상 피팅 탭에서만) */}
+                      {activeTab === "가상 피팅" && (
+                        <button 
+                          className={styles.deleteBtnTopRight}
+                          onClick={(e) => handleDeleteVirtualFitting(e, item)}
+                          title="삭제하기"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
 
                       {/* 오버레이 정보 */}
                       <div className={styles.contentOverlay}>
