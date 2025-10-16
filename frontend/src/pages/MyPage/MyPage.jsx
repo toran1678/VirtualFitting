@@ -82,7 +82,7 @@ const MyPage = () => {
       const fittings = Array.isArray(data?.fittings) ? data.fittings : []
       const formatted = fittings.map((f) => ({
         id: f.fitting_id,
-        image: `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}${f.image_url}?t=${Date.now()}`,
+        image: `${process.env.REACT_APP_API_URL || ""}${f.image_url}?t=${Date.now()}`,
         title: f.title || `가상 피팅 #${f.fitting_id}`,
         brand: f.title || "",
         date: new Date(f.created_at).toLocaleDateString("ko-KR"),

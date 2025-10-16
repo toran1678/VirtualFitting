@@ -672,11 +672,11 @@ async def get_background_custom_history(
         # 결과를 딕셔너리로 변환
         history_data = []
         for item in history:
-            # 이미지 URL을 절대 URL로 변환
+            # 이미지 URL을 상대 경로로 변환
             image_url = item.custom_image_url
             if image_url and not image_url.startswith("http"):
-                # 상대 경로인 경우 절대 URL로 변환
-                image_url = f"http://localhost:8000/{image_url.lstrip('/')}"
+                # 상대 경로로 반환 (nginx가 프록시)
+                image_url = f"/{image_url.lstrip('/')}"
 
             history_data.append(
                 {
@@ -793,7 +793,7 @@ async def get_recent_custom_backgrounds(
                     {
                         "id": file_name,  # 파일명을 ID로 사용
                         "name": display_name,
-                        "url": f"http://localhost:8000/{relative_path}",
+                        "url": f"/{relative_path}",  # 상대 경로로 반환 (nginx가 프록시)
                         "file_path": f"/{relative_path}",  # Add leading slash for consistency
                         "created_at": file_info["mtime"],
                     }
