@@ -11,7 +11,7 @@ import { getProfileImageUrl, getFeedImageUrl } from "../../utils/imageUtils"
 import { getMyFeeds } from "../../api/feeds"
 import { getUserProfileByEmail } from "../../api/userProfiles"
 import { Heart, Clock, Camera, Share2, Palette, Trash2 } from "lucide-react"
-import { getFittingHistory, getFittingResultImageUrl,  deleteFittingResult } from "../../api/virtual_fitting"
+import { getFittingHistory, deleteFittingResult } from "../../api/virtual_fitting"
 import { getMyCustomClothes, getCustomClothingImageUrl, updateCustomClothing, deleteCustomClothing } from "../../api/customClothingAPI"
 
 const MyPage = () => {
@@ -82,7 +82,7 @@ const MyPage = () => {
       const fittings = Array.isArray(data?.fittings) ? data.fittings : []
       const formatted = fittings.map((f) => ({
         id: f.fitting_id,
-        image: getFittingResultImageUrl(f.fitting_id),
+        image: `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}${f.image_url}?t=${Date.now()}`,
         title: f.title || `가상 피팅 #${f.fitting_id}`,
         brand: f.title || "",
         date: new Date(f.created_at).toLocaleDateString("ko-KR"),
@@ -342,6 +342,16 @@ const MyPage = () => {
     }
   }
 
+  // 이미지 미리 로드 함수
+  const preloadImages = (imageUrls) => {
+    imageUrls.forEach(url => {
+      if (url && !url.includes('placeholder')) {
+        const img = new Image()
+        img.src = url
+      }
+    })
+  }
+
   // 초기 인증 및 데이터 로드
   useEffect(() => {
     const checkAuth = async () => {
@@ -365,6 +375,14 @@ const MyPage = () => {
 
     checkAuth()
   }, [navigate])
+
+  // 모든 탭의 이미지 미리 로드
+  useEffect(() => {
+    const allImages = Object.values(tabData).flat().map(item => item.image).filter(Boolean)
+    if (allImages.length > 0) {
+      preloadImages(allImages)
+    }
+  }, [tabData])
 
   const handleProfileEdit = () => {
     navigate("/profile/edit")
@@ -1098,7 +1116,7 @@ const MyPage = () => {
             <div className={styles.modalContent}>
               <div className={styles.virtualFittingImageContainer}>
                 <img 
-                  src={getFittingResultImageUrl(selectedVirtualFitting.id)} 
+                  src={selectedVirtualFitting.image} 
                   alt={selectedVirtualFitting.title}
                   className={styles.virtualFittingModalImage}
                 />
