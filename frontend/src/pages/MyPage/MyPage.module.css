@@ -1244,11 +1244,11 @@
   color: white;
   border: none;
   border-radius: 8px;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-  flex: 1;
 }
 
 .deleteButton:hover {

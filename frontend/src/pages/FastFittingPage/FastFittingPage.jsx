@@ -1111,7 +1111,7 @@ const FastFittingPage = () => {
               <p>인물 이미지 관리 페이지에서 이미지를 등록해주세요.</p>
               <button 
                 className={styles.primaryBtn}
-                onClick={() => navigate("/person-image-manage")}
+                onClick={() => navigate("/my-avatar")}
               >
                 인물 이미지 관리
               </button>
