@@ -169,6 +169,26 @@ export const cancelFittingProcess = async (processId) => {
   }
 }
 
+// 가상 피팅 결과 삭제
+export const deleteFittingResult = async (fittingId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/virtual-fitting-redis/result/${fittingId}`, {
+      method: "DELETE",
+      credentials: "include",
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.detail || "가상 피팅 결과 삭제에 실패했습니다.")
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error("가상 피팅 결과 삭제 오류:", error)
+    throw error
+  }
+}
+
 // 이미지 URL 생성 헬퍼 함수들
 export const getProcessImageUrl = (processId, imageIndex) => {
   return `${API_BASE_URL}/api/virtual-fitting-redis/image/${processId}/${imageIndex}`

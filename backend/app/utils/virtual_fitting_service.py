@@ -447,9 +447,14 @@ class VirtualFittingServiceRedis:
         return result_paths
 
     def _cleanup_temp_files(self, file_paths: List[str]):
-        """임시 파일들 정리"""
+        """임시 파일들 정리 (원본 파일은 절대 삭제 금지!)"""
         for file_path in file_paths:
             try:
+                # person_images, custom_clothing, user_clothes 등 원본 폴더의 파일은 삭제하지 않음
+                if 'person_images' in file_path or 'custom_clothing' in file_path or 'user_clothes' in file_path:
+                    logger.info(f"원본 파일 유지 (삭제 안 함): {file_path}")
+                    continue
+                
                 if os.path.exists(file_path):
                     os.remove(file_path)
                     logger.info(f"임시 파일 삭제: {file_path}")
@@ -605,10 +610,15 @@ class VirtualFittingServiceRedis:
                         logger.info(f"프로세스 이미지 삭제: {absolute_path}")
                     except Exception as e:
                         logger.warning(f"프로세스 이미지 삭제 실패: {e}")
-        # 입력 이미지 정리
+        # 입력 이미지 정리 (임시 파일만 삭제, 원본 person_images는 절대 삭제 금지!)
         for p in [process.model_image_path, process.cloth_image_path]:
             if p:
                 try:
+                    # person_images, custom_clothing 등 원본 폴더의 파일은 삭제하지 않음
+                    if 'person_images' in p or 'custom_clothing' in p or 'user_clothes' in p:
+                        logger.info(f"원본 파일 유지 (삭제 안 함): {p}")
+                        continue
+                    
                     abspath = Path(p)
                     if not abspath.is_absolute():
                         abspath = self.project_root / p

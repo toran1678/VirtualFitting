@@ -1,4 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form, Query
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    UploadFile,
+    File,
+    Form,
+    Query,
+    Body,
+)
 from fastapi.responses import JSONResponse, FileResponse
 from sqlalchemy.orm import Session
 from typing import Optional, List
@@ -443,6 +452,25 @@ async def get_original_fitting_image(
         )
 
 
+@router.delete("/result/{fitting_id}")
+async def delete_fitting_result(
+    fitting_id: int,
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user),
+):
+    """저장된 가상 피팅 결과 삭제"""
+    success = VirtualFittingCRUD.delete_fitting_result(
+        db=db, fitting_id=fitting_id, user_id=current_user.user_id
+    )
+
+    if not success:
+        raise HTTPException(
+            status_code=404, detail="가상 피팅 결과를 찾을 수 없습니다."
+        )
+
+    return {"success": True, "message": "가상 피팅 결과가 삭제되었습니다."}
+
+
 async def save_temp_image(file: UploadFile, prefix: str) -> str:
     """임시 이미지 파일 저장"""
     import uuid
@@ -462,3 +490,86 @@ async def save_temp_image(file: UploadFile, prefix: str) -> str:
         buffer.write(content)
 
     return file_path
+
+
+@router.post("/save-result")
+async def save_leffa_result(
+    request_data: dict = Body(...),
+    db: Session = Depends(get_db),
+    current_user: Users = Depends(get_current_user),
+):
+    """Leffa 결과 저장 (프론트에서 받은 이미지 URL들을 다운로드하여 저장)"""
+    import httpx
+    import uuid
+    from datetime import datetime
+
+    try:
+        result_name = request_data.get("result_name")
+        image_urls = request_data.get("image_urls", [])
+        model_type = request_data.get("model_type", "leffa")
+        fitting_type = request_data.get("fitting_type", "상의")
+
+        if not result_name or not image_urls:
+            raise HTTPException(
+                status_code=400, detail="결과 이름과 이미지가 필요합니다."
+            )
+
+        # 결과 저장 디렉토리 (기존 가상 피팅과 동일한 경로 사용)
+        result_dir = "uploads/selected_fittings"
+        os.makedirs(result_dir, exist_ok=True)
+
+        # 이미지 다운로드 및 저장
+        saved_image_paths = []
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            for idx, image_url in enumerate(image_urls):
+                try:
+                    # Hugging Face에서 이미지 다운로드
+                    response = await client.get(image_url)
+                    if response.status_code == 200:
+                        # 기존 가상 피팅 형식에 맞게 파일명 생성
+                        import time
+
+                        timestamp = int(time.time())
+                        random_hex = uuid.uuid4().hex[:8]
+                        filename = (
+                            f"user_{current_user.user_id}_{timestamp}_{random_hex}.png"
+                        )
+                        file_path = os.path.join(result_dir, filename)
+
+                        # 파일 저장
+                        with open(file_path, "wb") as f:
+                            f.write(response.content)
+
+                        saved_image_paths.append(file_path)
+                except Exception as e:
+                    continue
+
+        if not saved_image_paths:
+            raise HTTPException(status_code=500, detail="이미지 저장에 실패했습니다.")
+
+        # 첫 번째 이미지를 대표 이미지로 사용
+        result_image_path = saved_image_paths[0]
+
+        # DB에 저장할 경로 형식: uploads/selected_fittings/user_X_timestamp_hash.png
+        # Windows 경로 구분자를 슬래시로 변경
+        db_path = result_image_path.replace("\\", "/")
+
+        # DB에 저장
+        new_fitting = VirtualFittings(
+            user_id=current_user.user_id, fitting_image_url=db_path, title=result_name
+        )
+
+        db.add(new_fitting)
+        db.commit()
+        db.refresh(new_fitting)
+
+        return {
+            "message": "결과가 저장되었습니다.",
+            "fitting_id": new_fitting.fitting_id,
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"결과 저장 실패: {str(e)}")

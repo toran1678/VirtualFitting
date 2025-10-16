@@ -13,6 +13,7 @@ import KakaoCallback from "./components/KakaoCallback/KakaoCallback"
 import LoginPage from "./pages/LoginPage/LoginPage"
 import VirtualFittingPage from "./pages/VirtualFittingPage/VirtualFittingPage"
 import VirtualFittingMainPage from "./pages/VirtualFittingMainPage/VirtualFittingMainPage"
+import FastFittingPage from "./pages/FastFittingPage/FastFittingPage"
 import ClothingBrowsePage from "./pages/ClothingBrowsePage/ClothingBrowsePage"
 import MyPage from "./pages/MyPage/MyPage"
 import UserProfilePage from "./pages/UserProfilePage/UserProfilePage"
@@ -45,6 +46,7 @@ function App() {
             <Route path="/clothing-browse" element={<ClothingBrowsePage />} />
             <Route path="/virtual-fitting" element={<VirtualFittingPage />} />
             <Route path="/virtual-fitting-main" element={<VirtualFittingMainPage />} />
+            <Route path="/fast-fitting" element={<FastFittingPage />} />
             <Route path="/virtual-fitting/select/:processId" element={<VirtualFittingSelectPage />} />
             <Route path="/background-custom/:fittingId" element={<BackgroundCustomPage />} />
             <Route path="/feed" element={<FeedPage />} />
