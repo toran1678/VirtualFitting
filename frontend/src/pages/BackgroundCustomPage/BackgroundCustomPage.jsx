@@ -69,7 +69,7 @@ const BackgroundCustomPage = () => {
 
   const fetchBackgroundHistory = async (fittingId) => {
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '';
       const response = await axios.get(`${API_BASE_URL}/api/background-custom/history/${fittingId}`, {
         withCredentials: true,
       });
@@ -92,7 +92,7 @@ const BackgroundCustomPage = () => {
 
   const fetchRecentCustomBackgrounds = async () => {
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '';
       const response = await axios.get(`${API_BASE_URL}/api/background-custom/recent-customs`, {
         withCredentials: true,
       });
@@ -111,7 +111,7 @@ const BackgroundCustomPage = () => {
 
   const fetchOriginalImage = async () => {
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '';
       
       // 현재 이미지 (배경 커스텀된 이미지) 로드
       const historyResponse = await axios.get(`${API_BASE_URL}/api/virtual-fitting-redis/history`, {
@@ -153,7 +153,7 @@ const BackgroundCustomPage = () => {
 
   const fetchDefaultBackgrounds = async () => {
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '';
       const response = await axios.get(`${API_BASE_URL}/api/background-custom/backgrounds`, {
         withCredentials: true
       });
@@ -223,7 +223,7 @@ const BackgroundCustomPage = () => {
         formData.append('background_image', backgroundFile);
       } else {
         // 기본 배경 이미지 또는 최근 배경 이미지 경로 전달
-        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+        const API_BASE_URL = process.env.REACT_APP_API_URL || '';
         let backgroundPath = backgroundUrl;
         
         // 절대 URL인 경우 상대 경로로 변환
@@ -236,7 +236,7 @@ const BackgroundCustomPage = () => {
         formData.append('background_path', backgroundPath);
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '';
       const response = await axios.post(`${API_BASE_URL}/api/background-custom/preview`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -338,7 +338,7 @@ const BackgroundCustomPage = () => {
       formData.append('preview_only', 'true');
       formData.append('background_color', colorValue);
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '';
       const response = await axios.post(`${API_BASE_URL}/api/background-custom/preview`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -381,7 +381,7 @@ const BackgroundCustomPage = () => {
           formData.append('background_image', customBackground.file);
         } else {
           // Recent background - use file_path
-          const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+          const API_BASE_URL = process.env.REACT_APP_API_URL || '';
           let backgroundPath = customBackground.file_path || customBackground.url;
           
           // Convert absolute URL to relative path if needed
@@ -395,7 +395,7 @@ const BackgroundCustomPage = () => {
         }
       } else if (selectedBackground) {
         // 기본 배경 이미지 경로 전달
-        const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+        const API_BASE_URL = process.env.REACT_APP_API_URL || '';
         let backgroundPath = selectedBackground.url;
         
         // 절대 URL인 경우 상대 경로로 변환
@@ -414,7 +414,7 @@ const BackgroundCustomPage = () => {
         formData.append('history_id', selectedHistoryItem.custom_fitting_id);
       }
 
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '';
       const response = await axios.post(`${API_BASE_URL}/api/background-custom/process`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -426,7 +426,7 @@ const BackgroundCustomPage = () => {
           alert('배경 커스텀이 완료되었습니다!');
           
           // 저장된 이미지로 미리보기 업데이트
-          const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+          const API_BASE_URL = process.env.REACT_APP_API_URL || '';
           const updatedImageUrl = `${API_BASE_URL}/api/virtual-fitting-redis/result/${fittingId}?t=${Date.now()}`;
           setPreviewImage(updatedImageUrl);
           
@@ -455,7 +455,7 @@ const BackgroundCustomPage = () => {
     }
 
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const API_BASE_URL = process.env.REACT_APP_API_URL || '';
       const response = await axios.delete(`${API_BASE_URL}/api/background-custom/history/${historyId}`, {
         withCredentials: true,
       });

@@ -34,6 +34,10 @@ from app.api.routes import background_custom_router
 # 환경 변수 로드
 load_dotenv()
 
+# 데이터베이스 테이블 생성
+# Base.metadata.drop_all(bind=engine) # 기존 테이블 삭제(테스트용)
+Base.metadata.create_all(bind=engine)
+
 # 로깅 설정
 logging.basicConfig(
     level=logging.INFO,
@@ -41,10 +45,6 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
-
-# 데이터베이스 테이블 생성
-# Base.metadata.drop_all(bind=engine) # 기존 테이블 삭제(테스트용)
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Virtual Fitting API",
@@ -54,8 +54,7 @@ app = FastAPI(
 
 # 세션 미들웨어 추가 (비밀 키 설정)
 app.add_middleware(
-    SessionMiddleware,
-    secret_key=os.getenv("SECRET_KEY", "your_secret_key")
+    SessionMiddleware, secret_key=os.getenv("SECRET_KEY", "your_secret_key")
 )
 
 # CORS 설정
