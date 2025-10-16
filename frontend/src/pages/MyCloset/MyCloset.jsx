@@ -618,6 +618,16 @@ const MyCloset = () => {
                             >
                               <Camera size={16} />
                             </button>
+                            <button
+                              className={`${styles.overlayButton} ${styles.deleteOverlayButton}`}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteClothing(clothing.id)
+                              }}
+                              title="삭제"
+                            >
+                              <Trash2 size={16} />
+                            </button>
                           </div>
                         </div>
 

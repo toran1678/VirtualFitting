@@ -53,7 +53,10 @@ app = FastAPI(
 )
 
 # 세션 미들웨어 추가 (비밀 키 설정)
-app.add_middleware(SessionMiddleware, secret_key="your_secret_key")
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SECRET_KEY", "your_secret_key")
+)
 
 # CORS 설정
 origins = [

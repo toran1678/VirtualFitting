@@ -1,5 +1,6 @@
 import httpx
 import logging
+import os
 from typing import Dict, Any
 from fastapi import HTTPException
 import asyncio
@@ -8,8 +9,8 @@ logger = logging.getLogger(__name__)
 
 class KakaoOAuth:
     def __init__(self):
-        self.client_id = "3a1212c7ad4ed946e69cf4c9462b2688"
-        self.redirect_uri = "http://localhost:3000/auth/kakao/callback"
+        self.client_id = os.getenv("KAKAO_CLIENT_ID", "3a1212c7ad4ed946e69cf4c9462b2688")
+        self.redirect_uri = os.getenv("KAKAO_REDIRECT_URI", "http://localhost:3000/auth/kakao/callback")
         self.token_url = "https://kauth.kakao.com/oauth/token"
         self.user_info_url = "https://kapi.kakao.com/v2/user/me"
         self.auth_url = "https://kauth.kakao.com/oauth/authorize"

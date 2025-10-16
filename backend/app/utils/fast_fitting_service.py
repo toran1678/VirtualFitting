@@ -40,7 +40,7 @@ class FastFittingService:
         self.change_clothes_client = None  # Change Clothes AI
         self.leffa_client = None           # Leffa AI
         
-        logger.info(f"FastFittingService 초기화: project_root={self.project_root}")
+        # logger.info(f"FastFittingService 초기화: project_root={self.project_root}")
     
     def get_change_clothes_client(self):
         """Change Clothes AI Gradio Client 초기화"""

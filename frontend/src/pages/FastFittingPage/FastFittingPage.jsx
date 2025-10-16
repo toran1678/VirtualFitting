@@ -373,7 +373,7 @@ const FastFittingPage = () => {
         throw new Error("결과 저장에 실패했습니다.")
       }
 
-      alert("✅ 결과가 저장되었습니다!")
+      alert("결과가 저장되었습니다!")
       setShowLeffaResults(false)
       setLeffaResults([])
       setLeffaResultName("")
