@@ -441,9 +441,12 @@ async def get_original_fitting_image(
     if fitting.source_model_image_url:
         return {"original_image_url": f"/{fitting.source_model_image_url}"}
     else:
-        raise HTTPException(
-            status_code=404, detail="원본 이미지 경로를 찾을 수 없습니다."
+        # source_model_image_url이 없는 경우 현재 fitting_image_url을 원본으로 사용
+        # 이는 배경 커스텀 전의 이미지를 의미할 수 있음
+        print(
+            f"Warning: source_model_image_url not found for fitting_id {fitting_id}, using current fitting_image_url as fallback"
         )
+        return {"original_image_url": f"/{fitting.fitting_image_url}"}
 
 
 @router.delete("/result/{fitting_id}")
