@@ -12,7 +12,7 @@ import { getMyFeeds } from "../../api/feeds"
 import { getUserProfileByEmail } from "../../api/userProfiles"
 import { Heart, Clock, Camera, Share2, Palette, Trash2 } from "lucide-react"
 import { getFittingHistory, getFittingResultImageUrl,  deleteFittingResult } from "../../api/virtual_fitting"
-import { getMyCustomClothes, getCustomClothingImageUrl, updateCustomClothing } from "../../api/customClothingAPI"
+import { getMyCustomClothes, getCustomClothingImageUrl, updateCustomClothing, deleteCustomClothing } from "../../api/customClothingAPI"
 
 const MyPage = () => {
   const [activeTab, setActiveTab] = useState("피드")
@@ -554,6 +554,32 @@ const MyPage = () => {
     }
   }
 
+  // 커스텀 의류 삭제 핸들러
+  const handleDeleteCustomClothing = async (e, item) => {
+    e.stopPropagation() // 부모 클릭 이벤트 방지
+    
+    // eslint-disable-next-line no-restricted-globals
+    if (!confirm('정말로 이 커스텀 의류를 삭제하시겠습니까?')) {
+      return
+    }
+
+    try {
+      await deleteCustomClothing(item.id)
+      alert('커스텀 의류가 삭제되었습니다.')
+      
+      // 모달이 열려있으면 닫기
+      if (showImageModal) {
+        handleCloseImageModal()
+      }
+      
+      // 커스텀 의류 데이터 다시 로드
+      await loadCustomClothes()
+    } catch (error) {
+      console.error("커스텀 의류 삭제 오류:", error)
+      alert('커스텀 의류 삭제에 실패했습니다: ' + error.message)
+    }
+  }
+
   const getStatusColor = (status) => {
     switch (status) {
       case "완료":
@@ -736,11 +762,20 @@ const MyPage = () => {
                         {item.title}
                       </div>
 
-                      {/* 우측 상단 삭제 버튼 (가상 피팅 탭에서만) */}
+                      {/* 우측 상단 삭제 버튼 (가상 피팅, 커스텀 의류 탭에서) */}
                       {activeTab === "가상 피팅" && (
                         <button 
                           className={styles.deleteBtnTopRight}
                           onClick={(e) => handleDeleteVirtualFitting(e, item)}
+                          title="삭제하기"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
+                      {activeTab === "커스텀 의류" && (
+                        <button 
+                          className={styles.deleteBtnTopRight}
+                          onClick={(e) => handleDeleteCustomClothing(e, item)}
                           title="삭제하기"
                         >
                           <Trash2 size={16} />
@@ -1023,6 +1058,17 @@ const MyPage = () => {
                   >
                     <Share2 size={16} />
                     공유하기
+                  </button>
+                  
+                  <button 
+                    className={styles.deleteButton}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteCustomClothing(e, selectedImage)
+                    }}
+                  >
+                    <Trash2 size={16} />
+                    삭제하기
                   </button>
                 </div>
               </div>

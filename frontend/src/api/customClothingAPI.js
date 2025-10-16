@@ -80,7 +80,8 @@ export const updateCustomClothing = async (customClothingId, customName) => {
 // 커스터마이징 의류 삭제
 export const deleteCustomClothing = async (customClothingId) => {
   const response = await customClothingAPI.delete(`/${customClothingId}`)
-  return response.data
+  // 204 No Content 응답이므로 성공 여부만 반환
+  return { success: true, message: '커스텀 의류가 삭제되었습니다.' }
 }
 
 // 커스터마이징 의류 일괄 삭제
