@@ -138,7 +138,7 @@ const BackgroundCustomPage = () => {
             console.log('원본 이미지 로드 성공:', originalImageUrl);
           }
         } catch (originalError) {
-          console.warn('원본 이미지 로드 실패, 현재 이미지 사용:', originalError);
+          console.log('원본 이미지 로드 실패, 현재 이미지를 원본으로 사용합니다.');
           // 원본 이미지 로드 실패 시 현재 이미지를 원본으로 사용
           setOriginalImage(currentImageUrl);
         }
@@ -222,7 +222,7 @@ const BackgroundCustomPage = () => {
         // 커스텀 배경 파일
         formData.append('background_image', backgroundFile);
       } else {
-        // 기본 배경 이미지 경로 전달
+        // 기본 배경 이미지 또는 최근 배경 이미지 경로 전달
         const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
         let backgroundPath = backgroundUrl;
         
@@ -231,7 +231,7 @@ const BackgroundCustomPage = () => {
           backgroundPath = backgroundUrl.replace(API_BASE_URL, '');
         }
         
-        console.log('기본 배경 이미지 URL:', backgroundUrl);
+        console.log('배경 이미지 URL:', backgroundUrl);
         console.log('변환된 배경 이미지 경로:', backgroundPath);
         formData.append('background_path', backgroundPath);
       }
@@ -318,7 +318,9 @@ const BackgroundCustomPage = () => {
     setError(null);
     
     // 즉시 미리보기 생성 (파일 경로 사용)
-    await processBackgroundCustomPreview(recentBackground.url);
+    // Use file_path if available, otherwise use url
+    const backgroundPath = recentBackground.file_path || recentBackground.url;
+    await processBackgroundCustomPreview(backgroundPath);
   };
 
   const processColorBackgroundPreview = async (colorValue) => {
@@ -373,7 +375,24 @@ const BackgroundCustomPage = () => {
       formData.append('title', title || '배경 커스텀 결과');
       
       if (customBackground) {
-        formData.append('background_image', customBackground.file);
+        // Check if this is a newly uploaded file or a recent background
+        if (customBackground.file) {
+          // Newly uploaded file
+          formData.append('background_image', customBackground.file);
+        } else {
+          // Recent background - use file_path
+          const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+          let backgroundPath = customBackground.file_path || customBackground.url;
+          
+          // Convert absolute URL to relative path if needed
+          if (backgroundPath.startsWith(API_BASE_URL)) {
+            backgroundPath = backgroundPath.replace(API_BASE_URL, '');
+          }
+          
+          console.log('Recent background URL:', customBackground.url);
+          console.log('Recent background path:', backgroundPath);
+          formData.append('background_path', backgroundPath);
+        }
       } else if (selectedBackground) {
         // 기본 배경 이미지 경로 전달
         const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';

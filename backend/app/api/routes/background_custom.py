@@ -794,7 +794,7 @@ async def get_recent_custom_backgrounds(
                         "id": file_name,  # 파일명을 ID로 사용
                         "name": display_name,
                         "url": f"http://localhost:8000/{relative_path}",
-                        "file_path": relative_path,
+                        "file_path": f"/{relative_path}",  # Add leading slash for consistency
                         "created_at": file_info["mtime"],
                     }
                 )
