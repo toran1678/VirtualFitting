@@ -16,6 +16,12 @@ class BackgroundCustomResponse(BaseModel):
     title: str
 
 
+class BackgroundCustomPreviewResponse(BaseModel):
+    success: bool
+    message: str
+    image_url: str
+
+
 class BackgroundCustomItem(BaseModel):
     custom_fitting_id: int
     title: str
@@ -29,4 +35,3 @@ class BackgroundCustomListResponse(BaseModel):
     page: int
     per_page: int
     total_pages: int
-

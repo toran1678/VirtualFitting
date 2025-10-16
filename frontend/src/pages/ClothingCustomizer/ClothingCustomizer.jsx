@@ -274,6 +274,7 @@ const ClothingCustomizer = () => {
     init()
   }, [navigate, customization])
 
+
   // ** 레이어 추가/삭제/이동/수정 **
   const addTextLayer = useCallback(() => {
     const newLayer = {
@@ -300,7 +301,7 @@ const ClothingCustomizer = () => {
         type: "logo",
         content: imageData,
         position: { x: 50, y: 50 },
-        style: { size: 100 },
+        style: { size: 100, rotation: 0 },
         visible: true,
       }
       setLayers((prev) => [...prev, newLayer])
@@ -316,7 +317,7 @@ const ClothingCustomizer = () => {
       type: "sticker",
       content: src,
       position: { x: 50, y: 50 },
-      style: { size: 110 },
+      style: { size: 110, rotation: 0 },
       visible: true,
     }
     setLayers(prev => [...prev, newLayer])
@@ -674,6 +675,11 @@ const ClothingCustomizer = () => {
           }
         }
         ctx.restore();
+        
+        // 의류 영역 밖 클리핑: 텍스트를 그린 후 의류 영역으로 마스킹
+        ctx.globalCompositeOperation = "destination-in";
+        ctx.drawImage(garmentImg, dx, dy, dW, dH);
+        ctx.globalCompositeOperation = "source-over";
       }
 
       if (layer.type === "logo" || layer.type === "sticker") {
@@ -686,12 +692,18 @@ const ClothingCustomizer = () => {
         const w = Math.round(layer.style.size || 100);
         const ar = (logoImg.naturalWidth || 1) / (logoImg.naturalHeight || 1);
         const h = Math.round(w / ar);
+        
         ctx.save();
         ctx.translate(x, y);
-        const rot = ((layer.style?.rotation || 0) * Math.PI) / 180; // 로고 회전도 쓰면 반영
+        const rot = ((layer.style?.rotation || 0) * Math.PI) / 180;
         ctx.rotate(rot);
         ctx.drawImage(logoImg, Math.round(-w / 2), Math.round(-h / 2), w, h);
         ctx.restore();
+        
+        // 의류 영역 밖 클리핑: 로고/스티커를 그린 후 의류 영역으로 마스킹
+        ctx.globalCompositeOperation = "destination-in";
+        ctx.drawImage(garmentImg, dx, dy, dW, dH);
+        ctx.globalCompositeOperation = "source-over";
       }
     }
 
@@ -818,6 +830,11 @@ const ClothingCustomizer = () => {
             }
           }
           ctx.restore();
+          
+          // 의류 영역 밖 클리핑: 텍스트를 그린 후 의류 영역으로 마스킹
+          ctx.globalCompositeOperation = "destination-in";
+          ctx.drawImage(garmentImg, dx, dy, dW, dH);
+          ctx.globalCompositeOperation = "source-over";
         } else if (layer.type === "logo" || layer.type === "sticker") {
           const logoImg = await new Promise((resolve, reject) => {
             const img = new Image();
@@ -825,11 +842,23 @@ const ClothingCustomizer = () => {
             img.onerror = reject;
             img.src = layer.content;
           });
+          
           // 원본 비율 유지 (미리보기 동일하게)
           const w = Math.round(layer.style.size || 100)
           const ar = (logoImg.naturalWidth || 1) / (logoImg.naturalHeight || 1);
           const h = Math.round(w / ar)
-          ctx.drawImage(logoImg, Math.round(x - w / 2), Math.round(y - h / 2), w, h)
+          
+          ctx.save();
+          ctx.translate(x, y);
+          const rot = ((layer.style?.rotation || 0) * Math.PI) / 180;
+          ctx.rotate(rot);
+          ctx.drawImage(logoImg, Math.round(-w / 2), Math.round(-h / 2), w, h);
+          ctx.restore();
+          
+          // 의류 영역 밖 클리핑: 로고/스티커를 그린 후 의류 영역으로 마스킹
+          ctx.globalCompositeOperation = "destination-in";
+          ctx.drawImage(garmentImg, dx, dy, dW, dH);
+          ctx.globalCompositeOperation = "source-over";
         }
       }
       // 7) 저장
@@ -1129,7 +1158,10 @@ const ClothingCustomizer = () => {
                                 src={layer.content || "/placeholder.svg"}
                                 alt="logo"
                                 className={styles.logoOverlay}
-                                style={{ width: `${layer.style.size}px` }}
+                                style={{ 
+                                  width: `${layer.style.size}px`,
+                                  transform: `rotate(${layer.style.rotation || 0}deg)`
+                                }}
                                 draggable={false}
                               />
                               {/* 선택됐을 때만 리사이즈 핸들 표시 */}
@@ -1159,7 +1191,10 @@ const ClothingCustomizer = () => {
                                 src={layer.content}
                                 alt="sticker"
                                 className={styles.logoOverlay}
-                                style={{ width: `${layer.style.size}px` }}
+                                style={{ 
+                                  width: `${layer.style.size}px`,
+                                  transform: `rotate(${layer.style.rotation || 0}deg)`
+                                }}
                                 draggable={false}
                               />
                               {selectedLayerId === layer.id && (
@@ -1421,26 +1456,48 @@ const ClothingCustomizer = () => {
                         <p className={styles.inputHint}>카테고리를 고른 뒤 스티커를 클릭하면 레이어로 추가됩니다.</p>
                       </div>
                       {selectedLayerId && layers.find(l => l.id === selectedLayerId && l.type === "sticker") && (
-                        <div className={styles.optionGroup}>
-                          <label className={styles.inputLabel}>
-                            스티커 크기: {layers.find(l => l.id === selectedLayerId)?.style?.size ?? 100}px
-                            <input
-                              type="range"
-                              min="35"
-                              max="600"
-                              step="1"
-                              value={layers.find(l => l.id === selectedLayerId)?.style?.size ?? 100}
-                              onChange={(e) => {
-                                const next = parseInt(e.target.value, 10);
-                                updateLayer(selectedLayerId, {
-                                  style: { ...(layers.find(l => l.id === selectedLayerId)?.style || {}), size: next },
-                                });
-                              }}
-                              onMouseUp={saveToHistory}
-                              className={styles.rangeInput}
-                            />
-                          </label>
-                        </div>
+                        <>
+                          <div className={styles.optionGroup}>
+                            <label className={styles.inputLabel}>
+                              스티커 크기: {layers.find(l => l.id === selectedLayerId)?.style?.size ?? 100}px
+                              <input
+                                type="range"
+                                min="35"
+                                max="600"
+                                step="1"
+                                value={layers.find(l => l.id === selectedLayerId)?.style?.size ?? 100}
+                                onChange={(e) => {
+                                  const next = parseInt(e.target.value, 10);
+                                  updateLayer(selectedLayerId, {
+                                    style: { ...(layers.find(l => l.id === selectedLayerId)?.style || {}), size: next },
+                                  });
+                                }}
+                                onMouseUp={saveToHistory}
+                                className={styles.rangeInput}
+                              />
+                            </label>
+                          </div>
+                          <div className={styles.optionGroup}>
+                            <label className={styles.inputLabel}>
+                              회전: {layers.find(l => l.id === selectedLayerId)?.style?.rotation ?? 0}°
+                              <input
+                                type="range"
+                                min="-180"
+                                max="180"
+                                step="1"
+                                value={layers.find(l => l.id === selectedLayerId)?.style?.rotation ?? 0}
+                                onChange={(e) => {
+                                  const next = parseInt(e.target.value, 10);
+                                  updateLayer(selectedLayerId, {
+                                    style: { ...(layers.find(l => l.id === selectedLayerId)?.style || {}), rotation: next },
+                                  });
+                                }}
+                                onMouseUp={saveToHistory}
+                                className={styles.rangeInput}
+                              />
+                            </label>
+                          </div>
+                        </>
                       )}
                     </div>
                   )}
@@ -1455,24 +1512,46 @@ const ClothingCustomizer = () => {
                         </label>
                       </div>
                       {selectedLayerId && layers.find((l) => l.id === selectedLayerId && l.type === "logo") && (
-                        <div className={styles.optionGroup}>
-                          <label className={styles.inputLabel}>
-                            이미지 크기: {layers.find((l) => l.id === selectedLayerId)?.style.size || 100}px
-                            <input
-                              type="range"
-                              min="50"
-                              max="200"
-                              value={layers.find((l) => l.id === selectedLayerId)?.style.size || 100}
-                              onChange={(e) =>
-                                updateLayer(selectedLayerId, {
-                                  style: { ...layers.find((l) => l.id === selectedLayerId)?.style, size: parseInt(e.target.value) },
-                                })
-                              }
-                              onMouseUp={saveToHistory}
-                              className={styles.rangeInput}
-                            />
-                          </label>
-                        </div>
+                        <>
+                          <div className={styles.optionGroup}>
+                            <label className={styles.inputLabel}>
+                              이미지 크기: {layers.find((l) => l.id === selectedLayerId)?.style.size || 100}px
+                              <input
+                                type="range"
+                                min="50"
+                                max="200"
+                                value={layers.find((l) => l.id === selectedLayerId)?.style.size || 100}
+                                onChange={(e) =>
+                                  updateLayer(selectedLayerId, {
+                                    style: { ...layers.find((l) => l.id === selectedLayerId)?.style, size: parseInt(e.target.value) },
+                                  })
+                                }
+                                onMouseUp={saveToHistory}
+                                className={styles.rangeInput}
+                              />
+                            </label>
+                          </div>
+                          <div className={styles.optionGroup}>
+                            <label className={styles.inputLabel}>
+                              회전: {layers.find((l) => l.id === selectedLayerId)?.style?.rotation ?? 0}°
+                              <input
+                                type="range"
+                                min="-180"
+                                max="180"
+                                step="1"
+                                value={layers.find((l) => l.id === selectedLayerId)?.style?.rotation ?? 0}
+                                onChange={(e) => {
+                                  const next = parseInt(e.target.value, 10);
+                                  updateLayer(selectedLayerId, {
+                                    style: { ...layers.find((l) => l.id === selectedLayerId)?.style, rotation: next },
+                                  });
+                                }}
+                                onMouseUp={saveToHistory}
+                                className={styles.rangeInput}
+                              />
+                            </label>
+                          </div>
+                        </>
                       )}
                     </div>
                   )}
