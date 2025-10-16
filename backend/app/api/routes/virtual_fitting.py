@@ -28,11 +28,10 @@ from app.schemas.virtual_fitting import (
     VirtualFittingSelectResponse,
     VirtualFittingListResponse,
     VirtualFittingProcessItem,
-    VirtualFittingProcessListResponse,
+    VirtualFittingProcessListResponse
 )
 
 router = APIRouter(prefix="/api/virtual-fitting-redis", tags=["virtual-fitting-redis"])
-
 
 @router.post("/start", response_model=VirtualFittingStartResponse)
 async def start_virtual_fitting_redis(
@@ -43,7 +42,7 @@ async def start_virtual_fitting_redis(
     scale: float = Form(2.0, description="스케일"),
     samples: int = Form(4, description="생성할 샘플 수"),
     db: Session = Depends(get_db),
-    current_user: Users = Depends(get_current_user),
+    current_user: Users = Depends(get_current_user)
 ):
     """가상 피팅 시작 (Redis 큐 사용)"""
     try:
@@ -78,13 +77,13 @@ async def start_virtual_fitting_redis(
             category=category,
             model_type=model_type,
             scale=scale,
-            samples=samples,
+            samples=samples
         )
 
         return VirtualFittingStartResponse(
             success=True,
             message="가상 피팅이 큐에 추가되었습니다.",
-            process_id=process_id,
+            process_id=process_id
         )
 
     except HTTPException:
@@ -99,7 +98,7 @@ async def start_virtual_fitting_redis(
 async def get_fitting_status_redis(
     process_id: int,
     db: Session = Depends(get_db),
-    current_user: Users = Depends(get_current_user),
+    current_user: Users = Depends(get_current_user)
 ):
     """가상 피팅 처리 상태 조회 (Redis 큐 사용)"""
     process = fitting_service_redis.get_fitting_status(
@@ -114,9 +113,9 @@ async def get_fitting_status_redis(
     # 결과 이미지 URL 생성 (정적 경로 반환하여 인증 없이 표시 가능)
     result_images = []
     result_items = []
-    if process.status == "COMPLETED":
+    if process.status == 'COMPLETED':
         for i in range(1, 7):
-            image_path = getattr(process, f"result_image_{i}", None)
+            image_path = getattr(process, f'result_image_{i}', None)
             if image_path:
                 # DB에는 'uploads/...'로 저장되므로 앞에 '/'만 붙여 정적 경로 제공
                 url = f"/{image_path}"
@@ -146,11 +145,10 @@ async def get_fitting_status_redis(
         completed_at=process.completed_at,
         result_images=result_images,
         result_items=result_items,
-        error_message=process.error_message if process.status == "FAILED" else None,
+        error_message=process.error_message if process.status == 'FAILED' else None,
         model_image_url=_to_static_url(process.model_image_path),
-        cloth_image_url=_to_static_url(process.cloth_image_path),
+        cloth_image_url=_to_static_url(process.cloth_image_path)
     )
-
 
 @router.get("/processes", response_model=VirtualFittingProcessListResponse)
 async def get_user_processes(
@@ -160,7 +158,7 @@ async def get_user_processes(
         None, description="상태 필터 (QUEUED, PROCESSING, COMPLETED, FAILED)"
     ),
     db: Session = Depends(get_db),
-    current_user: Users = Depends(get_current_user),
+    current_user: Users = Depends(get_current_user)
 ):
     """사용자의 모든 가상 피팅 프로세스 목록 조회"""
     skip = (page - 1) * per_page
@@ -175,7 +173,7 @@ async def get_user_processes(
         user_id=current_user.user_id,
         skip=skip,
         limit=per_page,
-        status_filter=status,
+        status_filter=status
     )
 
     total_pages = (total + per_page - 1) // per_page
@@ -341,14 +339,10 @@ async def get_fitting_result_image_redis(
     current_user: Users = Depends(get_current_user),
 ):
     """저장된 가상 피팅 결과 이미지 조회"""
-    result = (
-        db.query(VirtualFittings)
-        .filter(
-            VirtualFittings.fitting_id == fitting_id,
-            VirtualFittings.user_id == current_user.user_id,
-        )
-        .first()
-    )
+    result = db.query(VirtualFittings).filter(
+        VirtualFittings.fitting_id == fitting_id,
+        VirtualFittings.user_id == current_user.user_id
+    ).first()
 
     if not result:
         raise HTTPException(
