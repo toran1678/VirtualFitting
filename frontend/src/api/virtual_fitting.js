@@ -4,6 +4,8 @@
  * ===================================================================
  */
 
+import axios from 'axios'
+
 const API_BASE_URL = process.env.REACT_APP_API_URL || ""
 
 // 가상 피팅 시작
@@ -173,5 +175,20 @@ export const getProcessImageUrl = (processId, imageIndex) => {
 }
 
 export const getFittingResultImageUrl = (fittingId) => {
-  return `${API_BASE_URL}/api/virtual-fitting-redis/result/${fittingId}`
+  // 캐시 방지를 위해 타임스탬프 추가
+  const timestamp = Date.now()
+  return `${API_BASE_URL}/api/virtual-fitting-redis/result/${fittingId}?t=${timestamp}`
+}
+
+// 가상피팅 결과 삭제
+export const deleteVirtualFitting = async (fittingId) => {
+  try {
+    const response = await axios.delete(`${API_BASE_URL}/api/virtual-fitting-redis/${fittingId}`, {
+      withCredentials: true,
+    })
+    return response.data
+  } catch (error) {
+    console.error('가상피팅 삭제 실패:', error)
+    throw error
+  }
 }

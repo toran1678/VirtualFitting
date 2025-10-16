@@ -82,3 +82,4 @@ export const getDefaultBackgrounds = async () => {
     throw error;
   }
 };
+

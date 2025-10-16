@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useContext, useEffect, useCallback, useRef } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useSearchParams } from "react-router-dom"
 import { ThemeContext } from "../../context/ThemeContext"
 import Header from "../../components/Header/Header"
 import Footer from "../../components/Footer/Footer"
@@ -21,6 +21,7 @@ import styles from "./VirtualFittingMainPage.module.css"
 const VirtualFittingMainPage = () => {
   const { darkMode } = useContext(ThemeContext)
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   
   // 상태 관리
   const [allProcesses, setAllProcesses] = useState([])
@@ -135,6 +136,17 @@ const VirtualFittingMainPage = () => {
   useEffect(() => {
     loadData()
   }, [loadData])
+
+  // 배경 커스텀 완료 후 새로고침 감지
+  useEffect(() => {
+    const refreshParam = searchParams.get('refresh')
+    if (refreshParam === 'background-custom') {
+      // 데이터 새로고침
+      loadData(true)
+      // URL에서 파라미터 제거
+      setSearchParams({})
+    }
+  }, [searchParams, setSearchParams, loadData])
 
   // 자동 새로고침 설정 (allProcesses가 변경될 때만)
   useEffect(() => {
@@ -322,8 +334,8 @@ const VirtualFittingMainPage = () => {
   const handleBackgroundCustomClick = (e, result) => {
     e.stopPropagation() // 부모 클릭 이벤트 방지
     
-    // 배경 커스텀 페이지로 이동
-    navigate(`/background-custom/${result.fitting_id}`)
+    // 배경 커스텀 페이지로 이동 (소스 페이지 정보 포함)
+    navigate(`/background-custom/${result.fitting_id}?source=main`)
   }
 
   // 이미지 미리보기 함수

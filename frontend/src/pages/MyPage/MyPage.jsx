@@ -12,7 +12,7 @@ import { getMyFeeds } from "../../api/feeds"
 import { getUserProfileByEmail } from "../../api/userProfiles"
 import { Heart, Clock, Camera, Share2, Palette } from "lucide-react"
 import { getFittingHistory, getFittingResultImageUrl } from "../../api/virtual_fitting"
-import { getMyCustomClothes, getCustomClothingImageUrl } from "../../api/customClothingAPI"
+import { getMyCustomClothes, getCustomClothingImageUrl, updateCustomClothing } from "../../api/customClothingAPI"
 
 const MyPage = () => {
   const [activeTab, setActiveTab] = useState("피드")
@@ -25,6 +25,10 @@ const MyPage = () => {
   const [feedsLoading, setFeedsLoading] = useState(false)
   const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
+  
+  // 가상피팅 모달 상태
+  const [showVirtualFittingModal, setShowVirtualFittingModal] = useState(false)
+  const [selectedVirtualFitting, setSelectedVirtualFitting] = useState(null)
 
   // 탭과 URL 파라미터 매핑
   const tabToParamMap = {
@@ -58,6 +62,11 @@ const MyPage = () => {
   // 이미지 모달 상태
   const [selectedImage, setSelectedImage] = useState(null)
   const [showImageModal, setShowImageModal] = useState(false)
+  
+  // 커스텀 의류 이름 변경 상태
+  const [isEditingName, setIsEditingName] = useState(false)
+  const [editingName, setEditingName] = useState("")
+  const [isUpdatingName, setIsUpdatingName] = useState(false)
 
   const [tabData, setTabData] = useState({
     피드: [],
@@ -113,6 +122,17 @@ const MyPage = () => {
   // URL 파라미터 변경 감지 및 탭 동기화
   useEffect(() => {
     const tabParam = searchParams.get("tab")
+    const refreshParam = searchParams.get("refresh")
+
+    // 배경 커스텀 완료 후 새로고침 처리
+    if (refreshParam === "background-custom") {
+      loadVirtualFittings()
+      // URL에서 파라미터 제거
+      const newParams = new URLSearchParams(searchParams)
+      newParams.delete("refresh")
+      setSearchParams(newParams)
+      return
+    }
 
     if (tabParam && paramToTabMap[tabParam]) {
       const tabFromParam = paramToTabMap[tabParam]
@@ -124,7 +144,7 @@ const MyPage = () => {
       const defaultParam = tabToParamMap["피드"]
       navigate(`/mypage?tab=${defaultParam}`, { replace: true })
     }
-  }, [searchParams, activeTab, navigate, paramToTabMap])
+  }, [searchParams, activeTab, navigate, paramToTabMap, setSearchParams])
 
   // 콘텐츠 요약 함수
   const truncateContent = (content, maxLength = 80) => {
@@ -384,7 +404,8 @@ const MyPage = () => {
         navigate(`/feed/${item.id}`)
         break
       case "가상 피팅":
-        navigate(`/virtual-fitting/${item.id}`)
+        setSelectedVirtualFitting(item)
+        setShowVirtualFittingModal(true)
         break
       case "커스텀 의류":
         // 커스터마이징 의류는 이미지 모달로 표시
@@ -405,12 +426,67 @@ const MyPage = () => {
   const handleCloseImageModal = () => {
     setShowImageModal(false)
     setSelectedImage(null)
+    setIsEditingName(false)
+    setEditingName("")
+  }
+  
+  // 커스텀 의류 이름 변경 시작
+  const startEditingName = () => {
+    setIsEditingName(true)
+    setEditingName(selectedImage.title)
+  }
+  
+  // 커스텀 의류 이름 변경 취소
+  const cancelEditingName = () => {
+    setIsEditingName(false)
+    setEditingName("")
+  }
+  
+  // 커스텀 의류 이름 변경 저장
+  const saveCustomClothingName = async () => {
+    if (!editingName.trim()) {
+      alert("이름을 입력해주세요.")
+      return
+    }
+    
+    if (editingName.trim() === selectedImage.title) {
+      setIsEditingName(false)
+      return
+    }
+    
+    try {
+      setIsUpdatingName(true)
+      await updateCustomClothing(selectedImage.id, editingName.trim())
+      
+      // 로컬 상태 업데이트
+      setSelectedImage(prev => ({ ...prev, title: editingName.trim() }))
+      setTabData(prev => ({
+        ...prev,
+        "커스텀 의류": prev["커스텀 의류"].map(item => 
+          item.id === selectedImage.id 
+            ? { ...item, title: editingName.trim() }
+            : item
+        )
+      }))
+      
+      setIsEditingName(false)
+      alert("이름이 변경되었습니다.")
+    } catch (error) {
+      console.error("이름 변경 실패:", error)
+      alert("이름 변경에 실패했습니다.")
+    } finally {
+      setIsUpdatingName(false)
+    }
   }
 
   // 모달 배경 클릭 시 닫기
   const handleModalBackgroundClick = (e) => {
     if (e.target === e.currentTarget) {
-      handleCloseImageModal()
+      if (isEditingName) {
+        cancelEditingName()
+      } else {
+        handleCloseImageModal()
+      }
     }
   }
 
@@ -454,9 +530,10 @@ const MyPage = () => {
   const handleBackgroundCustomClick = (e, item) => {
     e.stopPropagation() // 부모 클릭 이벤트 방지
     
-    // 배경 커스텀 페이지로 이동
-    navigate(`/background-custom/${item.id}`)
+    // 배경 커스텀 페이지로 이동 (소스 페이지 정보 포함)
+    navigate(`/background-custom/${item.id}?source=mypage`)
   }
+
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -805,34 +882,184 @@ const MyPage = () => {
 
       {/* 이미지 모달 */}
       {showImageModal && selectedImage && (
-        <div 
-          className={styles.imageModal} 
-          onClick={handleModalBackgroundClick}
-        >
-          <div className={styles.imageModalContent}>
-            <button 
-              className={styles.imageModalClose}
-              onClick={handleCloseImageModal}
-              aria-label="닫기"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-            <div className={styles.imageModalImageContainer}>
-              <img 
-                src={selectedImage.image || "/placeholder.svg"} 
-                alt={selectedImage.title}
-                className={styles.imageModalImage}
-                onError={(e) => handleImageError(e, selectedImage.title)}
-              />
+        <div className={styles.modalOverlay} onClick={handleModalBackgroundClick}>
+          <div className={styles.customClothingModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>커스텀 의류 상세 정보</h2>
+              <button 
+                className={styles.modalClose}
+                onClick={() => {
+                  if (isEditingName) {
+                    cancelEditingName()
+                  } else {
+                    handleCloseImageModal()
+                  }
+                }}
+                aria-label="닫기"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
             </div>
-            <div className={styles.imageModalInfo}>
-              <h3 className={styles.imageModalTitle}>{selectedImage.title}</h3>
-              <div className={styles.imageModalMeta}>
-                <span className={styles.imageModalStatus}>{selectedImage.status}</span>
-                <span className={styles.imageModalDate}>{selectedImage.date}</span>
+            
+            <div className={styles.modalContent}>
+              <div className={styles.customClothingImageContainer}>
+                <img 
+                  src={selectedImage.image || "/placeholder.svg"} 
+                  alt={selectedImage.title}
+                  className={styles.customClothingModalImage}
+                  onError={(e) => handleImageError(e, selectedImage.title)}
+                />
+              </div>
+              
+              <div className={styles.customClothingInfo}>
+                <div className={styles.customClothingTitleContainer}>
+                  {isEditingName ? (
+                    <div className={styles.nameEditContainer}>
+                      <input
+                        type="text"
+                        value={editingName}
+                        onChange={(e) => setEditingName(e.target.value)}
+                        className={styles.nameEditInput}
+                        placeholder="커스텀 의류 이름"
+                        maxLength={50}
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            saveCustomClothingName()
+                          } else if (e.key === 'Escape') {
+                            cancelEditingName()
+                          }
+                        }}
+                      />
+                      <div className={styles.nameEditButtons}>
+                        <button
+                          onClick={saveCustomClothingName}
+                          disabled={isUpdatingName}
+                          className={styles.nameEditSaveButton}
+                        >
+                          {isUpdatingName ? "저장 중..." : "저장"}
+                        </button>
+                        <button
+                          onClick={cancelEditingName}
+                          disabled={isUpdatingName}
+                          className={styles.nameEditCancelButton}
+                        >
+                          취소
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className={styles.nameDisplayContainer}>
+                      <h3 className={styles.customClothingTitle}>{selectedImage.title}</h3>
+                      <button
+                        onClick={startEditingName}
+                        className={styles.nameEditButton}
+                        title="이름 변경"
+                      >
+                        ✏️
+                      </button>
+                    </div>
+                  )}
+                </div>
+                <div className={styles.customClothingMeta}>
+                  <span className={styles.customClothingStatus}>{selectedImage.status}</span>
+                  <span className={styles.customClothingDate}>
+                    <Clock size={16} />
+                    {selectedImage.date}
+                  </span>
+                </div>
+                
+                <div className={styles.customClothingActions}>
+                  <button 
+                    className={styles.virtualFittingButton}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleVirtualFittingClick(e, selectedImage)
+                    }}
+                  >
+                    <Camera size={16} />
+                    가상 피팅
+                  </button>
+                  
+                  <button 
+                    className={styles.shareButton}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleShareClick(e, selectedImage, 'custom')
+                    }}
+                  >
+                    <Share2 size={16} />
+                    공유하기
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 가상피팅 모달 */}
+      {showVirtualFittingModal && selectedVirtualFitting && (
+        <div className={styles.modalOverlay} onClick={() => setShowVirtualFittingModal(false)}>
+          <div className={styles.virtualFittingModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>가상피팅 상세 정보</h2>
+              <button 
+                className={styles.modalClose}
+                onClick={() => setShowVirtualFittingModal(false)}
+                aria-label="닫기"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+            </div>
+            
+            <div className={styles.modalContent}>
+              <div className={styles.virtualFittingImageContainer}>
+                <img 
+                  src={getFittingResultImageUrl(selectedVirtualFitting.id)} 
+                  alt={selectedVirtualFitting.title}
+                  className={styles.virtualFittingModalImage}
+                />
+              </div>
+              
+              <div className={styles.virtualFittingInfo}>
+                <h3 className={styles.virtualFittingTitle}>{selectedVirtualFitting.title}</h3>
+                <div className={styles.virtualFittingMeta}>
+                  <span className={styles.virtualFittingDate}>
+                    <Clock size={16} />
+                    {selectedVirtualFitting.date}
+                  </span>
+                </div>
+                
+                <div className={styles.virtualFittingActions}>
+                  <button 
+                    className={styles.backgroundCustomButton}
+                    onClick={() => {
+                      setShowVirtualFittingModal(false)
+                      navigate(`/background-custom/${selectedVirtualFitting.id}?source=mypage`)
+                    }}
+                  >
+                    <Palette size={16} />
+                    배경 커스텀
+                  </button>
+                  
+                  <button 
+                    className={styles.shareButton}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleShareClick(e, selectedVirtualFitting, 'virtual-fitting')
+                    }}
+                  >
+                    <Share2 size={16} />
+                    공유하기
+                  </button>
+                </div>
               </div>
             </div>
           </div>

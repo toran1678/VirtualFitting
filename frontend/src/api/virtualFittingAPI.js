@@ -8,7 +8,7 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || ""
 
 // axios 인스턴스 생성
 const virtualFittingAPI = axios.create({
-  baseURL: `${API_BASE_URL}/api/virtual-fitting`,
+  baseURL: `${API_BASE_URL}/api/virtual-fitting-redis`,
   withCredentials: true,
   timeout: 60000, // 가상 피팅은 시간이 오래 걸릴 수 있음
 })
@@ -64,9 +64,12 @@ export const startVirtualFitting = async (fittingData) => {
     const formData = new FormData()
     
     // 파일 추가
-    formData.append("person_image", fittingData.personImage)
-    formData.append("clothing_image", fittingData.clothingImage)
+    formData.append("model_image", fittingData.personImage)
+    formData.append("cloth_image", fittingData.clothingImage)
     formData.append("category", fittingData.category.toString())
+    formData.append("model_type", fittingData.modelType || "dc")
+    formData.append("scale", (fittingData.scale || 2.0).toString())
+    formData.append("samples", (fittingData.samples || 4).toString())
 
     const response = await virtualFittingAPI.post("/start", formData, {
       headers: {
@@ -158,5 +161,24 @@ export const getUserProcessingCount = async () => {
   } catch (error) {
     console.error("처리 중인 피팅 개수 확인 오류:", error)
     throw error
+  }
+}
+// 특정 가상 피팅 결과 조회 (배경 커스텀용)
+export const getVirtualFittingResult = async (fittingId) => {
+  try {
+    console.log('getVirtualFittingResult 호출 시작, fittingId:', fittingId);
+    const response = await virtualFittingAPI.get(`/redis/${fittingId}`);
+    console.log('getVirtualFittingResult 응답:', response.data);
+    return {
+      success: true,
+      data: response.data.data
+    };
+  } catch (error) {
+    console.error('가상 피팅 결과 조회 실패:', error);
+    console.error('에러 응답:', error.response);
+    return {
+      success: false,
+      error: error.response?.data?.detail || '가상 피팅 결과를 불러오는데 실패했습니다.'
+    };
   }
 }

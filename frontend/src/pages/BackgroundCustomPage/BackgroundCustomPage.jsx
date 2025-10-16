@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { isLoggedIn } from '../../api/auth';
 import Header from '../../components/Header/Header';
@@ -9,7 +9,11 @@ import styles from './BackgroundCustomPage.module.css';
 const BackgroundCustomPage = () => {
   const { fittingId } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const fileInputRef = useRef(null);
+  
+  // 소스 페이지 정보 가져오기
+  const sourcePage = searchParams.get('source') || 'main';
   
   const [originalImage, setOriginalImage] = useState(null);
   const [backgrounds, setBackgrounds] = useState([]);
@@ -29,6 +33,7 @@ const BackgroundCustomPage = () => {
   const [customColor, setCustomColor] = useState('#FFFFFF');
   const [backgroundHistory, setBackgroundHistory] = useState([]);
   const [selectedHistoryItem, setSelectedHistoryItem] = useState(null);
+  const [recentCustomBackgrounds, setRecentCustomBackgrounds] = useState([]); // 최근 사용한 커스텀 배경 3개
 
   // 배경 색상 옵션
   const backgroundColors = [
@@ -56,6 +61,7 @@ const BackgroundCustomPage = () => {
     
     fetchOriginalImage();
     fetchDefaultBackgrounds();
+    fetchRecentCustomBackgrounds();
     if (fittingId) {
       fetchBackgroundHistory(fittingId);
     }
@@ -84,37 +90,64 @@ const BackgroundCustomPage = () => {
     }
   };
 
+  const fetchRecentCustomBackgrounds = async () => {
+    try {
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await axios.get(`${API_BASE_URL}/api/background-custom/recent-customs`, {
+        withCredentials: true,
+      });
+
+      if (response.data.success) {
+        setRecentCustomBackgrounds(response.data.custom_backgrounds || []);
+      } else {
+        console.error('최근 커스텀 배경 조회 실패:', response.data.message);
+        setRecentCustomBackgrounds([]);
+      }
+    } catch (error) {
+      console.error('최근 커스텀 배경 조회 실패:', error);
+      setRecentCustomBackgrounds([]);
+    }
+  };
+
   const fetchOriginalImage = async () => {
     try {
-      // 먼저 가상피팅 결과 정보를 가져와서 이미지 URL을 얻음
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-      console.log('가상피팅 결과 정보 요청:', `${API_BASE_URL}/api/virtual-fitting-redis/history`);
       
-      const response = await axios.get(`${API_BASE_URL}/api/virtual-fitting-redis/history`, {
+      // 현재 이미지 (배경 커스텀된 이미지) 로드
+      const historyResponse = await axios.get(`${API_BASE_URL}/api/virtual-fitting-redis/history`, {
         params: { page: 1, per_page: 50 },
         withCredentials: true
       });
       
-      console.log('가상피팅 히스토리 응답:', response.data);
-      
-      // 현재 fittingId와 일치하는 결과 찾기
-      const targetFitting = response.data.fittings.find(fitting => fitting.fitting_id === parseInt(fittingId));
+      const targetFitting = historyResponse.data.fittings.find(fitting => fitting.fitting_id === parseInt(fittingId));
       
       if (targetFitting) {
-        console.log('찾은 가상피팅 결과:', targetFitting);
-        // 정적 파일 URL로 직접 접근
-        const imageUrl = `${API_BASE_URL}${targetFitting.image_url}`;
-        console.log('이미지 URL:', imageUrl);
+        // 현재 이미지를 미리보기로 설정 (캐시 버스팅 추가)
+        const currentImageUrl = `${API_BASE_URL}${targetFitting.image_url}?t=${Date.now()}`;
+        setPreviewImage(currentImageUrl);
         
-        setOriginalImage(imageUrl);
-        setPreviewImage(imageUrl);
+        // 원본 이미지 로드
+        try {
+          const originalResponse = await axios.get(`${API_BASE_URL}/api/virtual-fitting-redis/original-image/${fittingId}`, {
+            withCredentials: true
+          });
+          
+          if (originalResponse.data.original_image_url) {
+            const originalImageUrl = `${API_BASE_URL}${originalResponse.data.original_image_url}`;
+            setOriginalImage(originalImageUrl);
+            console.log('원본 이미지 로드 성공:', originalImageUrl);
+          }
+        } catch (originalError) {
+          console.warn('원본 이미지 로드 실패, 현재 이미지 사용:', originalError);
+          // 원본 이미지 로드 실패 시 현재 이미지를 원본으로 사용
+          setOriginalImage(currentImageUrl);
+        }
       } else {
         throw new Error('가상피팅 결과를 찾을 수 없습니다.');
       }
     } catch (error) {
-      console.error('원본 이미지 로드 실패:', error);
-      console.error('에러 응답:', error.response?.data);
-      setError(`원본 이미지를 불러올 수 없습니다. (${error.response?.status || 'Unknown'})`);
+      console.error('이미지 로드 실패:', error);
+      setError(`이미지를 불러올 수 없습니다. (${error.response?.status || 'Unknown'})`);
     }
   };
 
@@ -264,7 +297,28 @@ const BackgroundCustomPage = () => {
     setCustomBackground(null);
     setSelectedColor(null);
     setSelectedHistoryItem(historyItem);
+    setBackgroundType('history');
+    
+    // 히스토리 아이템의 제목을 입력 필드에 설정
+    setTitle(historyItem.title || '');
+    
+    // 에러 메시지 초기화
+    setError(null);
+  };
+
+  const handleRecentBackgroundClick = async (recentBackground) => {
+    // 최근 배경 이미지를 선택
+    setCustomBackground(recentBackground);
+    setSelectedBackground(null);
+    setSelectedColor(null);
+    setSelectedHistoryItem(null);
     setBackgroundType('image');
+    
+    // 에러 메시지 초기화
+    setError(null);
+    
+    // 즉시 미리보기 생성 (파일 경로 사용)
+    await processBackgroundCustomPreview(recentBackground.url);
   };
 
   const processColorBackgroundPreview = async (colorValue) => {
@@ -336,6 +390,9 @@ const BackgroundCustomPage = () => {
       } else if (selectedColor) {
         // 색상 배경 전달
         formData.append('background_color', selectedColor.value);
+      } else if (selectedHistoryItem) {
+        // 히스토리 아이템 사용
+        formData.append('history_id', selectedHistoryItem.custom_fitting_id);
       }
 
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
@@ -346,10 +403,21 @@ const BackgroundCustomPage = () => {
         withCredentials: true,
       });
 
-      if (response.data.success) {
-        alert('배경 커스텀이 완료되었습니다!');
-        window.location.reload(); // 페이지 새로고침
-      }
+        if (response.data.success) {
+          alert('배경 커스텀이 완료되었습니다!');
+          
+          // 저장된 이미지로 미리보기 업데이트
+          const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+          const updatedImageUrl = `${API_BASE_URL}/api/virtual-fitting-redis/result/${fittingId}?t=${Date.now()}`;
+          setPreviewImage(updatedImageUrl);
+          
+          // 소스 페이지에 따라 적절한 페이지로 이동 (새로고침 파라미터 추가)
+          if (sourcePage === 'mypage') {
+            navigate('/mypage?refresh=background-custom');
+          } else {
+            navigate('/virtual-fitting-main?refresh=background-custom');
+          }
+        }
     } catch (error) {
       console.error('배경 커스텀 실패:', error);
       setError('배경 커스텀 처리 중 오류가 발생했습니다.');
@@ -373,16 +441,16 @@ const BackgroundCustomPage = () => {
         withCredentials: true,
       });
 
-      if (response.data.success) {
-        alert('히스토리가 삭제되었습니다.');
-        // 선택된 히스토리 아이템이 삭제된 경우 선택 해제
-        if (selectedHistoryItem && selectedHistoryItem.id === historyId) {
-          setSelectedHistoryItem(null);
-          setPreviewImage(null);
+        if (response.data.success) {
+          alert('히스토리가 삭제되었습니다.');
+          // 선택된 히스토리 아이템이 삭제된 경우 선택 해제
+          if (selectedHistoryItem && selectedHistoryItem.custom_fitting_id === historyId) {
+            setSelectedHistoryItem(null);
+            setPreviewImage(null);
+          }
+          // 히스토리 다시 로드
+          fetchBackgroundHistory(fittingId);
         }
-        // 히스토리 다시 로드
-        fetchBackgroundHistory(fittingId);
-      }
     } catch (error) {
       console.error('히스토리 삭제 실패:', error);
       alert('히스토리 삭제 중 오류가 발생했습니다.');
@@ -424,15 +492,15 @@ const BackgroundCustomPage = () => {
             {/* 배경 커스텀 히스토리 */}
             {backgroundHistory.length > 0 && (
               <div className={styles.historyContainer}>
-                <h3 className={styles.sectionTitle}>배경 커스텀 히스토리</h3>
+                <h3 className={styles.sectionTitle}>배경 커스텀 기록</h3>
                 <div className={styles.historyGrid}>
                   {backgroundHistory.map((item, index) => (
-                    <div 
-                      key={index} 
-                      className={`${styles.historyItem} ${
-                        selectedHistoryItem?.id === item.id ? styles.selected : ''
-                      }`}
-                    >
+                      <div 
+                        key={index} 
+                        className={`${styles.historyItem} ${
+                          selectedHistoryItem?.custom_fitting_id === item.custom_fitting_id ? styles.selected : ''
+                        }`}
+                      >
                       <div className={styles.historyItemContent} onClick={() => handleHistoryClick(item)}>
                         <img 
                           src={item.image_url} 
@@ -448,10 +516,10 @@ const BackgroundCustomPage = () => {
                       </div>
                       <button 
                         className={styles.deleteButton}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteHistory(item.id);
-                        }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteHistory(item.custom_fitting_id);
+                          }}
                         title="삭제"
                       >
                         ✕
@@ -609,13 +677,53 @@ const BackgroundCustomPage = () => {
                   onChange={handleCustomBackgroundUpload}
                   style={{ display: 'none' }}
                 />
-                <button
-                  className={styles.uploadButton}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <span className={styles.uploadIcon}>+</span>
-                  <span>배경 이미지 업로드</span>
-                </button>
+                <div className={styles.backgroundGrid} style={{ gap: '24px', padding: '16px' }}>
+                  {/* 첫 번째 칸: 업로드 버튼 */}
+                  <div
+                    className={styles.backgroundItem}
+                    onClick={() => fileInputRef.current?.click()}
+                    style={{ 
+                      cursor: 'pointer', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      backgroundColor: 'var(--bg-secondary)', 
+                      border: '2px dashed var(--border-color)',
+                      borderRadius: '12px',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.borderColor = 'var(--accent-color)';
+                      e.target.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.borderColor = 'var(--border-color)';
+                      e.target.style.backgroundColor = 'var(--bg-secondary)';
+                    }}
+                  >
+                    <div style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>
+                      <div style={{ fontSize: '28px', marginBottom: '8px', fontWeight: '300' }}>+</div>
+                      <div style={{ fontSize: '13px', fontWeight: '500' }}>업로드</div>
+                    </div>
+                  </div>
+                  
+                  {/* 최근 커스텀 배경 3개 */}
+                  {recentCustomBackgrounds.slice(0, 3).map((bg, index) => (
+                    <div
+                      key={index}
+                      className={`${styles.backgroundItem} ${
+                        customBackground?.id === bg.id ? styles.selected : ''
+                      }`}
+                      onClick={() => handleRecentBackgroundClick(bg)}
+                    >
+                      <img 
+                        src={bg.url} 
+                        alt={bg.name}
+                        className={styles.backgroundImage}
+                      />
+                    </div>
+                  ))}
+                </div>
                 
                 {customBackground && (
                   <div className={styles.customPreview}>
