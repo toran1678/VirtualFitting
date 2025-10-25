@@ -8,7 +8,10 @@
 
 .footerContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(250px, 1fr)
+  ); /* 데스크탑 기본 그리드 */
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
@@ -107,14 +110,99 @@
   font-size: 0.9rem;
 }
 
+/* --- 모바일 반응형 수정 --- */
 @media (max-width: 768px) {
   .footerContainer {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr); /* ★★★ 모바일 기본 2열 그리드 ★★★ */
+    gap: 1.5rem;
+    text-align: left; /* 기본 왼쪽 정렬 */
+  }
+
+  /* 첫 번째 섹션 (설명) - 한 줄 전체 차지 */
+  .footerSection:first-child {
+    grid-column: span 2; /* ★★★ 2칸 모두 차지 (1줄) ★★★ */
+    text-align: center; /* 설명 섹션만 중앙 정렬 */
+    margin-bottom: 1.5rem; /* 아래 섹션과 간격 */
+  }
+
+  .footerDescription {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 450px;
+  }
+
+  /* 두 번째(바로가기), 세 번째(소개) 섹션 - 다음 줄에서 각각 1칸씩 차지 (2줄) */
+  .footerSection:nth-child(2),
+  .footerSection:nth-child(3) {
+    /* grid-column: auto; 기본값 사용 (자동으로 1칸씩 차지) */
+    margin-bottom: 1rem; /* 아래 섹션과 간격 */
+  }
+
+  /* 네 번째 섹션 (고객센터) - 마지막 줄 전체 차지 (3줄) */
+  .footerSection:nth-child(4) {
+    grid-column: span 2; /* ★★★ 2칸 모두 차지 ★★★ */
+    text-align: center; /* 고객센터 섹션 중앙 정렬 */
+    margin-bottom: 1rem;
+  }
+  .footerSection:nth-child(4) .socialLinks {
+    justify-content: center; /* 고객센터 내 소셜 아이콘 중앙 정렬 */
   }
 
   .footerBottom {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    margin-top: 1.5rem;
+  }
+}
+
+/* 480px 이하의 더 작은 모바일 화면 */
+@media (max-width: 480px) {
+  .footer {
+    padding: 2rem 1rem 1rem;
+  }
+
+  .footerContainer {
+    grid-template-columns: 1fr; /* ★★★ 가장 작은 화면에서는 다시 1열 ★★★ */
+    gap: 1.5rem;
+    text-align: center; /* 전체 중앙 정렬 */
+  }
+
+  /* 모든 섹션 span 설정 제거 (자동으로 1열 차지) */
+  .footerSection:first-child,
+  .footerSection:nth-child(4) {
+    grid-column: auto;
+  }
+
+  .footerSection {
+    margin-bottom: 1.5rem; /* 섹션 하단 여백 균일하게 */
+    text-align: center !important; /* 모든 섹션 중앙 정렬 강제 */
+  }
+  .footerSection:last-child {
+    margin-bottom: 1rem;
+  }
+
+  .footerTitle {
+    font-size: 1.3rem;
+  }
+  .footerHeading {
+    font-size: 1rem;
+    margin-bottom: 0.8rem;
+  }
+  .footerDescription,
+  .footerLinks a,
+  .footerContact p {
+    font-size: 0.9rem;
+  }
+  .footerLinks li {
+    margin-bottom: 0.4rem;
+  }
+  .copyright,
+  .techStack {
+    font-size: 0.8rem;
+  }
+  .footerBottom {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
   }
 }

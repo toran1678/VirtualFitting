@@ -1,4 +1,4 @@
-/* Header.module.css */
+/* Header.module.css (전체 코드) */
 :root {
   --header-height: 70px;
 }
@@ -10,7 +10,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 1000;
+  z-index: 1000; /* 메뉴(2001)보다 낮게 설정 */
   width: 100%;
   transition: all 0.3s ease;
   height: var(--header-height);
@@ -34,11 +34,10 @@ body.has-header {
 /* 모바일에서는 헤더 높이 조정 */
 @media (max-width: 768px) {
   :root {
-    --header-height: auto;
+    --header-height: 60px;
   }
-
   body.has-header {
-    padding-top: 0;
+    padding-top: var(--header-height);
   }
 }
 
@@ -52,20 +51,58 @@ body.has-header {
   height: 100%;
 }
 
-/* 왼쪽 영역 (로고 + 검색창) */
+/* --- Left Area --- */
 .headerLeft {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
   height: 100%;
-  flex: 1;
+  flex-shrink: 0; /* 너비 고정 */
 }
 
 .logoContainer {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1rem; /* 로고와 햄버거 버튼 간격 */
   height: 100%;
+}
+
+/* 햄버거 버튼 스타일 */
+.hamburgerButton {
+  display: none; /* 데스크탑에서는 숨김 */
+  flex-direction: column;
+  justify-content: space-around;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 2002; /* 모바일 메뉴 오버레이(2000), 메뉴(2001)보다 높게 */
+}
+
+.hamburgerLine {
+  width: 24px;
+  height: 2px;
+  background-color: var(--text-primary);
+  border-radius: 10px;
+  transition: all 0.3s linear;
+  position: relative;
+  transform-origin: 1px; /* X자 변환 기준점 */
+}
+
+/* 햄버거 버튼 X자 변환 (활성화 시) */
+.hamburgerButton.active .hamburgerLine {
+  background-color: var(--text-primary);
+}
+.hamburgerButton.active .hamburgerLine:nth-child(1) {
+  transform: rotate(45deg);
+}
+.hamburgerButton.active .hamburgerLine:nth-child(2) {
+  opacity: 0;
+  transform: translateX(20px);
+}
+.hamburgerButton.active .hamburgerLine:nth-child(3) {
+  transform: rotate(-45deg);
 }
 
 .logo a {
@@ -83,9 +120,16 @@ body.has-header {
   color: var(--accent-color);
 }
 
-/* 검색창 스타일 */
+/* --- Center Area (Search Bar) --- */
+.searchBarContainer {
+  flex-grow: 1; /* 남는 공간 차지 */
+  display: flex;
+  justify-content: center; /* 내부 검색창 중앙 정렬 */
+  padding: 0 1rem; /* 좌우 여백 */
+}
+
 .searchBar {
-  max-width: 300px;
+  max-width: 400px;
   width: 100%;
 }
 
@@ -96,13 +140,23 @@ body.has-header {
 
 .searchBar input {
   width: 100%;
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 2.5rem 0.6rem 1rem; /* 오른쪽 패딩 늘려서 버튼 공간 확보 */
   border: 1px solid var(--border-color);
   border-radius: 24px;
   font-size: 0.9rem;
   background-color: var(--bg-secondary);
   color: var(--text-primary);
   transition: all 0.3s ease;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.searchBar input::placeholder {
+  color: var(--text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .searchBar input:focus {
@@ -113,7 +167,7 @@ body.has-header {
 
 .searchBar button {
   position: absolute;
-  right: 12px;
+  right: 6px; /* 버튼 위치 조정 */
   top: 50%;
   transform: translateY(-50%);
   background: none;
@@ -124,17 +178,19 @@ body.has-header {
   align-items: center;
   justify-content: center;
   transition: color 0.3s ease;
+  padding: 0.4rem; /* 버튼 클릭 영역 확보 */
 }
 
 .searchBar button:hover {
   color: var(--accent-color);
 }
 
-/* 오른쪽 영역 (네비게이션 + 로그인/프로필) */
+/* --- Right Area --- */
 .headerRight {
   display: flex;
   align-items: center;
   height: 100%;
+  flex-shrink: 0; /* 너비 고정 */
 }
 
 .navigation {
@@ -151,6 +207,11 @@ body.has-header {
   gap: 1.5rem;
   align-items: center;
   height: 100%;
+}
+
+/* 데스크탑 네비게이션 링크 */
+.navItem {
+  display: list-item; /* 데스크탑에서 보임 */
 }
 
 .navigation a {
@@ -187,7 +248,7 @@ body.has-header {
   color: var(--accent-color);
 }
 
-/* 로그인/회원가입 버튼 스타일 */
+/* 로그인/회원가입 버튼 */
 .authButtons {
   display: flex;
   gap: 0.8rem;
@@ -213,7 +274,6 @@ body.has-header {
   box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
   white-space: nowrap;
 }
-
 .loginButton:hover,
 .headerLoginButton:hover {
   background-color: var(--accent-hover);
@@ -221,30 +281,7 @@ body.has-header {
   box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }
 
-.registerButton {
-  background-color: transparent;
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  padding: 0 1.2rem;
-  border-radius: 18px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  white-space: nowrap;
-}
-
-.registerButton:hover {
-  background-color: var(--bg-secondary);
-  border-color: var(--accent-color);
-  color: var(--accent-color);
-}
-
-/* 사용자 프로필 스타일 */
+/* 사용자 프로필 */
 .userProfileContainer {
   margin-left: 0.5rem;
   height: 36px;
@@ -320,51 +357,121 @@ body.has-header {
   color: #f44336;
 }
 
-.logoutButton span {
-  display: none;
+.logoutButtonText {
+  display: none; /* 모바일에서만 보이도록 할 것이므로 기본 숨김 */
 }
 
-/* 햄버거 버튼 스타일 */
-.hamburgerButton {
+/* --- 모바일 메뉴 스타일 (수정됨) --- */
+.mobileNavOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* 반투명 검은 배경 */
+  z-index: 2000; /* 헤더(1000)보다 높고, 메뉴(2001)보다 낮게 */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0s 0.3s linear; /* visibility 전환 지연 */
+  will-change: opacity; /* 성능 최적화 */
+}
+
+.mobileNavOverlay.active {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.3s ease, visibility 0s linear;
+}
+
+.mobileNavMenu {
+  position: fixed; /* 화면에 고정 */
+  top: 0;
+  left: 0; /* 왼쪽 가장자리에 붙임 */
+  width: 280px; /* 메뉴 너비 */
+  height: 100%;
+  background-color: var(--bg-primary); /* 배경색 */
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1); /* 그림자 */
+  z-index: 2001; /* 오버레이보다 높게 */
+  transform: translateX(-100%); /* ★ 중요: 평소에는 왼쪽 화면 밖으로 숨김 */
+  transition: transform 0.3s ease; /* 부드러운 이동 효과 */
+  will-change: transform; /* 성능 최적화 */
   display: flex;
   flex-direction: column;
+  overflow-y: auto; /* 내용 많으면 스크롤 */
+}
+
+.mobileNavMenu.open {
+  transform: translateX(
+    0
+  ); /* ★ 중요: .open 클래스가 있으면 화면 안으로 보이게 함 */
+}
+
+/* 모바일 메뉴 헤더 */
+.mobileMenuHeader {
+  display: flex;
   justify-content: space-between;
-  width: 24px;
-  height: 18px;
-  background: transparent;
+  align-items: center;
+  padding: 1rem 1.5rem; /* 패딩 조정 */
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0; /* 크기 고정 */
+}
+
+.mobileLogo {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: "Courier New", Courier, monospace;
+}
+
+.mobileCloseButton {
+  background: none;
   border: none;
+  font-size: 1.8rem;
+  color: var(--text-primary);
   cursor: pointer;
   padding: 0;
-  z-index: 10;
+  line-height: 1;
 }
 
-.hamburgerLine {
-  width: 100%;
-  height: 2px;
-  background-color: var(--text-primary);
-  transition: all 0.3s ease;
+/* 모바일 메뉴 링크 */
+.mobileNavMenu ul {
+  list-style: none;
+  padding: 1.5rem;
+  margin: 0;
+  flex-grow: 1; /* 남은 공간 차지 */
 }
 
-.hamburgerButton.active .hamburgerLine:nth-child(1) {
-  transform: translateY(8px) rotate(45deg);
+.mobileNavMenu li {
+  margin-bottom: 0.5rem;
 }
 
-.hamburgerButton.active .hamburgerLine:nth-child(2) {
-  opacity: 0;
+.mobileNavMenu a {
+  display: block;
+  padding: 0.8rem 1rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.2s, color 0.2s;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
-.hamburgerButton.active .hamburgerLine:nth-child(3) {
-  transform: translateY(-8px) rotate(-45deg);
+.mobileNavMenu a:hover,
+.mobileNavMenu a:focus {
+  background-color: var(--bg-secondary);
+  color: var(--accent-color);
+  outline: none;
 }
 
-/* 반응형 스타일 */
+/* 모바일 메뉴 푸터 제거됨 */
+
+/* --- ★★★ 모바일 반응형 스타일 ★★★ --- */
 @media (max-width: 1024px) {
   .hamburgerButton {
-    display: flex;
+    display: flex; /* 모바일에서 햄버거 버튼 보이기 */
   }
 
   .navItem {
-    display: none;
+    display: none; /* 모바일에서 데스크탑 링크 숨기기 */
   }
 
   .headerContainer {
@@ -372,92 +479,137 @@ body.has-header {
   }
 
   .searchBar {
-    max-width: 200px;
+    max-width: 300px;
   }
 
-  .logoutButton span {
-    display: inline;
+  .logoutButtonText {
+    display: none; /* 1024 이하에서 로그아웃 텍스트 숨김 */
   }
 }
 
 @media (max-width: 768px) {
-  .header {
-    height: auto;
-  }
-
   .headerContainer {
-    flex-wrap: wrap;
-    padding: 0.8rem 1rem;
-    height: auto;
+    flex-wrap: nowrap;
+    padding: 0 0.8rem;
+    height: var(--header-height);
   }
 
   .headerLeft {
-    width: 100%;
-    justify-content: space-between;
-    margin-bottom: 0.8rem;
+    flex: 0 0 auto;
+    margin-bottom: 0;
+    gap: 0.8rem;
   }
 
   .logoContainer {
     width: auto;
     justify-content: flex-start;
-    height: auto;
+    height: 100%;
+  }
+
+  .searchBarContainer {
+    flex: 1 1 auto;
+    padding: 0 0.5rem;
+    order: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
   }
 
   .searchBar {
-    order: 3;
-    margin: 0.8rem 0;
     max-width: 100%;
     width: 100%;
   }
 
   .headerRight {
-    width: 100%;
+    flex: 0 0 auto;
+    width: auto;
     justify-content: flex-end;
-    height: auto;
+    height: 100%;
   }
 
   .navigation {
-    order: 2;
-    height: auto;
+    height: 100%;
   }
-
   .navigation ul {
+    gap: 0.5rem;
     justify-content: flex-end;
-    height: auto;
+    height: 100%;
   }
-
   .userProfile {
     padding: 0.2rem;
+    gap: 0.5rem;
   }
-
   .userName {
     display: none;
   }
-
+  .profileImage {
+    width: 28px;
+    height: 28px;
+  }
+  .profileInitial {
+    font-size: 0.9rem;
+  }
   .authButtons {
     gap: 0.5rem;
   }
-
   .loginButton,
   .headerLoginButton,
   .registerButton {
     padding: 0 0.8rem;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
+    height: 32px;
+  }
+  .logoutButton {
+    padding: 0.2rem 0.4rem;
+    height: 32px;
+  }
+  .logoutButton svg {
+    width: 14px;
+    height: 14px;
+  }
+  .logoutButtonText {
+    display: none;
+  }
+  .themeToggle {
+    padding: 0.4rem;
+  }
+  .themeToggle svg {
+    width: 16px;
+    height: 16px;
   }
 }
 
 @media (max-width: 480px) {
-  .authButtons {
-    flex-direction: row;
-    gap: 0.4rem;
-    align-items: center;
+  .headerContainer {
+    padding: 0 0.5rem;
   }
-
-  .themeToggle {
-    padding: 0.3rem;
+  .logo a {
+    font-size: 1.3rem;
   }
-
+  .searchBarContainer {
+    padding: 0 0.3rem;
+  }
+  .searchBar input {
+    font-size: 0.8rem;
+    padding: 0.5rem 2rem 0.5rem 0.8rem; /* 오른쪽 패딩 늘려서 버튼 공간 확보 */
+  }
+  .searchBar input::placeholder {
+    font-size: 0.8rem; /* Placeholder 폰트 크기 명시적 지정 */
+  }
+  .searchBar button svg {
+    width: 16px;
+    height: 16px;
+  }
   .navigation ul {
-    gap: 0.8rem;
+    gap: 0.3rem;
   }
+  .authButtons {
+    gap: 0.3rem;
+  }
+  .headerLoginButton {
+    padding: 0 0.6rem;
+  }
+  .mobileNavMenu {
+    width: 250px;
+  } /* 더 작은 화면 메뉴 너비 조정 */
 }

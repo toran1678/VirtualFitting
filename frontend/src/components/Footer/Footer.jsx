@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import { Link } from "react-router-dom"
-import styles from "./Footer.module.css"
+import { Link } from "react-router-dom";
+import styles from "./Footer.module.css";
 
 const Footer = () => {
   return (
@@ -10,8 +10,8 @@ const Footer = () => {
         <div className={styles.footerSection}>
           <h3 className={styles.footerTitle}>FASHION GUYS</h3>
           <p className={styles.footerDescription}>
-            가상 피팅 서비스로 구매 전 옷을 가상으로 입어볼 수 있습니다. AI 기술을 활용한 온라인 쇼핑의 미래를
-            경험해보세요.
+            가상 피팅 서비스로 구매 전 옷을 가상으로 입어볼 수 있습니다. AI
+            기술을 활용한 온라인 쇼핑의 미래를 경험해보세요.
           </p>
         </div>
 
@@ -128,11 +128,13 @@ const Footer = () => {
       </div>
 
       <div className={styles.footerBottom}>
-        <p className={styles.copyright}>&copy; {new Date().getFullYear()} Fashion Guys. All rights reserved.</p>
+        <p className={styles.copyright}>
+          &copy; {new Date().getFullYear()} Fashion Guys. All rights reserved.
+        </p>
         <p className={styles.techStack}>React & FastAPI 기반</p>
       </div>
     </footer>
-  )
-}
+  );
+};
 
-export default Footer
+export default Footer;

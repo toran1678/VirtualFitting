@@ -1,108 +1,128 @@
-"use client"
+"use client";
 
-import { useState, useContext, useEffect } from "react"
-import { Link, useNavigate, useLocation } from "react-router-dom"
-import styles from "./Header.module.css"
-import { ThemeContext } from "../../context/ThemeContext"
-import { useAuth } from "../../context/AuthContext"
-import Sidebar from "../Sidebar/Sidebar"
-import { getProfileImageUrl, handleImageError } from "../../utils/imageUtils"
+import { useState, useContext, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import styles from "./Header.module.css";
+import { ThemeContext } from "../../context/ThemeContext";
+import { useAuth } from "../../context/AuthContext";
+import { getProfileImageUrl, handleImageError } from "../../utils/imageUtils";
 
 const Header = () => {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
-  const { darkMode, toggleTheme } = useContext(ThemeContext)
-  const { user, isAuthenticated, logout } = useAuth()
-  const navigate = useNavigate()
-  const location = useLocation()
+  const [searchQuery, setSearchQuery] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { darkMode, toggleTheme } = useContext(ThemeContext);
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
+  // --- (useEffect, handleSearch, handleLoginLogout, toggleMobileMenu, handleMobileLinkClick 함수들은 이전과 동일하게 유지) ---
   // 스크롤 감지 효과
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop = window.scrollY
-      setIsScrolled(scrollTop > 10)
-    }
-
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+      const scrollTop = window.scrollY;
+      setIsScrolled(scrollTop > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // 헤더가 있는 페이지임을 body에 표시
   useEffect(() => {
-    document.body.classList.add("has-header")
-
+    document.body.classList.add("has-header");
     return () => {
-      document.body.classList.remove("has-header")
-    }
-  }, [])
+      document.body.classList.remove("has-header");
+    };
+  }, []);
 
   // URL에서 검색어 파라미터 가져오기
   useEffect(() => {
-    const params = new URLSearchParams(location.search)
-    const searchParam = params.get("search")
+    const params = new URLSearchParams(location.search);
+    const searchParam = params.get("search");
     if (searchParam) {
-      setSearchQuery(searchParam)
-    }
-  }, [location.search])
-
-  const handleSearch = (e) => {
-    e.preventDefault()
-    if (!searchQuery.trim()) return
-
-    // 현재 경로가 clothing-browse인지 확인
-    if (location.pathname === "/clothing-browse") {
-      // 현재 URL 파라미터 유지하면서 검색어만 업데이트
-      const params = new URLSearchParams(location.search)
-      params.set("search", searchQuery)
-      params.set("page", "1") // 검색 시 첫 페이지로 이동
-      navigate(`/clothing-browse?${params.toString()}`)
+      setSearchQuery(searchParam);
     } else {
-      // 다른 페이지에서는 clothing-browse로 이동하면서 검색어 전달
-      navigate(`/clothing-browse?search=${encodeURIComponent(searchQuery)}&page=1`)
+      setSearchQuery("");
     }
-  }
+  }, [location.search]);
 
+  // 검색 처리
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (!searchQuery.trim()) return;
+    if (location.pathname === "/clothing-browse") {
+      const params = new URLSearchParams(location.search);
+      params.set("search", searchQuery);
+      params.set("page", "1");
+      navigate(`/clothing-browse?${params.toString()}`);
+    } else {
+      navigate(
+        `/clothing-browse?search=${encodeURIComponent(searchQuery)}&page=1`
+      );
+    }
+  };
+
+  // 로그인/로그아웃 처리
   const handleLoginLogout = async () => {
     if (isAuthenticated) {
       try {
-        await logout()
-        // 헤더에서는 새로고침 유지 (필요한 경우)
-        window.location.reload()
+        await logout();
+        window.location.reload();
       } catch (error) {
-        console.error("로그아웃 오류:", error)
-        alert("로그아웃 중 오류가 발생했습니다.")
+        console.error("로그아웃 오류:", error);
+        alert("로그아웃 중 오류가 발생했습니다.");
       }
     } else {
-      navigate("/login")
+      navigate("/login");
     }
-  }
+  };
 
-  const toggleSidebar = () => {
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
-
-    if (!sidebarOpen) {
-      document.body.style.paddingRight = `${scrollbarWidth}px`
-      document.body.style.overflow = "hidden"
+  // 모바일 메뉴 토글 함수
+  const toggleMobileMenu = () => {
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    const isOpen = !mobileMenuOpen;
+    if (isOpen) {
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.paddingRight = "0"
-      document.body.style.overflow = ""
+      document.body.style.paddingRight = "0";
+      document.body.style.overflow = "";
     }
+    setMobileMenuOpen(isOpen);
+  };
 
-    setSidebarOpen(!sidebarOpen)
-  }
+  // 모바일 메뉴 링크 클릭 시 메뉴 닫기
+  const handleMobileLinkClick = () => {
+    setMobileMenuOpen(false);
+    document.body.style.paddingRight = "0";
+    document.body.style.overflow = "";
+  };
+
+  // 페이지 이동 시 모바일 메뉴 닫기
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      handleMobileLinkClick();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname]);
 
   return (
     <>
-      <header className={`${styles.header} ${isScrolled ? styles.scrolled : ""}`}>
+      <header
+        className={`${styles.header} ${isScrolled ? styles.scrolled : ""}`}
+      >
         <div className={styles.headerContainer}>
-          {/* 왼쪽 영역: 로고 + 검색창 */}
+          {/* 왼쪽 영역: 햄버거 버튼 + 로고 */}
           <div className={styles.headerLeft}>
             <div className={styles.logoContainer}>
               <button
-                className={`${styles.hamburgerButton} ${sidebarOpen ? styles.active : ""}`}
-                onClick={toggleSidebar}
-                aria-label="메뉴 열기"
+                className={`${styles.hamburgerButton} ${
+                  mobileMenuOpen ? styles.active : ""
+                }`}
+                onClick={toggleMobileMenu}
+                aria-label="메뉴 열기/닫기"
+                aria-expanded={mobileMenuOpen}
               >
                 <span className={styles.hamburgerLine}></span>
                 <span className={styles.hamburgerLine}></span>
@@ -112,12 +132,15 @@ const Header = () => {
                 <Link to="/">FASHION GUYS</Link>
               </div>
             </div>
+          </div>
 
+          {/* 가운데 영역: 검색창 */}
+          <div className={styles.searchBarContainer}>
             <div className={styles.searchBar}>
               <form onSubmit={handleSearch}>
                 <input
                   type="text"
-                  placeholder="브랜드, 상품을 검색해보세요."
+                  placeholder="브랜드, 상품 검색"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
@@ -145,6 +168,7 @@ const Header = () => {
           <div className={styles.headerRight}>
             <nav className={styles.navigation}>
               <ul>
+                {/* Desktop Nav Items */}
                 <li className={styles.navItem}>
                   <Link to="/clothing-browse">의류</Link>
                 </li>
@@ -157,15 +181,19 @@ const Header = () => {
                 <li className={styles.navItem}>
                   <Link to="/feed">피드</Link>
                 </li>
-
                 {isAuthenticated && (
                   <li className={styles.navItem}>
                     <Link to="/mypage">마이페이지</Link>
                   </li>
                 )}
 
+                {/* Always visible items */}
                 <li>
-                  <button className={styles.themeToggle} onClick={toggleTheme} aria-label="테마 전환">
+                  <button
+                    className={styles.themeToggle}
+                    onClick={toggleTheme}
+                    aria-label="테마 전환"
+                  >
                     {darkMode ? (
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -182,7 +210,12 @@ const Header = () => {
                         <line x1="12" y1="1" x2="12" y2="3"></line>
                         <line x1="12" y1="21" x2="12" y2="23"></line>
                         <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line
+                          x1="18.36"
+                          y1="18.36"
+                          x2="19.78"
+                          y2="19.78"
+                        ></line>
                         <line x1="1" y1="12" x2="3" y2="12"></line>
                         <line x1="21" y1="12" x2="23" y2="12"></line>
                         <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
@@ -205,23 +238,37 @@ const Header = () => {
                     )}
                   </button>
                 </li>
-
                 {isAuthenticated ? (
                   <li className={styles.userProfileContainer}>
                     <div className={styles.userProfile}>
                       <div className={styles.profileImage}>
                         {user?.profile_picture ? (
                           <img
-                            src={getProfileImageUrl(user.profile_picture) || "/placeholder.svg"}
+                            src={
+                              getProfileImageUrl(user.profile_picture) ||
+                              "/placeholder.svg"
+                            }
                             alt="프로필"
-                            onError={(e) => handleImageError(e, "/placeholder.svg?height=32&width=32")}
+                            onError={(e) =>
+                              handleImageError(
+                                e,
+                                "/placeholder.svg?height=32&width=32"
+                              )
+                            }
                           />
                         ) : (
-                          <div className={styles.profileInitial}>{user?.nickname?.charAt(0) || "U"}</div>
+                          <div className={styles.profileInitial}>
+                            {user?.nickname?.charAt(0) || "U"}
+                          </div>
                         )}
                       </div>
-                      <span className={styles.userName}>{user?.nickname || "사용자"}</span>
-                      <button className={styles.logoutButton} onClick={handleLoginLogout}>
+                      <span className={styles.userName}>
+                        {user?.nickname || "사용자"}
+                      </span>
+                      <button
+                        className={styles.logoutButton}
+                        onClick={handleLoginLogout}
+                      >
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           width="16"
@@ -237,13 +284,18 @@ const Header = () => {
                           <polyline points="16 17 21 12 16 7"></polyline>
                           <line x1="21" y1="12" x2="9" y2="12"></line>
                         </svg>
-                        <span>로그아웃</span>
+                        <span className={styles.logoutButtonText}>
+                          로그아웃
+                        </span>
                       </button>
                     </div>
                   </li>
                 ) : (
                   <li className={styles.authButtons}>
-                    <button className={styles.headerLoginButton} onClick={handleLoginLogout}>
+                    <button
+                      className={styles.headerLoginButton}
+                      onClick={handleLoginLogout}
+                    >
                       로그인
                     </button>
                   </li>
@@ -254,9 +306,65 @@ const Header = () => {
         </div>
       </header>
 
-      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} isLoggedIn={isAuthenticated} userData={user} />
-    </>
-  )
-}
+      {/* 모바일 메뉴 오버레이 */}
+      <div
+        className={`${styles.mobileNavOverlay} ${
+          mobileMenuOpen ? styles.active : ""
+        }`}
+        onClick={toggleMobileMenu}
+        aria-hidden={!mobileMenuOpen}
+      ></div>
 
-export default Header
+      {/* 모바일 메뉴 */}
+      <nav
+        className={`${styles.mobileNavMenu} ${
+          mobileMenuOpen ? styles.open : ""
+        }`}
+        aria-hidden={!mobileMenuOpen}
+      >
+        <div className={styles.mobileMenuHeader}>
+          <div className={styles.mobileLogo}>FASHION GUYS</div>
+          <button
+            className={styles.mobileCloseButton}
+            onClick={toggleMobileMenu}
+            aria-label="메뉴 닫기"
+          >
+            &times;
+          </button>
+        </div>
+        <ul>
+          <li>
+            <Link to="/clothing-browse" onClick={handleMobileLinkClick}>
+              의류
+            </Link>
+          </li>
+          <li>
+            <Link to="/virtual-fitting-main" onClick={handleMobileLinkClick}>
+              가상피팅
+            </Link>
+          </li>
+          <li>
+            <Link to="/clothing-customizer" onClick={handleMobileLinkClick}>
+              커스텀
+            </Link>
+          </li>
+          <li>
+            <Link to="/feed" onClick={handleMobileLinkClick}>
+              피드
+            </Link>
+          </li>
+          {isAuthenticated && (
+            <li>
+              <Link to="/mypage" onClick={handleMobileLinkClick}>
+                마이페이지
+              </Link>
+            </li>
+          )}
+        </ul>
+        {/* --- mobileMenuFooter 제거됨 --- */}
+      </nav>
+    </>
+  );
+};
+
+export default Header;
