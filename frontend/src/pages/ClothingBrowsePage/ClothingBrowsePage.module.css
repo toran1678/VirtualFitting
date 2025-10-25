@@ -690,6 +690,54 @@
   transform: translateY(-2px);
 }
 
+/* *** 모바일 필터용 기본 스타일 수정 *** */
+.mobileFilterToggleButton {
+  display: none; /* 데스크탑에서는 숨김 */
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 8px; /* 둥근 버튼에서 일반 버튼으로 변경 */
+  padding: 0.5rem 1rem; /* 패딩 조정 */
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  /* position: fixed 관련 속성 모두 제거 */
+}
+
+.mobileFilterToggleButton:hover {
+  background-color: var(--accent-hover);
+  /* transform 관련 속성 제거 */
+}
+
+.filterOverlay {
+  display: none;
+  opacity: 0;
+  will-change: opacity;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.filterOverlay.open {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobileFilterCloseButton {
+  display: none;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 1200px) {
   .browseLayout {
@@ -703,16 +751,75 @@
   }
 }
 
+/* *** @media (max-width: 1024px) 블록 수정 *** */
 @media (max-width: 1024px) {
   .browseLayout {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
 
+  /* [수정] 사이드바를 화면 밖으로 숨김 (Fixed Position) */
   .filterSidebar {
-    position: static;
-    margin-bottom: 2rem;
-    order: -1;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 320px;
+    max-width: 85%;
+    height: 100%;
+    background-color: var(--card-bg);
+    z-index: 1001;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-out;
+    overflow-y: auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    height: 100%;
+    border-radius: 0;
+  }
+
+  /* [추가] JS로 .open 클래스가 추가되면 화면 안으로 슬라이드 */
+  .filterSidebar.open {
+    transform: translateX(0);
+  }
+
+  /* [추가] .resultsHeader를 스티키 헤더로 만듭니다 */
+  .resultsHeader {
+    position: sticky;
+    top: 70px; /* 고정 헤더(Header)의 높이(padding-top)와 일치 */
+    background-color: var(--bg-primary); /* 스크롤 시 뒷 배경이 비치지 않게 */
+    z-index: 998; /* 다른 요소들보다 위에 있도록 */
+    padding-top: 1rem; /* 상단 여백 추가 */
+    margin-bottom: 1.5rem; /* 하단 여백 조정 */
+  }
+
+  /* [수정] .mobileFilterToggleButton을 보이도록 변경 */
+  .mobileFilterToggleButton {
+    display: flex;
+  }
+
+  /* [추가] 필터 헤더 수정 (모바일에서 상단 고정) */
+  .filterHeader {
+    position: sticky;
+    top: 0;
+    background: var(--card-bg);
+    z-index: 1;
+  }
+
+  /* [추가] '닫기' 버튼 보이기 */
+  .mobileFilterCloseButton {
+    display: block;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  /* [추가] '초기화' 버튼 숨기기 (공간 확보) */
+  .filterHeader .resetButton {
+    display: none;
   }
 
   .productGrid {
@@ -793,6 +900,10 @@
   .sortOption,
   .filterOption {
     font-size: 0.85rem;
+  }
+
+  .resultsHeader {
+    top: 70px; /* 헤더 높이와 일치하는지 확인 */
   }
 
   .tryOnButton {
@@ -883,6 +994,11 @@
 .dark-mode .likeButton.liked:hover {
   background-color: #ff5252;
   color: white;
+}
+
+/* 다크모드 스티키 헤더 배경 */
+.dark-mode .resultsHeader {
+  background-color: var(--bg-primary);
 }
 
 /* 접근성 개선 */
