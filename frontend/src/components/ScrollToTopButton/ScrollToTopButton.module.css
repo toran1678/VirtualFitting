@@ -1,0 +1,61 @@
+.scrollToTopButton {
+  position: fixed;
+  bottom: 2rem; /* 하단 여백 */
+  right: 2rem; /* 우측 여백 */
+  z-index: 100; /* 다른 요소 위에 표시 */
+
+  /* 버튼 스타일 */
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px; /* 버튼 크기 */
+  height: 50px;
+
+  /* 아이콘 정렬 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  /* 숨김/표시 애니메이션 */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+}
+
+.scrollToTopButton.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.scrollToTopButton:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-2px); /* 호버 시 살짝 위로 */
+  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.3);
+}
+
+.scrollToTopButton svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 3; /* 아이콘 굵기 */
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .scrollToTopButton {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    width: 44px; /* 모바일 버튼 크기 */
+    height: 44px;
+  }
+
+  .scrollToTopButton svg {
+    width: 20px;
+    height: 20px;
+  }
+}
