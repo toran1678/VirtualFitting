@@ -196,6 +196,33 @@ docker-compose exec backend python crawling/insert_csv.py
 
 ### 로컬 개발 환경
 
+#### Nginx 설정 (프록시 서버)
+
+프로덕션 환경 또는 로컬에서 프록시 서버를 사용하려면 Nginx를 설치하고 설정하세요:
+
+```bash
+# Nginx 설치 (Ubuntu/Debian)
+sudo apt update
+sudo apt install nginx
+
+# Nginx 설치 (macOS)
+brew install nginx
+
+# Nginx 설치 (Windows)
+# Winget 또는 Chocolatey 사용
+winget install nginx
+
+# 설정 파일 복사
+cp nginx/nginx.conf.example nginx/nginx.conf
+
+# Nginx 시작
+sudo systemctl start nginx   # Linux
+# 또는
+sudo nginx -s start          # macOS
+```
+
+**주의**: Nginx를 사용하면 프론트엔드는 3000번 포트, 백엔드는 8000번 포트를 직접 노출하지 않고 Nginx의 4000번 포트로 통합 접근할 수 있습니다.
+
 #### Backend 설정
 ```bash
 cd backend
