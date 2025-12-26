@@ -550,8 +550,8 @@ python insert_csv.py
 
 | 이름 | 역할 | GitHub |
 |------|------|--------|
-| 김선빈 | 1 | [@toran1678](https://github.com/toran1678) |
-| 이규현 | 1 | [@leekyuhyun](https://github.com/leekyuhyun) |
-| 정현구 | 1 | [@lhjjhg](https://github.com/lhjjhg) |
+| 김선빈 | 전체 시스템 설계 및 풀스택 개발 | [@toran1678](https://github.com/toran1678) |
+| 이규현 | UI/UX 설계 및 프론트엔드 개발 | [@leekyuhyun](https://github.com/leekyuhyun) |
+| 정현구 | 기능 구현 및 프론트엔드 개발 | [@lhjjhg](https://github.com/lhjjhg) |
 
 > **안양대학교 소프트웨어학과 2025 캡스톤 디자인 팀 - Fashiony Guys**
